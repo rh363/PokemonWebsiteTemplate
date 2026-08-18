@@ -329,7 +329,7 @@ Astro View Transitions, per mantenere la fluidità percepita della SPA.
 - **`src/config/site.ts`** — un solo file per tutto il branding: nome negozio, via, CAP,
   città, orari, Instagram/TikTok/WhatsApp, metadati SEO.
 - **`src/content/cards.csv`** — una carta per riga — e **`src/content/sets.json`**,
-  entrambi validati con Zod in `src/content/config.ts`. Un campo sbagliato fa fallire
+  entrambi validati con Zod in `src/content.config.ts`. Un campo sbagliato fa fallire
   il build con un messaggio chiaro, invece di produrre una pagina rotta.
 
 ### Perche' CSV e non un file per carta

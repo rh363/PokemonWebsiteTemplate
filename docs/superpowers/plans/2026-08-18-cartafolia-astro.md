@@ -51,7 +51,7 @@ Ogni file ha una responsabilità sola. La divisione è per responsabilità, non 
 | `src/styles/ds.css` | Le classi dei componenti del design system: layout base e stati hover/press convertiti da JS a CSS |
 | `src/styles/layout.css` | Le utility di pagina del prototipo (`.wrap`, `.sez`, `.g2`, `.g3`, `.cards`, `.cat`, `.det`, `.foot`) e le media query |
 | `src/config/site.ts` | Branding: nome negozio, indirizzo, orari, social, SEO. **L'unico file che il cliente tocca per il branding** |
-| `src/content/config.ts` | Schemi Zod delle collection `cards` e `sets` |
+| `src/content.config.ts` | Schemi Zod delle collection `cards` e `sets` |
 | `src/lib/catalog/types.ts` | `Card`, `Set`, `CardQuery`, `Page<T>`, `CatalogSource`. Nessuna logica |
 | `src/lib/catalog/query.ts` | Filtri, ordinamento, paginazione. Funzioni pure, nessun I/O |
 | `src/lib/catalog/search.ts` | Costruzione haystack e scan. Funzioni pure |
@@ -678,7 +678,7 @@ Questa fase è **interamente logica pura**: nessun DOM, nessun componente. È il
 - Create: `src/lib/catalog/types.ts`, `src/lib/catalog/labels.ts`, `src/lib/demo/prng.ts`, `src/config/site.ts`
 - Create: `scripts/seed-demo.ts`
 - Create: `src/content/sets.json`, `src/content/cards.csv` (generati)
-- Create: `src/content/config.ts`
+- Create: `src/content.config.ts`
 - Test: `src/lib/demo/prng.test.ts`
 
 **Interfaces:**
@@ -982,7 +982,7 @@ head -2 src/content/cards.csv
 
 Aggiungere a `package.json`: `"seed": "tsx scripts/seed-demo.ts"`.
 
-- [ ] **Step 10: Scrivere `src/content/config.ts`**
+- [ ] **Step 10: Scrivere `src/content.config.ts`**
 
 ```ts
 import { defineCollection, z } from 'astro:content'
@@ -1061,9 +1061,8 @@ dove `q = query.trim().toLowerCase()`. La ricerca è **substring, non per parole
 - Test: `src/lib/catalog/search.test.ts`
 
 **Interfaces:**
-- Consumes: `Card`, `CardSet` da `./types`; `RARITY_LABELS`, `CONDITION_LABELS` da `./labels`
+- Consumes: `Card`, `CardSet` da `./types`; `RARITY_LABELS`, `CONDITION_LABELS`, **`cardCode`** da `./labels` (definito al Task 5, non ridefinirlo qui)
 - Produces:
-  - `cardCode(card: Card, set: CardSet): string`
   - `buildHaystack(card: Card, set: CardSet): string`
   - `matches(haystack: string, q: string): boolean`
   - `normalizeQuery(q: string | undefined): string`
@@ -1074,7 +1073,8 @@ dove `q = query.trim().toLowerCase()`. La ricerca è **substring, non per parole
 
 ```ts
 import { describe, expect, it } from 'vitest'
-import { buildHaystack, cardCode, matches, normalizeQuery } from './search'
+import { cardCode } from './labels'
+import { buildHaystack, matches, normalizeQuery } from './search'
 import type { Card, CardSet } from './types'
 
 const set: CardSet = {
@@ -1152,11 +1152,8 @@ Atteso: FAIL, `Failed to resolve import "./search"`.
 - [ ] **Step 3: Scrivere `src/lib/catalog/search.ts`**
 
 ```ts
-import { CONDITION_LABELS, RARITY_LABELS } from './labels'
+import { cardCode, CONDITION_LABELS, RARITY_LABELS } from './labels'
 import type { Card, CardSet } from './types'
-
-/** "ALB 042/198" — come codeOf() in design-reference/dati.jsx */
-export const cardCode = (card: Card, set: CardSet) => `${set.code} ${card.num}`
 
 export const normalizeQuery = (q: string | undefined) => (q ?? '').trim().toLowerCase()
 
@@ -1587,7 +1584,7 @@ e spostare `getAllSets`/`getAllCards`/`staticSource` in `source.static.astro.ts`
 ```ts
 export * from './types'
 export * from './labels'
-export { cardCode, buildHaystack, matches, normalizeQuery } from './search'
+export { buildHaystack, matches, normalizeQuery } from './search'
 export { filterCards, sortCards, paginate, queryCards, type IndexedCard } from './query'
 export {
   staticSource, getAllCards, getAllSets, getIndexedCards,
