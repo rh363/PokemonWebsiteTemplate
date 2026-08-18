@@ -1,0 +1,52 @@
+<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Cartafolia — vetrina e catalogo, Ceccano</title><link rel="icon" href="assets/logo-mark.svg">
+<link rel="stylesheet" href="_ds/cartafolia-design-system-3cbf7559-ef12-4ca1-9d34-2c119fcda054/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/cartafolia-design-system-3cbf7559-ef12-4ca1-9d34-2c119fcda054/tokens/colors.css">
+<link rel="stylesheet" href="_ds/cartafolia-design-system-3cbf7559-ef12-4ca1-9d34-2c119fcda054/tokens/typography.css">
+<link rel="stylesheet" href="_ds/cartafolia-design-system-3cbf7559-ef12-4ca1-9d34-2c119fcda054/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/cartafolia-design-system-3cbf7559-ef12-4ca1-9d34-2c119fcda054/tokens/radius.css">
+<link rel="stylesheet" href="_ds/cartafolia-design-system-3cbf7559-ef12-4ca1-9d34-2c119fcda054/tokens/elevation.css">
+<link rel="stylesheet" href="_ds/cartafolia-design-system-3cbf7559-ef12-4ca1-9d34-2c119fcda054/tokens/motion.css">
+<link rel="stylesheet" href="_ds/cartafolia-design-system-3cbf7559-ef12-4ca1-9d34-2c119fcda054/tokens/effects.css">
+<link rel="stylesheet" href="_ds/cartafolia-design-system-3cbf7559-ef12-4ca1-9d34-2c119fcda054/tokens/base.css">
+<link rel="stylesheet" href="_ds/cartafolia-design-system-3cbf7559-ef12-4ca1-9d34-2c119fcda054/styles.css">
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="_ds/cartafolia-design-system-3cbf7559-ef12-4ca1-9d34-2c119fcda054/_ds_bundle.js"></script>
+<style>
+a{color:var(--text-link)}a:hover{color:var(--text-link-hover)}
+#root span[style*="14cqw"]{container-type:normal!important;width:100%}
+.wrap{max-width:var(--page-max);margin:0 auto;padding-left:var(--gutter-lg);padding-right:var(--gutter-lg)}
+.sez{padding-top:var(--section-y);padding-bottom:var(--section-y)}
+.g2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--sp-12);align-items:center}
+.hero{grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr)}
+.g3{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:var(--sp-4)}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(var(--grid-card-min),1fr));gap:var(--grid-gap)}
+.cat{display:grid;grid-template-columns:264px minmax(0,1fr);gap:var(--sp-10);align-items:start}
+.side{position:sticky;top:92px;display:grid;gap:var(--sp-2)}
+.det{display:grid;grid-template-columns:minmax(0,400px) minmax(0,1fr);gap:var(--sp-16);align-items:start}
+.det-fix{position:sticky;top:100px;display:grid;gap:var(--sp-4)}
+.foot{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:var(--sp-10)}
+.only-mob{display:none!important}
+.sheet-in{animation:sheetUp var(--dur-slow,340ms) var(--ease-out)}
+@keyframes sheetUp{from{transform:translateY(101%)}to{transform:translateY(0)}}
+.fade-in{animation:fadeIn 220ms var(--ease-out)}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.rise{animation:rise 340ms var(--ease-out) both}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@media (max-width:1080px){.cat{grid-template-columns:minmax(0,1fr)}.hero{grid-template-columns:minmax(0,1fr)}.g2{grid-template-columns:minmax(0,1fr);gap:var(--sp-8)}.det{grid-template-columns:minmax(0,1fr);gap:var(--sp-8)}.det-fix{position:static;max-width:340px;margin-left:auto;margin-right:auto;justify-items:center}.foot{grid-template-columns:1fr 1fr}}
+@media (max-width:1080px){.hide-mob{display:none!important}.only-mob{display:block!important}.side{display:none}}
+@media (max-width:760px){:root{--fs-display-xl:42px;--fs-display-l:34px;--fs-display-m:27px;--fs-title-l:24px;--section-y:56px;--gutter-lg:20px;--grid-card-min:148px;--grid-gap:14px}.foot{grid-template-columns:minmax(0,1fr)}.g2{gap:var(--sp-6)}}
+@media (prefers-reduced-motion:reduce){.rise,.fade-in,.sheet-in{animation:none}}
+</style></head><body style="background:var(--surface-page)"><div id="root"></div>
+<script type="text/babel" src="dati.jsx"></script>
+<script type="text/babel" src="pezzi.jsx"></script>
+<script type="text/babel" src="vetrina.jsx"></script>
+<script type="text/babel" src="catalogo.jsx"></script>
+<script type="text/babel" src="carta.jsx"></script>
+<script type="text/babel" src="espansioni.jsx"></script>
+<script type="text/babel" src="negozio.jsx"></script>
+<script type="text/babel" src="about.jsx"></script>
+<script type="text/babel" src="guscio.jsx"></script>
+<script type="text/babel">ReactDOM.createRoot(document.getElementById('root')).render(<window.App/>)</script>
+</body></html>

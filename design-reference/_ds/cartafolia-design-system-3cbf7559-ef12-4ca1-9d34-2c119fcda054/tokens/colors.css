@@ -1,0 +1,95 @@
+:root{
+  /* ── Base: inchiostro (neutro caldo-prugna) ───────────────── */
+  --ink-950:#0E0B12;
+  --ink-900:#17121C;
+  --ink-800:#241D2C;
+  --ink-700:#3A3244;
+  --ink-500:#6B6178;
+  --ink-400:#8A8296;
+  --ink-300:#A9A2B4;
+  --ink-200:#CFC9D6;
+  --ink-100:#E8E4EC;
+  --ink-50:#F3F0F6;
+  /* ── Base: carta (bianchi caldi) ──────────────────────────── */
+  --paper-0:#FFFFFF;
+  --paper-50:#FBF9F6;
+  --paper-100:#F5F1EA;
+  /* ── Brand primario: Rosso Ciliegia ──────────────────────── */
+  --cherry-800:#7C0B1A;
+  --cherry-700:#A50F23;
+  --cherry-600:#C4152B;
+  --cherry-500:#E01B33;
+  --cherry-400:#FF4A5E;
+  --cherry-300:#FF8994;
+  --cherry-200:#FFC2C9;
+  --cherry-100:#FFE7EA;
+  /* ── Brand secondario: Ciano Foil ────────────────────────── */
+  --cyan-700:#00767E;
+  --cyan-600:#00A3AD;
+  --cyan-500:#00D3E0;
+  --cyan-400:#4FE2EC;
+  --cyan-300:#7EEBF2;
+  --cyan-100:#DAFBFD;
+  /* ── Accenti giocosi ─────────────────────────────────────── */
+  --lemon-500:#FFD400;
+  --lemon-300:#FFE566;
+  --lemon-100:#FFF6CC;
+  --grape-500:#7C4DFF;
+  --grape-300:#B49BFF;
+  --grape-100:#EDE6FF;
+  --lime-500:#B6FF3D;
+  --lime-100:#EEFFD1;
+
+  /* ── Semantici: testo ────────────────────────────────────── */
+  --text-strong:var(--ink-950);
+  --text-body:var(--ink-800);
+  --text-muted:var(--ink-500);
+  --text-faint:var(--ink-400);
+  --text-invert:var(--paper-50);
+  --text-invert-muted:var(--ink-300);
+  --text-brand:var(--cherry-600);
+  --text-link:var(--cherry-600);
+  --text-link-hover:var(--cherry-800);
+  /* ── Semantici: superfici ────────────────────────────────── */
+  --surface-page:var(--paper-50);
+  --surface-card:var(--paper-0);
+  --surface-sunken:var(--paper-100);
+  --surface-raised:var(--paper-0);
+  --surface-invert:var(--ink-950);
+  --surface-invert-soft:var(--ink-800);
+  --surface-brand:var(--cherry-500);
+  --surface-brand-hover:var(--cherry-600);
+  --surface-brand-press:var(--cherry-700);
+  --surface-brand-soft:var(--cherry-100);
+  --surface-accent:var(--cyan-500);
+  --surface-accent-soft:var(--cyan-100);
+  /* ── Semantici: bordi ───────────────────────────────────── */
+  --border-hairline:var(--ink-100);
+  --border-subtle:var(--ink-200);
+  --border-strong:var(--ink-900);
+  --border-brand:var(--cherry-500);
+  --border-invert:rgba(255,255,255,.14);
+  --focus-ring:var(--cyan-500);
+  /* ── Semantici: stato ───────────────────────────────────── */
+  --state-success:#12A150;
+  --state-success-soft:#E4F7EC;
+  --state-warning:#FFB020;
+  --state-warning-soft:#FFF4E0;
+  --state-danger:var(--cherry-500);
+  --state-danger-soft:var(--cherry-100);
+  --state-info:var(--cyan-600);
+  --state-info-soft:var(--cyan-100);
+  /* ── Dominio: scala di rarità ───────────────────────────── */
+  --rarity-common:var(--ink-500);
+  --rarity-uncommon:#12A150;
+  --rarity-rare:#1B4DFF;
+  --rarity-holo:var(--cyan-500);
+  --rarity-ultra:var(--grape-500);
+  --rarity-secret:var(--lemon-500);
+  /* ── Dominio: condizione ────────────────────────────────── */
+  --cond-mint:#12A150;
+  --cond-near-mint:#5CC08A;
+  --cond-excellent:var(--lemon-500);
+  --cond-good:#FFB020;
+  --cond-played:var(--ink-400);
+}
