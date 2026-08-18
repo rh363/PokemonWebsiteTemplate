@@ -892,7 +892,7 @@ export const SITE = {
 `scripts/seed-demo.ts` riproduce la generazione di `design-reference/dati.jsx` e la **serializza su file**, così i dati demo diventano contenuto editabile invece che codice.
 
 ```ts
-import { mkdirSync, rmSync, writeFileSync } from 'node:fs'
+import { mkdirSync, writeFileSync } from 'node:fs'
 import { createPick, createRng } from '../src/lib/demo/prng'
 import type { Card, CardSet, Condition, Rarity } from '../src/lib/catalog/types'
 
