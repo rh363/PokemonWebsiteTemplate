@@ -562,7 +562,7 @@ const ATTESE = [
 
 describe('inventario icone', () => {
   it('contiene esattamente le 18 icone usate dal prototipo', () => {
-    expect([...ICON_NAMES].sort()).toEqual([...ATTESE].sort())
+    expect(ICON_NAMES.toSorted()).toEqual([...ATTESE].toSorted())
   })
 
   it('ogni icona ha contenuto SVG non vuoto', () => {
@@ -653,6 +653,8 @@ Porting di `design-reference/_ds/_ds_bundle.js:499-533`. L'originale dipinge una
 `viewBox`, `stroke-width` e i `stroke-linecap`/`linejoin` sono i default di Lucide: vanno riprodotti esattamente o i glifi cambiano spessore.
 
 `{@html}` qui è sicuro: il contenuto viene da un file generato in fase di build da un pacchetto npm, mai da input utente.
+
+**La prop `color` del prototipo non viene portata, deliberatamente.** `design-reference/CONTRATTI-COMPONENTI.md` la elenca e il sorgente la implementa (`background: color || "currentColor"`), ma nessuno la passa mai: i quattro chiamanti nei `.jsx` usano `style={{color:…}}`, e dentro il bundle le occorrenze di `color` stanno anch'esse dentro `style`. È API morta già nell'originale, e `style` ottiene lo stesso risultato.
 
 - [ ] **Step 6: Commit**
 
