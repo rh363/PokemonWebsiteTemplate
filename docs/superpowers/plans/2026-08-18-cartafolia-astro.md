@@ -311,12 +311,49 @@ import Receiver from '~/components/islands/__spike/Receiver.svelte'
 
 Devono essere **due direttive `client:` distinte**: è questo che le rende isole separate.
 
-- [ ] **Step 4: Verificare**
+- [ ] **Step 4: Verificare — due prove indipendenti**
 
-`pnpm dev`, aprire `http://localhost:4321`, cliccare «incrementa» tre volte.
+La verifica deve essere automatica: «aprire il browser e cliccare» non è eseguibile né ripetibile.
 
-- **Atteso (assunzione confermata):** «valore: 3». Le isole condividono lo store.
-- **Se resta «valore: 0»:** l'assunzione è smentita.
+**Prova A — comportamentale, con Playwright.** È quella che conta.
+
+```bash
+pnpm exec playwright install chromium
+```
+
+`scripts/spike-store.mjs` (file usa e getta, cancellato allo Step 6):
+
+```js
+import { chromium } from 'playwright'
+
+const browser = await chromium.launch()
+const page = await browser.newPage()
+const errori = []
+page.on('pageerror', (e) => errori.push(e.message))
+await page.goto('http://localhost:4321/')
+await page.getByRole('button', { name: 'incrementa' }).click({ clickCount: 3, delay: 50 })
+const testo = await page.getByTestId('spike-value').textContent()
+await browser.close()
+console.log('valore letto:', JSON.stringify(testo))
+console.log('errori di pagina:', errori.length ? errori : 'nessuno')
+console.log(testo?.includes('3') ? 'ESITO: store CONDIVISO' : 'ESITO: store NON condiviso')
+```
+
+Avviare `pnpm dev` in background, eseguire `node scripts/spike-store.mjs`, poi fermare il server.
+
+- **Atteso se l'assunzione regge:** `valore: 3` → store condiviso.
+- **Se resta `valore: 0`:** le isole hanno istanze separate, l'assunzione è smentita.
+
+**Prova B — strutturale, sul build.** Spiega *perché* il risultato è quello che è.
+
+```bash
+pnpm build
+grep -rl 'spikeCounter\|writable' dist/_astro/*.js | head
+```
+
+Se lo store finisce in **un solo chunk** importato da entrambe le isole, l'istanza è condivisa: due `import` dello stesso URL restituiscono lo stesso modulo. Se ogni isola porta la propria copia dello store, non lo è.
+
+Le due prove devono concordare. **Se discordano, riportare BLOCKED**: significa che il meccanismo non è quello che crediamo, e proseguire su un'assunzione sbagliata costerebbe il Task 15 intero.
 
 - [ ] **Step 5: Registrare l'esito nella spec**
 
@@ -343,11 +380,11 @@ export const onChrome = (fn: (e: ChromeEvent) => void) => {
 
 - [ ] **Step 6: Rimuovere lo spike e committare**
 
-Vanno via **tutti e tre** i pezzi dello spike: le due isole, lo store (che al Task 15 verra' ricreato con il contenuto vero) e le modifiche a `index.astro`. Se `index.astro` restasse a importare componenti cancellati, il build si romperebbe al Task 3.
+Vanno via **tutti** i pezzi dello spike: le due isole, lo store (che al Task 15 verra' ricreato con il contenuto vero), lo script di verifica e le modifiche a `index.astro`. Se `index.astro` restasse a importare componenti cancellati, il build si romperebbe al Task 3.
 
 ```bash
 rm -rf src/components/islands/__spike
-rm -f src/stores/chrome.ts
+rm -f src/stores/chrome.ts scripts/spike-store.mjs
 git checkout -- src/pages/index.astro   # torna al segnaposto del Task 1
 git add -A
 git commit -m "spike: verificata la condivisione dello store fra isole Svelte
