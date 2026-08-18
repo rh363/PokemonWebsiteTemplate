@@ -2825,71 +2825,193 @@ git commit -m "feat: pagina 404"
 ---
 # FASE 4 — Immagini, rifinitura, deploy
 
-### Task 23: Immagini delle carte
+### Task 23: Immagini delle carte su Cloudflare R2
 
-Il prototipo non ha nessuna immagine reale: `CardArt` senza `src` mostra il placeholder foil. Il template deve però **essere pronto** a riceverle, perché è la prima cosa che cambierà con un cliente vero.
+Il prototipo non ha nessuna immagine: `CardArt` senza `src` mostra il placeholder foil. Le foto vere **non entrano mai nel repository**: una collezione di migliaia di foto in git resta nella storia per sempre e se la porta dietro ogni clone, e ripulirla dopo significa riscrivere la storia.
+
+**Prerequisiti da procurarsi prima di iniziare** (spec §13): una zona Cloudflare per il dominio del sito, e un sottodominio da dedicare alle immagini (per esempio `img.<dominio>`).
 
 **Files:**
-- Create: `src/components/CardImage.astro`, `src/assets/cards/.gitkeep`
-- Modify: `src/components/ds/CardArt.svelte`, `src/content/config.ts`, `docs/CONTENUTI.md`
+- Create: `src/components/CardImage.astro`, `scripts/upload-immagini.ts`
+- Modify: `src/config/site.ts`, `docs/CONTENUTI.md`
+- **Non** si crea `src/assets/cards/`: nel repository non finiscono binari
 
 **Interfaces:**
-- Produces: `CardImage.astro` con props `{ card, sizes, loading }`; se `card.image` manca, ricade su `CardArt` senza `src`
+- Produces: `CardImage.astro` con props `{ card, set, sizes?, priority? }`; `urlImmagine(key, width)` esportata da `~/lib/immagini.ts`
+- Se la colonna `image` della carta e' vuota, ricade su `CardArt` senza `src`, identico al prototipo
 
-- [ ] **Step 1: Estendere lo schema**
+#### Come stanno insieme i pezzi
 
-In `src/content/config.ts` la colonna `image` esiste già nello schema. Documentarne il significato: nome del file relativo a `src/assets/cards/`, per esempio `fulmine-di-notte-alb-042.jpg`. Colonna vuota significa nessuna foto, e la carta ricade sul placeholder foil.
+```
+cards.csv  colonna image = "fulmine-di-notte-alb-042.jpg"   ← solo la chiave R2
+                              │
+   bucket R2 ── dominio personalizzato ──►  https://img.<dominio>/fulmine-di-notte-alb-042.jpg
+                              │
+   trasformazione ──►  https://<dominio>/cdn-cgi/image/width=300,format=auto/https://img.<dominio>/…
+```
 
-- [ ] **Step 2: Scrivere `CardImage.astro`**
+Il formato `https://<ZONA>/cdn-cgi/image/<OPZIONI>/<SORGENTE>` e' quello documentato da Cloudflare, e **la sorgente puo' essere una URL assoluta su un altro host**: non deve stare sulla zona. Le opzioni utili qui sono `width`, `format=auto` (che serve AVIF o WebP secondo il browser) e `quality`.
+
+- [ ] **Step 1: Creare il bucket e collegarlo a un dominio**
+
+```bash
+pnpm exec wrangler r2 bucket create cartafolia-carte
+```
+
+Poi, dalla dashboard: **R2 → Settings → Custom Domains → Add**, indicando `img.<dominio>`.
+
+**Non usare il sottodominio `r2.dev`.** La documentazione Cloudflare lo dichiara rate-limited, senza cache ne' WAF, e «unsupported» per la produzione: va bene solo per provare in locale.
+
+- [ ] **Step 2: Abilitare le trasformazioni sulla zona**
+
+Dashboard → la zona del sito → **Images → Transformations → abilita**. Senza questo passaggio le URL `/cdn-cgi/image/...` restituiscono l'originale non trasformato, il che **funziona ma silenziosamente**: il sito sembra a posto e serve foto da telefono non ridimensionate. E' l'errore piu' facile da non accorgersi, quindi va verificato allo Step 6.
+
+Il piano free include 5.000 trasformazioni uniche al mese; quelle gia' fatte restano in cache e non ricontano, quindi il consumo e' legato alle **foto nuove**, non alle visite.
+
+- [ ] **Step 3: Configurare le immagini in `site.ts`**
+
+```ts
+immagini: {
+  /** Dominio personalizzato del bucket R2. Vuoto = niente foto, si usa il placeholder. */
+  origine: '',                       // es. 'https://img.cartafolia.it'
+  /** Zona su cui girano le trasformazioni: di norma il dominio del sito. */
+  zona: '',                          // es. 'https://cartafolia.it'
+  larghezze: [150, 300, 450],
+  qualita: 82,
+},
+```
+
+Con `origine` o `zona` vuoti, `CardImage` ricade sul placeholder foil. Cosi' **lo sviluppo in locale funziona senza credenziali e senza rete**, e il sito non si rompe mai per una configurazione mancante.
+
+- [ ] **Step 4: Scrivere `src/lib/immagini.ts`**
+
+```ts
+import { SITE } from '~/config/site'
+
+export const immaginiAttive = () => Boolean(SITE.immagini.origine && SITE.immagini.zona)
+
+/** https://<zona>/cdn-cgi/image/<opzioni>/<url sorgente assoluta> */
+export function urlImmagine(key: string, width: number): string {
+  const { origine, zona, qualita } = SITE.immagini
+  const opzioni = `width=${width},format=auto,quality=${qualita},fit=scale-down`
+  return `${zona}/cdn-cgi/image/${opzioni}/${origine}/${encodeURIComponent(key)}`
+}
+
+export const srcsetImmagine = (key: string) =>
+  SITE.immagini.larghezze.map((w) => `${urlImmagine(key, w)} ${w}w`).join(', ')
+```
+
+- [ ] **Step 5: Scrivere `CardImage.astro`**
 
 ```astro
 ---
-import { Image } from 'astro:assets'
 import CardArt from '~/components/ds/CardArt.svelte'
 import { cardCode } from '~/lib/catalog'
+import { immaginiAttive, srcsetImmagine, urlImmagine } from '~/lib/immagini'
 import type { Card, CardSet } from '~/lib/catalog'
 
-interface Props { card: Card; set: CardSet; sizes?: string; loading?: 'lazy' | 'eager' }
-const { card, set, sizes = '(max-width:760px) 45vw, 190px', loading = 'lazy' } = Astro.props
-
-const immagini = import.meta.glob<{ default: ImageMetadata }>('/src/assets/cards/*.{jpg,jpeg,png,webp,avif}')
-const chiave = card.image ? `/src/assets/cards/${card.image}` : null
-const mod = chiave && immagini[chiave] ? await immagini[chiave]!() : null
+interface Props { card: Card; set: CardSet; sizes?: string; priority?: boolean }
+const { card, set, sizes = '(max-width:760px) 45vw, 190px', priority = false } = Astro.props
+const mostraFoto = Boolean(card.image) && immaginiAttive()
 ---
-{mod ? (
+{mostraFoto ? (
   <div class="ds-cardart" style="border-radius:var(--r-cardart)">
-    <Image src={mod.default} alt={card.name} {sizes}
-           widths={[150, 300, 450]} format="avif" {loading} decoding="async"
-           class="ds-cardart__img" />
+    <img
+      class="ds-cardart__img"
+      src={urlImmagine(card.image!, 300)}
+      srcset={srcsetImmagine(card.image!)}
+      {sizes}
+      alt={card.name}
+      width="63" height="88"
+      loading={priority ? 'eager' : 'lazy'}
+      fetchpriority={priority ? 'high' : undefined}
+      decoding="async"
+    />
   </div>
 ) : (
   <CardArt rarity={card.rarity} code={cardCode(card, set)} />
 )}
 ```
 
-`widths` copre le tre densità che servono alla griglia (`--grid-card-min` è 190px, 148px sotto 760px). Il rapporto 63/88 è già imposto da `.ds-cardart`, quindi **non c'è CLS** nemmeno prima che l'immagine arrivi.
+**Sul CLS**, che e' il rischio vero quando le immagini sono remote e il build non le conosce: `.ds-cardart` impone gia' `aspect-ratio: var(--card-aspect)` cioe' 63/88, e `width`/`height` sul tag ribadiscono la proporzione. Lo spazio e' quindi riservato prima che arrivi un solo byte — **niente salti di layout**, esattamente come con le immagini locali.
 
-- [ ] **Step 3: Usare `loading="eager"` solo dove serve**
+- [ ] **Step 6: Usare `priority` solo sui candidati LCP**
 
-Le prime 4 carte dell'hero e la carta grande della scheda sono candidate LCP: `loading="eager"` e `fetchpriority="high"`. Tutte le altre restano `lazy`.
+Le prime 4 carte dell'hero e la carta grande della scheda: `priority`. Tutte le altre restano `lazy`. Sulla scheda carta aggiungere anche il preload in `<head>`:
 
-- [ ] **Step 4: Documentare per il cliente**
+```astro
+<link rel="preload" as="image" imagesrcset={srcsetImmagine(card.image)} {sizes} />
+```
 
-`docs/CONTENUTI.md`, sezione «Aggiungere la foto di una carta»: mettere il file in `src/assets/cards/`, poi scrivere il nome del file nella colonna `image` della riga corrispondente in `cards.csv`. Formati accettati: jpg, png, webp, avif. Astro converte e ridimensiona da solo.
+- [ ] **Step 7: Scrivere lo script di upload**
 
-- [ ] **Step 5: Verificare con una foto di prova**
+`scripts/upload-immagini.ts` carica una cartella locale (fuori dal repository, o ignorata da git) sul bucket, usando come chiave il nome del file:
 
-Mettere un'immagine qualsiasi in `src/assets/cards/prova.jpg`, scriverne il nome nella colonna `image` di una riga, `pnpm build`, e controllare che in `dist/_astro/` compaiano le varianti `.avif` alle tre larghezze e che la pagina serva un `srcset`. Poi **rimuovere** la foto di prova e svuotare la colonna.
+```ts
+import { execFileSync } from 'node:child_process'
+import { readdirSync } from 'node:fs'
+import { join } from 'node:path'
 
-- [ ] **Step 6: Commit**
+const cartella = process.argv[2]
+const bucket = 'cartafolia-carte'
+if (!cartella) throw new Error('uso: pnpm tsx scripts/upload-immagini.ts <cartella>')
+
+const file = readdirSync(cartella).filter((f) => /\.(jpe?g|png|webp|avif)$/i.test(f))
+for (const f of file) {
+  execFileSync('pnpm', ['exec', 'wrangler', 'r2', 'object', 'put',
+    `${bucket}/${f}`, '--file', join(cartella, f), '--remote'], { stdio: 'inherit' })
+  console.log('caricato', f)
+}
+console.log(`${file.length} immagini caricate. Scrivi i nomi nella colonna image di cards.csv.`)
+```
+
+Aggiungere `"upload:img": "tsx scripts/upload-immagini.ts"` agli script.
+
+Aggiungere a `.gitignore` una cartella di lavoro per le foto, cosi' un errore non le fa finire nel repository:
+
+```
+/foto-carte/
+```
+
+- [ ] **Step 8: Verificare con una foto vera**
+
+```bash
+pnpm upload:img ./foto-carte
+```
+
+Scrivere il nome del file nella colonna `image` di una riga, poi `pnpm build && pnpm preview`. Nel pannello Rete controllare che:
+
+1. l'URL richiesta contenga `/cdn-cgi/image/width=`;
+2. il `content-type` della risposta sia `image/avif` o `image/webp`, **non** `image/jpeg` — se e' jpeg, le trasformazioni non sono attive sulla zona (Step 2);
+3. il peso trasferito sia una frazione dell'originale;
+4. il riquadro della carta occupi il suo spazio **prima** che l'immagine arrivi: rallentare la rete a «Slow 3G» e verificare che nulla salti.
+
+Il punto 2 e' quello che va controllato davvero, perche' senza trasformazioni tutto sembra funzionare lo stesso.
+
+- [ ] **Step 9: Documentare per chi aggiorna**
+
+In `docs/CONTENUTI.md`, sezione «Aggiungere la foto di una carta»:
+
+1. metti i file in una cartella qualsiasi (per esempio `foto-carte/`, che git ignora);
+2. `pnpm upload:img ./foto-carte`;
+3. scrivi il nome del file nella colonna `image` della riga della carta in `cards.csv`;
+4. commit e push.
+
+Aggiungere la regola: **le foto non si mettono mai nel repository.** Se una foto finisce in un commit, va tolta prima che il commit venga pushato.
+
+- [ ] **Step 10: Commit**
 
 ```bash
 git add -A
-git commit -m "feat: supporto immagini delle carte con astro:assets
+git commit -m "feat: immagini delle carte su R2 con trasformazioni Cloudflare
 
-Il rapporto 63/88 e' gia' imposto dal contenitore, quindi non c'e' CLS
-nemmeno prima che l'immagine arrivi. Senza foto resta il placeholder foil
-del design system, identico al prototipo."
+Le foto non entrano nel repository: migliaia di binari resterebbero nella
+storia git per sempre e li scaricherebbe ogni clone. Stanno su R2 dietro un
+dominio personalizzato, e /cdn-cgi/image serve AVIF o WebP ridimensionati.
+
+Il rapporto 63/88 e' imposto dal contenitore, quindi niente CLS nonostante
+le immagini siano remote e sconosciute al build. Con la configurazione vuota
+si ricade sul placeholder foil, cosi' lo sviluppo locale funziona senza rete."
 ```
 
 ---
@@ -3272,8 +3394,9 @@ Le domande aperte della spec §13 non bloccano nessun task fino al 26:
 1. **Nome del Worker e account ID** — servono al Task 26
 2. **Remote GitHub** — serve al Task 26
 3. **Dati reali del cliente** — fino ad allora restano i dati demo, che sono validi e completi
-4. **Foto delle carte** — fino ad allora resta il placeholder foil, identico al prototipo
-5. **Mappa vera al posto del segnaposto** — decisione da prendere con l'indirizzo reale, valutando il costo di un iframe di terze parti
+4. **Zona Cloudflare e sottodominio immagini** — servono al Task 23
+5. **Foto delle carte** — fino ad allora resta il placeholder foil, identico al prototipo
+6. **Mappa vera al posto del segnaposto** — decisione da prendere con l'indirizzo reale, valutando il costo di un iframe di terze parti
 
 ### Task 28, previsto ma non pianificato: pipeline di ingestione
 

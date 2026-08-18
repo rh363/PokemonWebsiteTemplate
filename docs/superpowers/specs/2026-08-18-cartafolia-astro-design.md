@@ -246,11 +246,41 @@ Nota sulla fedeltà delle icone: nel prototipo il glifo è una CSS mask riempita
 `currentColor`. Le icone Lucide sono stroke-only, quindi la mask dipinge esattamente i
 tratti; un `<svg stroke="currentColor">` inline produce gli stessi pixel.
 
-### 7.2 Immagini
+### 7.2 Immagini — su R2, mai nel repository
 
-`astro:assets` con `<Image>`: AVIF/WebP, `srcset` responsive, `loading="lazy"`,
-`decoding="async"`, aspect-ratio `63/88` riservato in CSS → **zero CLS**. Quando manca
-l'immagine si usa il placeholder foil del design system, identico al prototipo.
+Le foto delle carte **non entrano in git**. Una collezione di migliaia di immagini
+resterebbe nella storia del repository per sempre e la scaricherebbe ogni clone;
+ripulirla dopo significa riscrivere la storia. È una decisione che costa poco adesso
+e cara più tardi, quindi si prende subito.
+
+| Pezzo | Scelta |
+|---|---|
+| Archiviazione | Bucket **Cloudflare R2**, dietro un **dominio personalizzato** |
+| Ottimizzazione | **Cloudflare Image Transformations**, `https://<zona>/cdn-cgi/image/<opzioni>/<url sorgente>` |
+| Formato servito | `format=auto` → AVIF o WebP secondo il browser |
+| Dimensioni | `srcset` a 150 / 300 / 450 px, `sizes` per la griglia |
+| Caricamento | `loading="lazy"`, `eager` + `fetchpriority=high` solo sui candidati LCP |
+| Riferimento nei dati | La colonna `image` di `cards.csv` contiene **solo la chiave R2** |
+
+**Sul CLS**, che è il rischio proprio delle immagini remote: il contenitore
+`.ds-cardart` impone già `aspect-ratio: var(--card-aspect)` cioè 63/88, e `width`/`height`
+sul tag ribadiscono la proporzione. Lo spazio è riservato prima che arrivi un byte, quindi
+**zero salti di layout** nonostante il build non conosca le immagini.
+
+Quando la configurazione delle immagini è vuota si ricade sul placeholder foil del design
+system, identico al prototipo: lo sviluppo in locale funziona senza credenziali e senza rete.
+
+**Costi.** Il piano free R2 dà 10 GB di storage, **egress gratuito e illimitato**, 10 M di
+letture al mese; le trasformazioni sono 5.000 uniche al mese e quelle già fatte restano in
+cache senza ricontare, quindi il consumo segue le foto nuove e non le visite. Per un
+catalogo da qualche migliaio di carte resta gratuito.
+
+**Vincoli verificati sulla documentazione Cloudflare**, entrambi bloccanti:
+- le trasformazioni vanno **abilitate sulla zona** dalla dashboard, altrimenti
+  `/cdn-cgi/image/…` restituisce l'originale **senza segnalare errori** — il sito sembra
+  a posto e serve foto non ridimensionate;
+- il sottodominio `r2.dev` è rate-limited, senza cache né WAF, e dichiarato non supportato
+  in produzione: serve un dominio personalizzato sul bucket.
 
 ### 7.3 Cache
 
@@ -361,4 +391,6 @@ Non bloccano l'inizio dell'implementazione; servono prima del primo deploy.
 2. Esiste già un remote GitHub per questo repository?
 3. Dati reali del cliente (nome negozio, indirizzo, orari, social) — finché mancano
    restano i dati demo del prototipo
-4. Immagini reali delle carte — finché mancano resta il placeholder foil del design system
+4. **Zona Cloudflare e sottodominio per le immagini** (per esempio `img.<dominio>`) —
+   servono al Task 23 per creare il bucket R2 e abilitare le trasformazioni
+5. Immagini reali delle carte — finché mancano resta il placeholder foil del design system
