@@ -9,7 +9,7 @@ const ATTESE = [
 
 describe('inventario icone', () => {
   it('contiene esattamente le 18 icone usate dal prototipo', () => {
-    expect([...ICON_NAMES].sort()).toEqual([...ATTESE].sort())
+    expect(ICON_NAMES.toSorted()).toEqual([...ATTESE].toSorted())
   })
 
   it('ogni icona ha contenuto SVG non vuoto', () => {
