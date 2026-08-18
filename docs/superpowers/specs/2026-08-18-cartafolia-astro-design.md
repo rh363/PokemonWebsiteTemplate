@@ -230,6 +230,8 @@ l'import allo stesso modulo.
 Fallback se non regge: `CustomEvent` su `window`. Nessun impatto sul design in entrambi
 i casi.
 
+**Esito della verifica (2026-08-18):** confermata
+
 ---
 
 ## 7. Performance
