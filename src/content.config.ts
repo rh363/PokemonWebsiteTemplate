@@ -1,6 +1,6 @@
 import { defineCollection, z } from 'astro:content'
 import { file } from 'astro/loaders'
-import { parse } from 'csv-parse/sync'
+import { csvLoader } from '~/lib/catalog/csv-loader'
 
 const rarity = z.enum(['common', 'uncommon', 'rare', 'holo', 'ultra', 'secret'])
 const condition = z.enum(['mint', 'near-mint', 'excellent', 'good', 'played'])
@@ -14,9 +14,10 @@ const sets = defineCollection({
 })
 
 const cards = defineCollection({
-  loader: file('src/content/cards.csv', {
-    parser: (text) => parse(text, { columns: true, skip_empty_lines: true, bom: true }),
-  }),
+  // Loader nostro invece di file(): file() intercetta gli errori del parser CSV
+  // e li degrada a log, producendo una collection vuota e un build verde.
+  // csvLoader rilancia, con il numero di riga, così un CSV malformato ferma il build.
+  loader: csvLoader('src/content/cards.csv', 'slug'),
   // Da CSV ogni campo arriva come stringa: z.coerce converte, e un valore
   // non convertibile fa fallire il build indicando la riga.
   schema: z.object({
