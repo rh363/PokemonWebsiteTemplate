@@ -343,8 +343,12 @@ export const onChrome = (fn: (e: ChromeEvent) => void) => {
 
 - [ ] **Step 6: Rimuovere lo spike e committare**
 
+Vanno via **tutti e tre** i pezzi dello spike: le due isole, lo store (che al Task 15 verra' ricreato con il contenuto vero) e le modifiche a `index.astro`. Se `index.astro` restasse a importare componenti cancellati, il build si romperebbe al Task 3.
+
 ```bash
 rm -rf src/components/islands/__spike
+rm -f src/stores/chrome.ts
+git checkout -- src/pages/index.astro   # torna al segnaposto del Task 1
 git add -A
 git commit -m "spike: verificata la condivisione dello store fra isole Svelte
 
@@ -458,7 +462,9 @@ Contenuto atteso (verificarlo contro il sorgente, non fidarsi di questo estratto
 
 ```css
 /* Classi dei componenti del design system.
-   Popolato dai Task 8-13, un blocco per componente. */
+   Popolato dai Task 9-14, un blocco per componente, in aggiunta.
+   Nessun task riscrive questo file: ognuno accoda il proprio blocco
+   preceduto da un commento che cita la sorgente nel bundle. */
 ```
 
 Serve perché `global.css` lo importa già.
@@ -2165,11 +2171,11 @@ della sorgente; lo scrim passa su ::backdrop."
 
 **Files:**
 - Create: `src/components/ds/{Tabs,Pagination,Breadcrumb}.svelte`
-- Create: `src/components/NavBar.astro`, `src/components/Footer.astro`
-- Modify: `src/styles/ds.css`
+- Create: `src/components/NavBar.astro`, `src/components/Footer.astro`, `src/config/nav.ts`
+- Modify: `src/styles/ds.css`, `src/pages/__ds.astro`
 
 **Interfaces:**
-- Produces: `Tabs` (`items`, `value`, `onchange`, `variant`), `Pagination` (`page`, `pages`, `onchange`), `Breadcrumb` (`items`), `NavBar.astro` (`active: string`), `Footer.astro`
+- Produces: `Tabs` (`items`, `value`, `onchange`, `variant`), `Pagination` (`page`, `pages`, `onchange`), `Breadcrumb` (`items`), `NavBar.astro` (props `{ active: string; catalogCount?: number }`), `Footer.astro`
 
 | Componente | Sorgente | Nota di porting |
 |---|---|---|
@@ -2186,7 +2192,8 @@ della sorgente; lo scrim passa su ::backdrop."
 import { SITE } from '~/config/site'
 import Icon from '~/components/ds/Icon.svelte'
 import { NAV } from '~/config/nav'
-const { active } = Astro.props as { active: string }
+const { active, catalogCount } = Astro.props as { active: string; catalogCount?: number }
+const voci = NAV.map((v) => (v.id === 'catalogo' ? { ...v, count: catalogCount } : v))
 ---
 <header class="ds-nav" data-scrolled="false">
   <nav class="ds-nav__inner">
@@ -2195,7 +2202,7 @@ const { active } = Astro.props as { active: string }
       <span>{SITE.brand}</span>
     </a>
     <div class="ds-nav__links">
-      {NAV.map((it) => (
+      {voci.map((it) => (
         <a href={it.href} class="ds-nav__link" data-on={it.id === active}
            aria-current={it.id === active ? 'page' : undefined}>
           {it.label}
@@ -2326,7 +2333,8 @@ L'ordine delle pagine non è casuale: si parte dalla più semplice (`/chi-siamo`
 ### Task 15: Layout di base e shell interattiva
 
 **Files:**
-- Create: `src/layouts/Base.astro`, `src/components/islands/SiteChrome.svelte`, `src/stores/chrome.ts`, `src/config/nav.ts`
+- Create: `src/layouts/Base.astro`, `src/components/islands/SiteChrome.svelte`, `src/stores/chrome.ts`
+- Consuma (creato al Task 13): `src/config/nav.ts`
 - Create: `public/assets/logo-mark.svg`, `public/assets/logo.svg`
 
 **Interfaces:**
@@ -2671,6 +2679,8 @@ Validare ogni valore contro le costanti di `labels.ts`: la querystring è input 
 
 - [ ] **Step 4: Eseguire il test e verificare che passi** → PASS, 5 test.
 
+Aggiungere poi `export * from './url'` a `src/lib/catalog/index.ts`, cosi' le pagine continuano a importare solo da `~/lib/catalog`.
+
 - [ ] **Step 5: Renderizzare staticamente la prima pagina**
 
 `src/pages/catalogo.astro` renderizza in HTML l'intestazione, la barra dei filtri e **le prime 24 carte** dell'ordinamento `novita` senza filtri (spec §6.1), dentro un contenitore che `CatalogApp` sostituirà quando l'utente interagisce.
@@ -2833,7 +2843,8 @@ Il prototipo non ha nessuna immagine: `CardArt` senza `src` mostra il placeholde
 
 **Files:**
 - Create: `src/components/CardImage.astro`, `scripts/upload-immagini.ts`
-- Modify: `src/config/site.ts`, `docs/CONTENUTI.md`
+- Modify: `src/config/site.ts`
+- Create: `docs/CONTENUTI.md` (primo scrittore; il Task 27 lo completa)
 - **Non** si crea `src/assets/cards/`: nel repository non finiscono binari
 
 **Interfaces:**
@@ -3318,7 +3329,8 @@ cosi' un errore di tipo non arriva in produzione."
 
 **Files:**
 - Delete: `src/pages/__ds.astro`
-- Create: `README.md`, `docs/CONTENUTI.md`, `docs/FEDELTA.md`
+- Create: `README.md`, `docs/FEDELTA.md`
+- Modify: `docs/CONTENUTI.md` (creato al Task 23, qui si completa)
 
 - [ ] **Step 1: Confronto affiancato completo**
 
