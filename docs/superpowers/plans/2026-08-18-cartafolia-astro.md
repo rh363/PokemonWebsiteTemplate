@@ -73,7 +73,7 @@ Ogni file ha una responsabilità sola. La divisione è per responsabilità, non 
 ### Task 1: Scaffold del progetto e riferimento di design
 
 **Files:**
-- Create: `package.json`, `astro.config.mjs`, `tsconfig.json`, `.gitignore`, `.prettierrc`, `oxlintrc.json`
+- Create: `package.json`, `astro.config.mjs`, `tsconfig.json`, `.gitignore`, `.prettierrc`, `.prettierignore`, `oxlintrc.json`
 - Create: `design-reference/` (popolata dal progetto Claude Design)
 - Create: `src/pages/index.astro` (segnaposto minimo, sostituito al Task 18)
 
@@ -3348,11 +3348,30 @@ Punti su cui si accumulano gli scostamenti, da controllare per primi:
 
 - [ ] **Step 2: Verificare l'aderenza ai token**
 
+Il design system porta con sé `_adherence.oxlintrc.json`, che vieta i valori hardcoded.
+**Non è utilizzabile qui**: i suoi selettori sono `JSXOpeningElement` e le sue regole
+cercano literal JavaScript, quindi valida React e non vede né i `.svelte` né i `.css`.
+I contratti di prop che conteneva sono stati estratti in
+`design-reference/CONTRATTI-COMPONENTI.md`; le tre regole di aderenza che sopravvivono
+al porting si verificano così:
+
 ```bash
-pnpm exec oxlint --config design-reference/_ds/cartafolia-design-system-3cbf7559-ef12-4ca1-9d34-2c119fcda054/_adherence.oxlintrc.json src
+# 1. Nessun colore esadecimale grezzo fuori dai file che definiscono i token
+grep -rnE '#[0-9a-fA-F]{3,8}\b' src --include='*.svelte' --include='*.astro'   --include='*.css' --include='*.ts' | grep -v '^src/styles/tokens/' || echo "ok: nessun hex grezzo"
+
+# 2. Nessun px grezzo in ds.css e layout.css (i token li definiscono altrove)
+grep -nE '[^-a-zA-Z(]([0-9]+)px' src/styles/ds.css src/styles/layout.css || echo "ok: nessun px grezzo"
+
+# 3. Solo le tre famiglie del design system
+grep -rn 'font-family' src --include='*.svelte' --include='*.astro' --include='*.css'   | grep -v 'var(--font-' | grep -v '^src/styles/tokens/' || echo "ok: solo font del design system"
 ```
 
-Questa configurazione arriva dal design system e vieta i valori hardcoded al posto dei token. Ogni segnalazione va risolta o giustificata in `docs/FEDELTA.md`.
+Il punto 2 produrrà dei riscontri legittimi: i valori che il prototipo stesso scrive come
+numeri nudi (`gap: 12` e `padding: 12` in `CardTile`, `padding: "8px 16px"` in `Button`,
+le altezze delle barre di `ConditionBadge`). La regola del progetto è **fedeltà letterale
+alla sorgente**, non normalizzazione: ognuno di questi va confrontato con l'intervallo di
+righe nel bundle e, se corrisponde, annotato in `docs/FEDELTA.md` come atteso. Ciò che non
+corrisponde a nulla nella sorgente è invece un difetto da correggere.
 
 - [ ] **Step 3: Rimuovere la galleria di sviluppo**
 
