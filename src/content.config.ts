@@ -5,6 +5,17 @@ import { csvLoader } from '~/lib/catalog/csv-loader'
 const rarity = z.enum(['common', 'uncommon', 'rare', 'holo', 'ultra', 'secret'])
 const condition = z.enum(['mint', 'near-mint', 'excellent', 'good', 'played'])
 
+// Intero obbligatorio da cella CSV: una cella vuota o solo spazi non deve
+// coercere silenziosamente a 0 (Number('') === 0), deve fallire il build.
+const interoObbligatorio = z.string().trim().min(1, 'cella vuota').transform((v, ctx) => {
+  const n = Number(v)
+  if (!Number.isInteger(n)) {
+    ctx.addIssue({ code: 'custom', message: 'deve essere un numero intero' })
+    return z.NEVER
+  }
+  return n
+})
+
 const sets = defineCollection({
   loader: file('src/content/sets.json'),
   schema: z.object({
@@ -24,9 +35,9 @@ const cards = defineCollection({
     id: z.string(), slug: z.string(), name: z.string(), set: z.string(),
     num: z.string(), rarity, cond: condition, lang: z.string(), artist: z.string(),
     nuovo: z.union([z.boolean(), z.enum(['true', 'false'])]).transform((v) => v === true || v === 'true'),
-    vetrina: z.coerce.number().int(),
+    vetrina: interoObbligatorio,
     entrata: z.string(),
-    ordine: z.coerce.number().int(),
+    ordine: interoObbligatorio,
     image: z.string().optional().transform((v) => (v === '' ? undefined : v)),
   }),
 })

@@ -1,4 +1,4 @@
-import { mkdirSync, rmSync, writeFileSync } from 'node:fs'
+import { mkdirSync, writeFileSync } from 'node:fs'
 import { createPick, createRng } from '../src/lib/demo/prng'
 import type { Card, CardSet, Condition, Rarity } from '../src/lib/catalog/types'
 
