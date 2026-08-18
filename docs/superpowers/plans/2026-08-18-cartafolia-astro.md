@@ -87,6 +87,7 @@ Ogni file ha una responsabilità sola. La divisione è per responsabilità, non 
 cd /home/alex/WebstormProjects/PokemonWebsiteTemplate
 pnpm init
 pnpm add astro@^7.2.2 svelte@^5.56.9 @astrojs/svelte@^9.0.1 @astrojs/sitemap@^3.7.3
+pnpm add csv-parse@^7.0.2
 pnpm add -D typescript@^5 vitest@^3 @playwright/test@^1 oxlint@^1 \
   prettier@^3 prettier-plugin-svelte@^3 prettier-plugin-astro@^0 \
   wrangler@^4.123.0 serve@^14
@@ -631,7 +632,7 @@ Questa fase è **interamente logica pura**: nessun DOM, nessun componente. È il
 **Files:**
 - Create: `src/lib/catalog/types.ts`, `src/lib/catalog/labels.ts`, `src/lib/demo/prng.ts`, `src/config/site.ts`
 - Create: `scripts/seed-demo.ts`
-- Create: `src/content/sets.json`, `src/content/cards/*.json` (generati)
+- Create: `src/content/sets.json`, `src/content/cards.csv` (generati)
 - Create: `src/content/config.ts`
 - Test: `src/lib/demo/prng.test.ts`
 
@@ -900,14 +901,28 @@ while (cards.length < 100) {
 const slugs = new Set(cards.map((c) => c.slug))
 if (slugs.size !== cards.length) throw new Error('slug duplicati fra le carte demo')
 
-rmSync('src/content/cards', { recursive: true, force: true })
-mkdirSync('src/content/cards', { recursive: true })
-writeFileSync('src/content/sets.json', JSON.stringify(SETS, null, 2) + '\n')
-for (const c of cards) {
-  writeFileSync(`src/content/cards/${c.slug}.json`, JSON.stringify(c, null, 2) + '\n')
+const COLONNE = [
+  'id','slug','name','set','num','rarity','cond','lang','artist',
+  'nuovo','vetrina','entrata','ordine','image',
+] as const
+
+/** Virgolette solo dove servono: virgola, virgoletta o a capo nel valore. */
+const cella = (v: unknown) => {
+  const t = v == null ? '' : String(v)
+  return /[",\n]/.test(t) ? `"${t.replace(/"/g, '""')}"` : t
 }
+
+mkdirSync('src/content', { recursive: true })
+writeFileSync('src/content/sets.json', JSON.stringify(SETS, null, 2) + '\n')
+writeFileSync(
+  'src/content/cards.csv',
+  [COLONNE.join(','), ...cards.map((c) => COLONNE.map((k) => cella((c as any)[k])).join(','))]
+    .join('\n') + '\n',
+)
 console.log(`generate ${cards.length} carte e ${SETS.length} espansioni`)
 ```
+
+**Perche' CSV e non un file JSON per carta.** Una carta non e' un documento, e' una riga di tabella: quindici campi piatti, nessun corpo. Un file per record non scala (5.000 carte = 5.000 file) e soprattutto nessuno lo aggiornerebbe a mano. Il catalogo arrivera' da un foglio di calcolo del negozio, e CSV e' cio' che un foglio esporta e cio' che Supabase importa nativamente.
 
 **L'ordine delle chiamate a `rnd()` deve restare identico a `dati.jsx`**, altrimenti i dati demo divergono e il confronto visivo del Task 25 non è più 1:1.
 
@@ -916,7 +931,8 @@ console.log(`generate ${cards.length} carte e ${SETS.length} espansioni`)
 ```bash
 pnpm add -D tsx
 pnpm tsx scripts/seed-demo.ts
-ls src/content/cards | wc -l   # atteso: 100
+wc -l src/content/cards.csv    # atteso: 101 (intestazione + 100 carte)
+head -2 src/content/cards.csv
 ```
 
 Aggiungere a `package.json`: `"seed": "tsx scripts/seed-demo.ts"`.
@@ -926,6 +942,7 @@ Aggiungere a `package.json`: `"seed": "tsx scripts/seed-demo.ts"`.
 ```ts
 import { defineCollection, z } from 'astro:content'
 import { file } from 'astro/loaders'
+import { parse } from 'csv-parse/sync'
 
 const rarity = z.enum(['common', 'uncommon', 'rare', 'holo', 'ultra', 'secret'])
 const condition = z.enum(['mint', 'near-mint', 'excellent', 'good', 'played'])
@@ -939,14 +956,19 @@ const sets = defineCollection({
 })
 
 const cards = defineCollection({
-  loader: file('src/content/cards', {
-    parser: (text) => JSON.parse(text),
+  loader: file('src/content/cards.csv', {
+    parser: (text) => parse(text, { columns: true, skip_empty_lines: true, bom: true }),
   }),
+  // Da CSV ogni campo arriva come stringa: z.coerce converte, e un valore
+  // non convertibile fa fallire il build indicando la riga.
   schema: z.object({
     id: z.string(), slug: z.string(), name: z.string(), set: z.string(),
     num: z.string(), rarity, cond: condition, lang: z.string(), artist: z.string(),
-    nuovo: z.boolean(), vetrina: z.number().int(), entrata: z.string(),
-    ordine: z.number().int(), image: z.string().optional(),
+    nuovo: z.union([z.boolean(), z.enum(['true', 'false'])]).transform((v) => v === true || v === 'true'),
+    vetrina: z.coerce.number().int(),
+    entrata: z.string(),
+    ordine: z.coerce.number().int(),
+    image: z.string().optional().transform((v) => (v === '' ? undefined : v)),
   }),
 })
 
@@ -960,7 +982,9 @@ Se l'API dei loader di Astro 7 differisce da questa firma, consultare `https://d
 ```bash
 pnpm check
 ```
-Atteso: 0 errori. Poi rompere di proposito un file — in `src/content/cards/<uno>.json` sostituire `"rarity": "holo"` con `"rarity": "leggendaria"` — e rilanciare `pnpm check`. Atteso: errore che nomina il file e il campo. **Ripristinare il valore** dopo la verifica.
+Atteso: 0 errori. Poi rompere di proposito una riga — in `src/content/cards.csv` sostituire un `holo` con `leggendaria` — e rilanciare `pnpm check`. Atteso: errore che nomina il campo `rarity` e permette di risalire alla riga. **Ripristinare il valore** dopo la verifica.
+
+Ripetere con una riga a cui manca una colonna, che e' l'errore piu' probabile quando i dati arrivano da un foglio di calcolo: anche quella deve fermare il build.
 
 Questo step verifica il pilastro 5: se il cliente sbaglia un campo, il build lo dice invece di produrre una pagina rotta.
 
@@ -1394,6 +1418,8 @@ Qui si materializza il seam della spec §5.2: l'isola del catalogo **non importe
 ```
 
 I due file sono separati di proposito: la griglia ha bisogno di `catalog.json` subito, l'indice serve solo quando l'utente scrive nel campo di ricerca.
+
+**Questo payload non dipende dal formato dei contenuti.** Il catalogo sta in CSV, ma se domani diventasse JSON, SQLite o una tabella Supabase, `catalog.json` uscirebbe identico e nulla a valle cambierebbe. E' il motivo per cui il seam sta qui e non nell'interfaccia TypeScript.
 
 - [ ] **Step 1: Scrivere il test**
 
@@ -2812,7 +2838,7 @@ Il prototipo non ha nessuna immagine reale: `CardArt` senza `src` mostra il plac
 
 - [ ] **Step 1: Estendere lo schema**
 
-In `src/content/config.ts` il campo `image` esiste già come `z.string().optional()`. Documentarne il significato: percorso relativo a `src/assets/cards/`, per esempio `"fulmine-di-notte-alb-042.jpg"`.
+In `src/content/config.ts` la colonna `image` esiste già nello schema. Documentarne il significato: nome del file relativo a `src/assets/cards/`, per esempio `fulmine-di-notte-alb-042.jpg`. Colonna vuota significa nessuna foto, e la carta ricade sul placeholder foil.
 
 - [ ] **Step 2: Scrivere `CardImage.astro`**
 
@@ -2849,11 +2875,11 @@ Le prime 4 carte dell'hero e la carta grande della scheda sono candidate LCP: `l
 
 - [ ] **Step 4: Documentare per il cliente**
 
-`docs/CONTENUTI.md`, sezione «Aggiungere la foto di una carta»: mettere il file in `src/assets/cards/`, poi scrivere il nome del file nel campo `image` del JSON della carta. Formati accettati: jpg, png, webp, avif. Astro converte e ridimensiona da solo.
+`docs/CONTENUTI.md`, sezione «Aggiungere la foto di una carta»: mettere il file in `src/assets/cards/`, poi scrivere il nome del file nella colonna `image` della riga corrispondente in `cards.csv`. Formati accettati: jpg, png, webp, avif. Astro converte e ridimensiona da solo.
 
 - [ ] **Step 5: Verificare con una foto di prova**
 
-Mettere un'immagine qualsiasi in `src/assets/cards/prova.jpg`, assegnarla a una carta, `pnpm build`, e controllare che in `dist/_astro/` compaiano le varianti `.avif` alle tre larghezze e che la pagina serva un `srcset`. Poi **rimuovere** la foto di prova e rimettere `image` a assente.
+Mettere un'immagine qualsiasi in `src/assets/cards/prova.jpg`, scriverne il nome nella colonna `image` di una riga, `pnpm build`, e controllare che in `dist/_astro/` compaiano le varianti `.avif` alle tre larghezze e che la pagina serva un `srcset`. Poi **rimuovere** la foto di prova e svuotare la colonna.
 
 - [ ] **Step 6: Commit**
 
@@ -3248,3 +3274,24 @@ Le domande aperte della spec §13 non bloccano nessun task fino al 26:
 3. **Dati reali del cliente** — fino ad allora restano i dati demo, che sono validi e completi
 4. **Foto delle carte** — fino ad allora resta il placeholder foil, identico al prototipo
 5. **Mappa vera al posto del segnaposto** — decisione da prendere con l'indirizzo reale, valutando il costo di un iframe di terze parti
+
+### Task 28, previsto ma non pianificato: pipeline di ingestione
+
+Per ora il catalogo lo committa lo sviluppatore: il cliente manda i dati, lui aggiorna `cards.csv` e pusha. Zero infrastruttura, niente che si rompa.
+
+Quando quella cadenza diventera' fastidiosa — il prototipo dice che il catalogo si aggiorna «ogni martedi» — la strada gia' valutata e':
+
+```
+Google Sheet ──[voce di menu "Pubblica sul sito"]──► repository_dispatch
+                                                            │
+                                              Action: scarica CSV → valida
+                                              → committa se cambiato → deploy
+```
+
+Un **trigger esplicito**, non un cron: il cron farebbe aspettare al cliente ore senza sapere se ha funzionato, e girerebbe a vuoto il resto del tempo. E su una voce di menu, non su `onEdit`, che farebbe partire un deploy a ogni tasto premuto.
+
+E' proprio per tenere aperta questa strada a costo zero che il formato nel repo e' CSV: e' cio' che un foglio esporta, quindi la pipeline sarebbe solo l'Action, senza nessuna conversione da mantenere.
+
+Due punti da risolvere quando si costruira', gia' identificati:
+- **accesso al foglio** — pubblicato in sola lettura (basta: il catalogo e' pubblico comunque) oppure service account Google;
+- **ritorno degli errori** — se il cliente rompe una colonna il build si ferma giustamente, ma lui vede il sito invariato e non sa perche'. Minimo indispensabile: la mail di fallimento dell'Action arriva allo sviluppatore, che fa da fallback. Mitigazione a monte: convalida dati sulle colonne del foglio, con rarita', condizione e lingua come elenchi chiusi.

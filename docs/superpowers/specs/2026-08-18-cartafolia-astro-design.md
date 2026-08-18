@@ -266,9 +266,24 @@ Astro View Transitions, per mantenere la fluidità percepita della SPA.
 
 - **`src/config/site.ts`** — un solo file per tutto il branding: nome negozio, via, CAP,
   città, orari, Instagram/TikTok/WhatsApp, metadati SEO.
-- **`src/content/sets.json`** e **`src/content/cards/*.json`** — validati con Zod in
-  `src/content/config.ts`. Un campo sbagliato fa fallire il build con un messaggio
-  chiaro, invece di produrre una pagina rotta.
+- **`src/content/cards.csv`** — una carta per riga — e **`src/content/sets.json`**,
+  entrambi validati con Zod in `src/content/config.ts`. Un campo sbagliato fa fallire
+  il build con un messaggio chiaro, invece di produrre una pagina rotta.
+
+### Perche' CSV e non un file per carta
+
+Una carta non e' un documento, e' una riga di tabella: quindici campi piatti, nessun
+corpo, nessun ciclo di vita editoriale. L'idioma «un file per entita'» delle content
+collection serve ai post di un blog, non ai record di un inventario, e a 5.000 carte
+produrrebbe 5.000 file che nessuno aggiornerebbe a mano.
+
+Il catalogo di un negozio vive gia' in un foglio di calcolo. CSV e' cio' che un foglio
+esporta, cio' che Supabase importa nativamente, e cio' che permette di aggiungere in
+futuro una pipeline di pubblicazione senza portarsi dietro una conversione di formato.
+
+**Chi lo aggiorna, per ora:** lo sviluppatore. Il cliente manda i dati, lo sviluppatore
+aggiorna il file e pusha. Nessuna infrastruttura di ingestione finche' la frequenza degli
+aggiornamenti non la giustifica (vedi Task 28 nel piano).
 
 ### Dati demo
 
