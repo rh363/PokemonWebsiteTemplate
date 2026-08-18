@@ -230,7 +230,37 @@ l'import allo stesso modulo.
 Fallback se non regge: `CustomEvent` su `window`. Nessun impatto sul design in entrambi
 i casi.
 
-**Esito della verifica (2026-08-18):** confermata
+**Esito della verifica (2026-08-18):** confermata — due prove indipendenti, comportamentale
+(Playwright su dev server) e strutturale (grafo degli import nel build di produzione),
+concordi. Non serve il fallback a `CustomEvent`.
+
+### 6.4 Click persi prima dell'idratazione
+
+Lo spike ha però mostrato un secondo fatto, non richiesto ma importante: nella prima
+esecuzione a freddo il contatore ha letto **2 invece di 3**. Un click era arrivato prima
+che l'isola fosse idratata, ed è andato perso.
+
+Non intacca la conclusione sopra — un valore diverso da zero è possibile solo se lo store
+è condiviso — ma descrive un comportamento reale del sito:
+
+> Finché un'isola non è idratata, i click sui suoi controlli non fanno niente e non
+> lasciano traccia. Non c'è coda, non c'è recupero.
+
+Riguarda direttamente `SiteChrome`, che §6.2 monta con `client:idle`, cioè **più tardi**
+di `client:load`. Un utente che tocca il menu mobile o «Chiedi una carta» appena la pagina
+compare può non ottenere risposta.
+
+Il Task 15 deve affrontarlo, scegliendo fra:
+
+1. **`client:load` invece di `client:idle`** per `SiteChrome` — idrata prima, ma compete
+   col first paint e quindi col pilastro 3;
+2. **degradare senza JavaScript** — il menu mobile diventa un `<dialog>` o un `<details>`
+   apribile dal browser da solo, e l'isola lo arricchisce quando arriva. È la strada
+   coerente con le scelte già fatte per `FilterGroup` (§Task 11) e costa un controllo
+   che funziona sempre;
+3. **accettarlo e dirlo** — la finestra è di poche centinaia di millisecondi.
+
+La scelta 2 è quella allineata al resto del progetto e va preferita salvo motivi contrari.
 
 ---
 
