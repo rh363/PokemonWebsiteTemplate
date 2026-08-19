@@ -1862,7 +1862,9 @@ Confronto con la sorgente, riga per riga: `padding`, `fontSize`, `gap`, `minHeig
 **Files:**
 - Create: `src/components/ds/{CardArt,Badge,RarityBadge,ConditionBadge,SpecList,Skeleton,EmptyState}.svelte`
 - Modify: `src/styles/ds.css`
-- Create: `src/pages/__ds.astro` (galleria di verifica, rimossa al Task 25)
+- Create: `src/pages/ds-gallery.astro` (galleria di verifica, rimossa al Task 27)
+
+**Nota sul nome del file:** non usare un nome che inizi per `_`. Astro esclude dal routing ogni segmento di percorso che comincia con un underscore, quindi `__ds.astro` restituirebbe 404 sia in dev sia nel build.
 
 **Interfaces:**
 - Consumes: `Icon` (Task 4), token (Task 3), tipi `Rarity`/`Condition` (Task 5)
@@ -1888,7 +1890,7 @@ Per ciascuno seguire il protocollo a 5 passi. Nessuno di questi ha stato di inte
 
 - [ ] **Step 3: Costruire la galleria di verifica**
 
-`src/pages/__ds.astro` mostra ogni componente in tutte le sue varianti, affiancate:
+`src/pages/ds-gallery.astro` mostra ogni componente in tutte le sue varianti, affiancate:
 
 ```astro
 ---
@@ -1934,7 +1936,7 @@ const COND = ['mint','near-mint','excellent','good','played'] as const
 
 - [ ] **Step 4: Verificare la fedeltà**
 
-Aprire `http://localhost:4321/__ds` accanto a `http://localhost:4322/index.html`.
+Aprire `http://localhost:4321/ds-gallery` accanto a `http://localhost:4322/index.html`.
 
 - Le sei `CardArt` con rarità alta (`holo`, `ultra`, `secret`) devono avere il fondo foil arcobaleno; le altre il retino a punti su grigio caldo.
 - I pallini di `RarityBadge` devono essere 1, 2, 3, 4, 5, 6 e il bordo del colore della rarità.
@@ -1963,7 +1965,7 @@ affiancato col prototipo."
 
 **Files:**
 - Create: `src/components/ds/{Button,IconButton,Chip,Panel,Tooltip}.svelte`
-- Modify: `src/styles/ds.css`, `src/pages/__ds.astro`
+- Modify: `src/styles/ds.css`, `src/pages/ds-gallery.astro`
 
 **Interfaces:**
 - Produces: `Button` (props `variant`, `size`, `fullWidth`, `disabled`, `href`, `onclick`, snippet `icon`/`iconRight`/`children`), `IconButton` (`icon: IconName`, `variant`, `size`, `label`, `onclick`), `Chip` (`onclick`, `onRemove`, snippet `children`), `Panel` (`variant`, `padding`, `hoverLift`, `as`), `Tooltip` (`label`, `side`)
@@ -2018,7 +2020,7 @@ Per `Tooltip`:
 
 - [ ] **Step 3: Estendere la galleria**
 
-Aggiungere a `src/pages/__ds.astro`: le 5 varianti di `Button` × 3 dimensioni, più uno `disabled` e uno `fullWidth`; `IconButton` in tutte le varianti; `Chip` con e senza `onRemove`; i 5 `Panel` con e senza `hoverLift`; `Tooltip` nelle 4 posizioni.
+Aggiungere a `src/pages/ds-gallery.astro`: le 5 varianti di `Button` × 3 dimensioni, più uno `disabled` e uno `fullWidth`; `IconButton` in tutte le varianti; `Chip` con e senza `onRemove`; i 5 `Panel` con e senza `hoverLift`; `Tooltip` nelle 4 posizioni.
 
 - [ ] **Step 4: Verificare hover, press e tastiera**
 
@@ -2053,7 +2055,7 @@ controlli funzionano in pagine che non idratano nulla."
 
 **Files:**
 - Create: `src/components/ds/{Input,SearchField,Select,Checkbox,Switch,FilterGroup}.svelte`
-- Modify: `src/styles/ds.css`, `src/pages/__ds.astro`
+- Modify: `src/styles/ds.css`, `src/pages/ds-gallery.astro`
 
 **Interfaces:**
 - Produces: `Input`, `SearchField` (`value`, `oninput`, `onclear`, `suggestions`, `onpick`, `size`), `Select` (`value`, `options`, `onchange`, `size`), `Checkbox` (`checked`, `label`, `description`, `count`, `onchange`), `Switch` (`checked`, `label`, `onchange`), `FilterGroup` (`title`, `activeCount`, `defaultOpen`, snippet `children`)
@@ -2081,11 +2083,11 @@ Seguire il protocollo. Per `FilterGroup` la conversione a `<details>` è un camb
 
 - [ ] **Step 2: Estendere la galleria**
 
-Dentro `__ds.astro` serve un'isola contenitore, perché questi componenti hanno stato. Creare `src/components/islands/__DsForms.svelte` che li monta tutti con valori locali, e montarlo con `client:load`.
+Dentro `ds-gallery.astro` serve un'isola contenitore, perché questi componenti hanno stato. Creare `src/components/islands/DsForms.svelte` che li monta tutti con valori locali, e montarlo con `client:load`.
 
 - [ ] **Step 3: Verificare la tastiera**
 
-Su `http://localhost:4321/__ds`:
+Su `http://localhost:4321/ds-gallery`:
 - Tab raggiunge ogni campo; `Checkbox` e `Switch` si attivano con Spazio;
 - `FilterGroup` apre e chiude con Invio sul `<summary>`;
 - in `SearchField`, scrivendo appare la lista: `↓` evidenzia la prima voce, `Invio` la sceglie, `Esc` chiude;
@@ -2208,7 +2210,7 @@ della sorgente; lo scrim passa su ::backdrop."
 **Files:**
 - Create: `src/components/ds/{Tabs,Pagination,Breadcrumb}.svelte`
 - Create: `src/components/NavBar.astro`, `src/components/Footer.astro`, `src/config/nav.ts`
-- Modify: `src/styles/ds.css`, `src/pages/__ds.astro`
+- Modify: `src/styles/ds.css`, `src/pages/ds-gallery.astro`
 
 **Interfaces:**
 - Produces: `Tabs` (`items`, `value`, `onchange`, `variant`), `Pagination` (`page`, `pages`, `onchange`), `Breadcrumb` (`items`), `NavBar.astro` (props `{ active: string; catalogCount?: number }`), `Footer.astro`
@@ -2283,7 +2285,7 @@ Porting di `design-reference/guscio.jsx`, funzione `Footer`. Quattro colonne (`.
 
 - [ ] **Step 4: Verificare**
 
-Con la NavBar montata in `__ds.astro`: a scroll 0 il fondo è `var(--surface-page)` senza bordo; superati 8px compaiono vetro, sfocatura e bordo. Il confronto va fatto affiancato al prototipo, che si comporta identico.
+Con la NavBar montata in `ds-gallery.astro`: a scroll 0 il fondo è `var(--surface-page)` senza bordo; superati 8px compaiono vetro, sfocatura e bordo. Il confronto va fatto affiancato al prototipo, che si comporta identico.
 
 - [ ] **Step 5: Commit**
 
@@ -2304,7 +2306,7 @@ Il tilt dipende dalla posizione del puntatore dentro l'elemento: `rotateY = (x/w
 
 **Files:**
 - Create: `src/components/ds/CardTile.svelte`
-- Modify: `src/styles/ds.css`, `src/pages/__ds.astro`
+- Modify: `src/styles/ds.css`, `src/pages/ds-gallery.astro`
 
 **Interfaces:**
 - Consumes: `CardArt` (Task 9), `RarityBadge` (Task 9), `IconButton` (Task 10)
@@ -3364,7 +3366,7 @@ cosi' un errore di tipo non arriva in produzione."
 È il task che chiude il pilastro 1. Non va saltato.
 
 **Files:**
-- Delete: `src/pages/__ds.astro`
+- Delete: `src/pages/ds-gallery.astro`
 - Create: `README.md`, `docs/FEDELTA.md`
 - Modify: `docs/CONTENUTI.md` (creato al Task 23, qui si completa)
 
@@ -3412,8 +3414,8 @@ corrisponde a nulla nella sorgente è invece un difetto da correggere.
 - [ ] **Step 3: Rimuovere la galleria di sviluppo**
 
 ```bash
-rm src/pages/__ds.astro
-rm -f src/components/islands/__DsForms.svelte
+rm src/pages/ds-gallery.astro
+rm -f src/components/islands/DsForms.svelte
 ```
 
 - [ ] **Step 4: Scrivere `README.md`**
