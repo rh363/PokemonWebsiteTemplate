@@ -13,15 +13,9 @@ import SetFilter from '~/components/islands/SetFilter.svelte'
 import { SITE } from '~/config/site'
 import { getAllSets, getAllCards } from '~/lib/catalog'
 
-const [setsRaw, cards] = await Promise.all([getAllSets(), getAllCards()])
-
-// getCollection('sets') non garantisce l'ordine di src/content/sets.json (il
-// content layer di Astro lo restituisce alfabetico per id, non per
-// inserimento). design-reference/dati.jsx elenca le espansioni piu' recenti
-// per prime — ordine che qui va ricostruito esplicitamente, non ereditato
-// dalla collection: piu' anno, non un ID fisso, cosi' regge anche
-// un'espansione aggiunta in futuro.
-const sets = setsRaw.toSorted((a, b) => b.year - a.year)
+// L'ordine di visualizzazione (quello di sets.json) e' gia' garantito da
+// getAllSets(): vedi il commento in src/lib/catalog/source.static.astro.ts.
+const [sets, cards] = await Promise.all([getAllSets(), getAllCards()])
 
 // carte.length del sorgente (design-reference/espansioni.jsx riga 24): il
 // conteggio reale delle carte schedate in quell'espansione, non la stima

@@ -1,13 +1,27 @@
 import { getCollection } from 'astro:content'
+import setsRaw from '../../content/sets.json'
 import { buildHaystack } from './search'
 import { queryCards, type IndexedCard } from './query'
 import type { Card, CardQuery, CardSet, CatalogSource, Page } from './types'
+
+// L'ordine in cui compaiono le espansioni in sets.json e' una scelta
+// editoriale di chi cura il catalogo (come SETS in design-reference/dati.jsx,
+// un array la cui sequenza non deriva da nessun campo), quindi e' quello
+// l'ordine di visualizzazione. getCollection('sets') pero' NON lo preserva:
+// il content layer di Astro restituisce le entry ordinate alfabeticamente
+// per id, non nell'ordine di inserimento nel file. Coi dati demo il
+// risultato di "anno desc" coincide col file per puro caso (i pareggi
+// d'anno capitano gia' in ordine alfabetico di id) — non e' una prova che
+// quest'ordinamento sia superfluo: chi aggiunge un'espansione nuova in
+// cima al file va a finire altrove se questa riga sparisce.
+const idOrder = new Map(setsRaw.map((s, i) => [s.id, i]))
 
 /** Lettura dalle content collections. Solo a build time (astro:content non
  *  e' risolvibile sotto Vitest puro): per questo sta in un file separato da
  *  source.static.ts, che resta testabile senza Astro. */
 export async function getAllSets(): Promise<CardSet[]> {
-  return (await getCollection('sets')).map((e) => e.data as CardSet)
+  const sets = (await getCollection('sets')).map((e) => e.data as CardSet)
+  return sets.toSorted((a, b) => (idOrder.get(a.id) ?? 0) - (idOrder.get(b.id) ?? 0))
 }
 
 export async function getAllCards(): Promise<Card[]> {
