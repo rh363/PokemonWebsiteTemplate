@@ -329,8 +329,20 @@
 
     if (eraPrimoGiro && paginaIniziale === 1 && statoEDefault()) {
       pianificaIdle(() => {
+        // garantisciDati() intercetta il proprio rifiuto (avvisa con un
+        // toast) e si risolve comunque: qui, e SOLO qui, questo va
+        // controllato esplicitamente. #cat-static mostra gia' le 24 tessere
+        // corrette per questa vista di default — se il fetch fallisce non
+        // c'e' nulla da correggere, quindi non si passa la mano all'isola
+        // (mostraApp resta false, #cat-static resta visibile) e il toast
+        // basta a dire che filtrare non e' momentaneamente disponibile.
+        // Nel ramo sotto (querystring/filtri/pagina diversi dal default)
+        // vale l'opposto: la griglia statica sarebbe la lista SBAGLIATA per
+        // quello che l'utente ha chiesto, quindi li' si passa la mano
+        // sempre, anche a dati nullo, per mostrare l'errore con "Riprova"
+        // invece di 24 carte fuorvianti.
         void garantisciDati().then(() => {
-          mostraApp = true
+          if (dati) mostraApp = true
         })
       })
       return
