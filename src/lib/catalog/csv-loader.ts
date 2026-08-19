@@ -7,8 +7,17 @@ import type { Loader } from 'astro/loaders'
  *  produrrebbe una collection vuota e un build verde. Con { info: true }
  *  csv-parse restituisce anche il numero di riga reale di ogni record, che
  *  regge correttamente le righe vuote in mezzo al file (a differenza di un
- *  contatore basato sull'indice dell'array). */
-export function csvLoader(percorso: string, chiave: string): Loader {
+ *  contatore basato sull'indice dell'array).
+ *
+ *  `chiave` e' la colonna usata come id della collection (deve essere unica
+ *  per costruzione — Astro non accetterebbe due entry con lo stesso id).
+ *  `colonneUniche` (I2 del giro di fix finale) elenca colonne aggiuntive che
+ *  devono anch'esse essere uniche nel file ma che NON sono l'id della
+ *  collection — es. "id" per cards.csv, dove l'invariante sull'ordine di
+ *  source.static.astro.ts (Number(c.id)) dipende da valori distinti. Prima
+ *  di questo fix solo `chiave` (slug) era controllata: due carte con lo
+ *  stesso "id" passavano senza errore, contraddicendo docs/CONTENUTI.md. */
+export function csvLoader(percorso: string, chiave: string, colonneUniche: string[] = []): Loader {
   return {
     name: 'cartafolia:csv',
     load: async ({ store, parseData, logger }) => {
@@ -32,6 +41,7 @@ export function csvLoader(percorso: string, chiave: string): Loader {
       }
 
       const visti = new Map<string, number>()
+      const vistiPerColonna = new Map(colonneUniche.map((c) => [c, new Map<string, number>()]))
       store.clear()
       for (const { record: riga, info } of righe) {
         const id = riga[chiave]
@@ -44,6 +54,20 @@ export function csvLoader(percorso: string, chiave: string): Loader {
           )
         }
         visti.set(id, info.lines)
+
+        for (const colonna of colonneUniche) {
+          const valore = riga[colonna]
+          const visti2 = vistiPerColonna.get(colonna)!
+          const giaVisto = valore ? visti2.get(valore) : undefined
+          if (giaVisto !== undefined) {
+            throw new Error(
+              `${percorso}, riga ${info.lines}: colonna "${colonna}" duplicata — "${valore}" compare già alla riga ${giaVisto}.\n` +
+              `Due carte non possono avere lo stesso valore in questa colonna.`,
+            )
+          }
+          if (valore) visti2.set(valore, info.lines)
+        }
+
         try {
           store.set({ id, data: await parseData({ id, data: riga }) })
         } catch (e) {
