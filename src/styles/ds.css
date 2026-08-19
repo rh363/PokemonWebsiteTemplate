@@ -554,3 +554,49 @@ details.ds-fg[open] .ds-fg__chev{transform:rotate(0deg)}
   justify-content:space-between;gap:var(--sp-4);flex-wrap:wrap}
 .ds-foot__copy{font:var(--type-code);color:var(--ink-500)}
 .ds-foot__rights{font:var(--type-code);color:var(--ink-500)}
+
+/* CardTile — bundle:755-901. hover era un solo useState che pilotava bordo,
+   ombra, sollevamento e comparsa del bottone "mi piace": qui tutti e quattro
+   sono :hover in CSS, cosi' funzionano anche senza idratazione (vedi
+   CardTile.svelte). Sopravvive in JS solo cio' che dipende dalla posizione
+   del puntatore (rx/ry) o da un dato (sheen/scale del CardArt interno).
+   gap:12 e padding:12 sono numeri nudi nel sorgente: restano px letterali,
+   non un token di spaziatura (vedi CONTRATTI-COMPONENTI.md). */
+.ds-cardtile{position:relative;display:grid;gap:12px;padding:12px;min-width:0;
+  cursor:default;background:var(--surface-card);
+  border:var(--bw-hairline) solid var(--border-hairline);border-radius:var(--r-card);
+  box-shadow:var(--sh-1);transform:none;
+  transition:var(--t-card),border-color var(--dur-fast) var(--ease-out)}
+.ds-cardtile.is-clickable{cursor:pointer}
+@media (hover:hover){
+  .ds-cardtile:hover{border-color:var(--ink-950);box-shadow:var(--sh-3);transform:var(--lift-hover)}
+}
+.ds-cardtile__stage{perspective:700px}
+
+.ds-cardtile__badge{position:absolute;top:20px;left:20px}
+
+/* Stato persistente `liked` contro :hover — stesso trabocchetto di
+   IconButton (Task 10): senza la seconda regola, togliere il mouse da una
+   tessera gia' piaciuta farebbe sparire il bottone invece di lasciarlo
+   visibile (bundle:826, opacity: hover || liked ? 1 : 0). */
+.ds-cardtile__like{position:absolute;top:18px;right:18px;opacity:0;
+  transition:opacity var(--dur-fast) var(--ease-out)}
+@media (hover:hover){
+  .ds-cardtile:hover .ds-cardtile__like{opacity:1}
+}
+.ds-cardtile__like.is-liked,
+.ds-cardtile:hover .ds-cardtile__like.is-liked{opacity:1}
+
+.ds-cardtile__body{display:grid;gap:6px;min-width:0}
+.ds-cardtile__row{display:flex;align-items:baseline;justify-content:space-between;gap:8px;min-width:0}
+.ds-cardtile__name{font:var(--type-card-title);color:var(--text-strong);overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.ds-cardtile__code{font:var(--type-code);color:var(--text-faint);flex:none;white-space:nowrap}
+.ds-cardtile__meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+/* Riga singola (bundle:892-897): font shorthand seguito da font-size/font-weight
+   espliciti che lo sovrascrivono in parte, esattamente come nel sorgente
+   (font, poi fontSize, poi fontWeight nello stesso oggetto). Nessun
+   trabocchetto da base+modificatore qui: e' un'unica regola, l'ordine e'
+   lo stesso del sorgente. */
+.ds-cardtile__set{font:var(--type-label);font-size:var(--fs-caption);
+  font-weight:var(--fw-medium);color:var(--text-muted)}

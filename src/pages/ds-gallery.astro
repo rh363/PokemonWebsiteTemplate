@@ -28,8 +28,12 @@ import DsOverlay from '~/components/islands/DsOverlay.svelte'
 import Tabs from '~/components/ds/Tabs.svelte'
 import Pagination from '~/components/ds/Pagination.svelte'
 import Breadcrumb from '~/components/ds/Breadcrumb.svelte'
+import CardTile from '~/components/ds/CardTile.svelte'
+import DsCardTile from '~/components/islands/DsCardTile.svelte'
 import NavBar from '~/components/NavBar.astro'
 import Footer from '~/components/Footer.astro'
+
+const noop = () => {}
 
 const TABS_ITEMS = [
   { id: 'tutte', label: 'Tutte', count: 128 },
@@ -286,6 +290,71 @@ const TOOLTIP_LATI = ['top', 'bottom', 'left', 'right'] as const
 
       <h2>Breadcrumb</h2>
       <Breadcrumb items={BREADCRUMB_ITEMS} />
+
+      <h1 style="font:var(--type-hero);letter-spacing:var(--ls-display-xl)">Task 14 — CardTile</h1>
+
+      <h2>CardTile senza idratazione — nessun client: sotto</h2>
+      <p style="font:var(--type-body);color:var(--text-muted);max-width:640px">
+        Le sei tessere qui sotto sono lo stesso <code>CardTile.svelte</code> montato senza alcuna
+        direttiva <code>client:</code>: zero JavaScript spedito per questa griglia. Passa il mouse
+        sopra — bordo che si scurisce, ombra che passa da <code>--sh-1</code> a <code>--sh-3</code>,
+        sollevamento e comparsa del bottone "mi piace" funzionano lo stesso, perché sono tutti
+        <code>:hover</code> in CSS. L'unica cosa assente è il tilt 3D: senza idratazione
+        <code>onmousemove</code> non si attacca mai, quindi la carta non ruota. La quarta tessera
+        (Eevee) ha <code>liked</code> vero e nessun hover: il bottone resta visibile lo stesso —
+        è lo stato persistente che deve sopravvivere anche a mouse lontano.
+      </p>
+      <div class="cards">
+        <CardTile
+          id="cardtile-static-1"
+          name="Charizard ex"
+          code="ALB 042/198"
+          set="Alba Cromatica"
+          rarity="ultra"
+          onclick={noop}
+        />
+        <CardTile id="cardtile-static-2" name="Blastoise" code="ALB 009/198" set="Alba Cromatica" rarity="rare" />
+        <CardTile
+          id="cardtile-static-3"
+          name="Venusaur"
+          code="ALB 015/198"
+          set="Alba Cromatica"
+          rarity="holo"
+          onLike={noop}
+        >
+          <Badge slot="badge" tone="foil">Nuovo</Badge>
+        </CardTile>
+        <CardTile
+          id="cardtile-static-4"
+          name="Eevee"
+          code="ALB 130/198"
+          set="Alba Cromatica"
+          rarity="common"
+          liked
+          onLike={noop}
+        />
+        <CardTile id="cardtile-static-5" name="Gyarados" code="ALB 022/198" set="Alba Cromatica" rarity="uncommon" />
+        <CardTile
+          id="cardtile-static-6"
+          name="Mewtwo"
+          code="ALB 077/198"
+          set="Alba Cromatica"
+          rarity="secret"
+          tilt={false}
+        />
+      </div>
+
+      <h2>CardTile idratata — tilt e "mi piace" veri</h2>
+      <p style="font:var(--type-body);color:var(--text-muted);max-width:640px">
+        Qui sotto la stessa <code>CardTile.svelte</code>, montata dentro <code>DsCardTile.svelte</code>
+        con <code>client:load</code>. Muovi il mouse sopra la prima carta: ruota seguendo il
+        puntatore (coefficiente 10, <code>scale(1.02)</code> e sheen foil in movimento). Clicca il
+        cuore sulla seconda per togliere/aggiungere il "mi piace" — parte già piaciuta, prova a
+        toglierlo e ad allontanare il mouse. Clicca una carta qualsiasi per vedere il nome comparire
+        sotto. Prova anche <code>prefers-reduced-motion: reduce</code> nei DevTools: la rotazione si
+        ferma, il resto dell'hover resta.
+      </p>
+      <DsCardTile client:load />
     </div>
 
     <Footer />
