@@ -2699,6 +2699,39 @@ attributo: la pagina e' completa senza JS e il filtro e' istantaneo."
 
 ---
 
+## Le isole non trasportano dati: li chiedono al seam
+
+Deciso al Task 18, dopo che la review ha misurato il costo reale.
+
+`SetFilter` era stato costruito montando **l'intera lista** dentro l'isola, con tutti e sei
+gli oggetti `Card` completi passati come props. Misurato sul build: **21 KB di JSON**
+incorporati nell'HTML per sei elementi, che duplicano dati gia' presenti come markup reso,
+piu' sei alberi di componenti idratati che non hanno alcun motivo di essere reattivi.
+
+Su sei espansioni non si nota. Sulla home, sul catalogo e sulla scheda carta si', ed e'
+esattamente dove il pilastro delle prestazioni conta di piu'.
+
+**La regola, per i Task 19-21:**
+
+> La lista si rende in Astro, staticamente. L'isola monta solo i controlli, e i dati che le
+> servono se li procura **dal seam**, non dalle props.
+
+Il quick-view e' il caso che sembrava richiedere le props: per aprirlo serve una `Card`
+intera. Ma `/api/catalog.json` esiste gia' dal Task 8, ed e' proprio il canale previsto per
+questo. Quindi:
+
+- ogni tessera statica porta un attributo `data-carta="<slug>"`;
+- `SiteChrome` scarica `/api/catalog.json` **la prima volta** che serve un quick-view, e da
+  li' in poi lo tiene;
+- la ricerca e' per slug, e le props incorporate scendono a zero.
+
+E' lo stesso schema gia' usato per `data-chiedi-trigger`, ed e' il motivo per cui il seam
+era stato costruito: **oggi quel file arriva da un CSV, domani da Supabase, e le pagine non
+cambiano.** Usarlo qui significa che il quick-view funzionera' identico il giorno del
+passaggio.
+
+Un'isola che riceve `Card[]` come props sta reintroducendo il difetto.
+
 ### Task 19: `/` — la vetrina
 
 **Files:**
