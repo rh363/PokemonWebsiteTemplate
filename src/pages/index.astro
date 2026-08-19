@@ -51,9 +51,14 @@ const PASSI: [string, string, string][] = [
   <div>
     <section style="position:relative;overflow:hidden;border-bottom:1px solid var(--border-hairline)">
       <div style="position:absolute;inset:0;background:var(--pattern-dots) 0 0/var(--pattern-dots-size);opacity:.7" />
+      {
+        /* Finding 2: il padding verticale dimezzato sotto 1080px (vetrina.jsx
+           riga 8) e' nella regola .hero di src/styles/layout.css, non qui —
+           puro CSS, nessuna isola necessaria solo per un padding. */
+      }
       <div
         class="wrap g2 hero"
-        style="position:relative;padding-top:var(--sp-20);padding-bottom:var(--sp-16);gap:var(--sp-12)"
+        style="position:relative;gap:var(--sp-12)"
       >
         <div style="display:grid;gap:var(--sp-6)">
           <Occhiello>Vetrina e catalogo · {SITE.citta}</Occhiello>

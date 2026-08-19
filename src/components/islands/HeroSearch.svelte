@@ -25,6 +25,23 @@
   let suggestions = $state<{ label: string; meta: string }[]>([])
   let catalog: CatalogPayload | null = null
 
+  // Finding 2: vetrina.jsx riga 4/13 — Hero() prende `mobile` da
+  // useMedia("(max-width:1080px)") e lo passa a SearchField come
+  // size={mobile?"md":"lg"}. Il porting aveva perso questo flag e spediva
+  // sempre "lg". Stesso identico pattern (media query + $state) gia' usato
+  // da SiteChrome.svelte per il proprio `mobile`: qui e' l'isola giusta
+  // dove tenerlo, perche' size e' una prop passata a un componente Svelte
+  // (icona compresa, vedi sotto), non esprimibile in puro CSS come il
+  // padding della sezione (quello resta in index.astro, senza hydration).
+  let mobile = $state(false)
+  $effect(() => {
+    const mq = matchMedia('(max-width:1080px)')
+    const sync = () => (mobile = mq.matches)
+    sync()
+    mq.addEventListener('change', sync)
+    return () => mq.removeEventListener('change', sync)
+  })
+
   async function aggiornaSuggerimenti(q: string) {
     if (!q) {
       suggestions = []
@@ -78,7 +95,7 @@
 </script>
 
 <SearchField
-  size="lg"
+  size={mobile ? 'md' : 'lg'}
   value={query}
   oninput={handleInput}
   onclear={handleClear}
