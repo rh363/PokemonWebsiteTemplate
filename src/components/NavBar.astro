@@ -97,17 +97,24 @@ const voci = NAV.map((v) => (v.id === 'catalogo' ? { ...v, count: catalogCount }
   // quindi il corpo qui sotto non ripartirebbe da solo dopo il primo swap.
   // 'astro:page-load' spara sia al primo caricamento sia dopo ogni swap, ed
   // e' il rimpiazzo raccomandato da Astro per il codice che deve rieseguirsi
-  // a ogni navigazione. I due listener a livello di document (Escape,
-  // click-fuori del menu) restano fuori: sono attaccati una volta sola, piu'
-  // sotto, e ri-cercano il loro elemento al momento dell'evento invece di
-  // chiudersi su un riferimento che lo swap potrebbe aver scartato.
-  document.addEventListener('astro:page-load', () => {
+  // a ogni navigazione. Ma 'window' sopravvive allo swap per tutta la
+  // sessione della tab: un addEventListener a livello di script dentro
+  // 'astro:page-load' si accumulerebbe a ogni navigazione invece di
+  // ripartire da zero. Per questo il listener 'scroll' e i due listener a
+  // livello di document (Escape, click-fuori del menu) restano fuori,
+  // attaccati una volta sola piu' sotto, e ri-cercano il loro elemento al
+  // momento dell'evento invece di chiudersi su un riferimento che lo swap
+  // potrebbe aver scartato. 'sync' segue la stessa regola — e' definita qui
+  // sopra cosi' sia il listener 'scroll' (attaccato una volta) sia il
+  // callback qui sotto (che deve solo richiamarla a ogni swap, perche' la
+  // navigazione azzera lo scroll) possano vederla senza ridefinirla.
+  const sync = () => {
     const doc = document.scrollingElement || document.documentElement
-    const sync = () => {
-      const nav = document.querySelector<HTMLElement>('.ds-nav')
-      nav?.setAttribute('data-scrolled', String(doc.scrollTop > 8))
-    }
-    addEventListener('scroll', sync, { passive: true })
+    const nav = document.querySelector<HTMLElement>('.ds-nav')
+    nav?.setAttribute('data-scrolled', String(doc.scrollTop > 8))
+  }
+
+  document.addEventListener('astro:page-load', () => {
     sync()
 
     // "Chiedi una carta": un <button> qualsiasi, non un'isola. Scrive
@@ -145,6 +152,13 @@ const voci = NAV.map((v) => (v.id === 'catalogo' ? { ...v, count: catalogCount }
       })
     })
   })
+
+  // Sincronizza data-scrolled a ogni scroll. Attaccato una volta sola qui
+  // (non dentro 'astro:page-load'): 'sync' ri-cerca .ds-nav e
+  // document.scrollingElement al momento della chiamata, quindi non ha
+  // bisogno di essere ri-registrato a ogni swap — solo richiamato, il che
+  // avviene gia' dentro 'astro:page-load' qui sopra.
+  addEventListener('scroll', sync, { passive: true })
 
   // Arricchimento del menu nativo: <details> non chiude da solo su Escape o
   // su click fuori (a differenza di <dialog>). Nessuna isola richiesta:
