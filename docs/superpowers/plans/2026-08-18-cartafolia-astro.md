@@ -1818,9 +1818,13 @@ Nel prototipo `hover` e `press` sono due `useState`. Qui diventano `:hover` e `:
 <script lang="ts">
   import type { Snippet } from 'svelte'
 
+  type Variante = 'primary' | 'secondary' | 'ghost' | 'foil' | 'invert'
+  type Dimensione = 'sm' | 'md' | 'lg'
+
   let {
-    variant = 'primary',
-    size = 'md',
+    variant = 'primary' as Variante,
+    size = 'md' as Dimensione,
+    as = 'button' as 'button' | 'a',
     fullWidth = false,
     disabled = false,
     href = undefined as string | undefined,
@@ -1837,13 +1841,13 @@ Nel prototipo `hover` e `press` sono due `useState`. Qui diventano `:hover` e `:
   {@render icon?.()}{@render children?.()}{@render iconRight?.()}
 {/snippet}
 
-{#if href}
+{#if as === 'a'}
   <a
     class="ds-btn"
     class:ds-btn--full={fullWidth}
     data-variant={variant}
     data-size={size}
-    {href}
+    href={href}
     {onclick}
     {style}
     {...rest}>{@render inner()}</a>
@@ -1874,6 +1878,11 @@ in `src/styles/ds.css`:
 .ds-btn[data-size="md"]{padding:12px 22px;font-size:var(--fs-body-m);gap:8px;min-height:46px}
 .ds-btn[data-size="lg"]{padding:16px 30px;font-size:var(--fs-body-l);gap:10px;min-height:56px}
 
+/* Fallback: il sorgente fa VARIANTS[variant] || VARIANTS.primary, quindi una
+   variante sconosciuta deve rendere come primary, non senza stile. */
+.ds-btn{--btn-bg:var(--surface-brand);--btn-fg:var(--text-invert);
+  --btn-bd:var(--bw-strong) solid var(--ink-950);--btn-sh:var(--sh-sticker-sm);
+  --btn-bg-hover:var(--surface-brand-hover)}
 .ds-btn[data-variant="primary"]{--btn-bg:var(--surface-brand);--btn-fg:var(--text-invert);
   --btn-bd:var(--bw-strong) solid var(--ink-950);--btn-sh:var(--sh-sticker-sm);
   --btn-bg-hover:var(--surface-brand-hover)}
