@@ -125,10 +125,10 @@ const voci = NAV.map((v) => (v.id === 'catalogo' ? { ...v, count: catalogCount }
   // perche' le tessere sono HTML statico (CardTile, CardArt) senza isola
   // propria: nessun client:* le idrata, quindi nessun onclick Svelte si
   // attaccherebbe da solo.
-  document.querySelectorAll<HTMLElement>('[data-carta]').forEach((el) => {
-    el.addEventListener('click', (e) => {
+  document.querySelectorAll<HTMLElement>('[data-carta]').forEach((tessera) => {
+    tessera.addEventListener('click', (e) => {
       e.preventDefault()
-      apriQuick(el.dataset.carta!)
+      apriQuick(tessera.dataset.carta!)
     })
   })
 
