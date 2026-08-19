@@ -24,8 +24,18 @@ export async function getAllSets(): Promise<CardSet[]> {
   return sets.toSorted((a, b) => (idOrder.get(a.id) ?? 0) - (idOrder.get(b.id) ?? 0))
 }
 
+// Stesso difetto di getAllSets() sopra, sulla collection cards: getCollection()
+// non preserva l'ordine delle righe di cards.csv, restituisce le entry
+// ordinate alfabeticamente per id di collection (qui lo slug). La colonna
+// "id" del CSV pero' e' significativa: e' assegnata in sequenza dal
+// generatore (scripts/seed-demo.ts, come CARDS in design-reference/dati.jsx,
+// dove `nuovo:i<=9` marca le prime carte generate) — le prime N carte in
+// quell'ordine sono i "nuovi arrivi" che Hero e NuoviArrivi della Vetrina
+// mostrano. Senza questo sort, quelle sezioni pescherebbero un sottoinsieme
+// arbitrario (l'ordine alfabetico dello slug), non le carte piu' recenti.
 export async function getAllCards(): Promise<Card[]> {
-  return (await getCollection('cards')).map((e) => e.data as Card)
+  const cards = (await getCollection('cards')).map((e) => e.data as Card)
+  return cards.toSorted((a, b) => Number(a.id) - Number(b.id))
 }
 
 export async function getIndexedCards(): Promise<IndexedCard[]> {
