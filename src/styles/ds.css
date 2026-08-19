@@ -221,3 +221,144 @@
 .ds-tooltip:focus-within .ds-tooltip__bubble[data-side="left"],
 .ds-tooltip:hover .ds-tooltip__bubble[data-side="right"],
 .ds-tooltip:focus-within .ds-tooltip__bubble[data-side="right"]{opacity:1}
+
+/* Input — bundle:1411-1482. focus era useState su .field: qui e'
+   :focus-within sul contenitore. error ha priorita' su focus per il colore
+   del bordo (nel sorgente il ternario controlla entrambi, error vince). Il
+   size "lg" condivide fs-body-m con "md" nel sorgente: solo sm cambia. */
+.ds-input{display:grid;gap:6px}
+.ds-input__label{font:var(--type-label);color:var(--text-strong)}
+.ds-input__field{display:flex;align-items:center;gap:8px;box-sizing:border-box;
+  background:var(--surface-card);border:var(--bw-hairline) solid var(--border-subtle);
+  border-radius:var(--r-field);box-shadow:none;color:var(--text-muted);
+  transition:box-shadow var(--dur-fast) var(--ease-out),border-color var(--dur-fast) var(--ease-out)}
+.ds-input[data-size="sm"] .ds-input__field{padding:8px 12px}
+.ds-input[data-size="md"] .ds-input__field{padding:11px 14px}
+.ds-input[data-size="lg"] .ds-input__field{padding:14px 16px}
+.ds-input__field:focus-within{border-color:var(--ink-950);box-shadow:var(--sh-focus)}
+.ds-input__field.is-error,
+.ds-input__field.is-error:focus-within{border-color:var(--state-danger)}
+.ds-input__field.is-disabled{background:var(--surface-sunken);opacity:.6}
+.ds-input__control{all:unset;flex:1;min-width:0;font:var(--type-body);
+  font-size:var(--fs-body-m);color:var(--text-strong)}
+.ds-input[data-size="sm"] .ds-input__control{font-size:var(--fs-body-s)}
+.ds-input__msg{font:var(--type-label);font-size:var(--fs-caption);font-weight:var(--fw-medium);
+  color:var(--text-muted)}
+.ds-input__msg.is-error{color:var(--state-danger)}
+
+/* SearchField — bundle:1483-1596. focus era useState: qui e' :focus-within
+   su .ds-search__bar. La lista dei suggerimenti resta un pannello assoluto
+   identico al sorgente; la voce evidenziata da tastiera (.is-active) e' una
+   classe nuova, assente nel sorgente (che non aveva navigazione), colorata
+   con lo stesso --ink-50 usato per l'hover ghost di Button/IconButton. */
+.ds-search{position:relative}
+.ds-search__bar{display:flex;align-items:center;gap:10px;box-sizing:border-box;
+  background:var(--surface-card);border:var(--bw-strong) solid var(--border-subtle);
+  border-radius:var(--r-pill);box-shadow:var(--sh-1);
+  transition:box-shadow var(--dur-base) var(--ease-out),border-color var(--dur-fast) var(--ease-out)}
+.ds-search[data-size="lg"] .ds-search__bar{padding:14px 18px}
+.ds-search[data-size="md"] .ds-search__bar{padding:10px 14px}
+.ds-search__bar.is-focus{border-color:var(--ink-950);box-shadow:var(--sh-focus)}
+.ds-search__icon{display:grid;color:var(--text-muted)}
+.ds-search__bar.is-focus .ds-search__icon{color:var(--text-strong)}
+.ds-search__input{all:unset;flex:1;min-width:0;font:var(--type-body);
+  font-size:var(--fs-body-m);color:var(--text-strong)}
+.ds-search[data-size="lg"] .ds-search__input{font-size:var(--fs-body-l)}
+.ds-search__clear{all:unset;cursor:pointer;display:grid;place-items:center;color:var(--text-muted)}
+.ds-search__panel{position:absolute;top:calc(100% + 8px);left:0;right:0;z-index:40;
+  background:var(--surface-card);border:var(--bw-hairline) solid var(--border-subtle);
+  border-radius:var(--r-md);box-shadow:var(--sh-3);overflow:hidden}
+.ds-search__opt{all:unset;box-sizing:border-box;display:flex;width:100%;align-items:center;
+  gap:10px;padding:11px 16px;cursor:pointer;font:var(--type-body);font-size:var(--fs-body-s);
+  color:var(--text-body)}
+.ds-search__opt + .ds-search__opt{border-top:1px solid var(--border-hairline)}
+.ds-search__opt.is-active{background:var(--ink-50)}
+.ds-search__meta{margin-left:auto;font:var(--type-code);color:var(--text-faint)}
+
+/* Select — bundle:1597-1670. Resta un <select> nativo: accessibile di
+   serie, senza logica di posizionamento propria. focus era useState: qui e'
+   :focus sul <select>. */
+.ds-select{display:grid;gap:6px}
+.ds-select__label{font:var(--type-label);color:var(--text-strong)}
+.ds-select__wrap{position:relative;display:flex;align-items:center}
+.ds-select__control{all:unset;box-sizing:border-box;width:100%;cursor:pointer;
+  background:var(--surface-card);border:var(--bw-hairline) solid var(--border-subtle);
+  border-radius:var(--r-field);font:var(--type-body);color:var(--text-strong);box-shadow:none;
+  transition:box-shadow var(--dur-fast) var(--ease-out),border-color var(--dur-fast) var(--ease-out)}
+.ds-select[data-size="sm"] .ds-select__control{padding:8px 34px 8px 12px;font-size:var(--fs-body-s)}
+.ds-select[data-size="md"] .ds-select__control{padding:11px 38px 11px 14px;font-size:var(--fs-body-m)}
+.ds-select__control:focus{border-color:var(--ink-950);box-shadow:var(--sh-focus)}
+.ds-select__control:disabled{background:var(--surface-sunken);opacity:.6;cursor:not-allowed}
+.ds-select__chev{position:absolute;right:14px;pointer-events:none;color:var(--text-muted);display:grid}
+
+/* Checkbox — bundle:1323-1410. Un <input type="checkbox"> reale e'
+   nascosto (posizione assoluta, opacita' 0) accanto al riquadro disegnato:
+   Tab e Spazio funzionano da soli. hover era useState e nel sorgente cambia
+   il bordo SOLO quando non checked (checked vince sempre sul ternario);
+   qui e' lo stesso: la regola is-checked ha priorita' su :hover, scritta
+   anche nella sua variante :hover, altrimenti la spunta sparirebbe sotto
+   il mouse (lezione del Task 10). */
+.ds-checkbox{display:flex;gap:10px;align-items:center;cursor:pointer;padding:4px 0}
+.ds-checkbox.has-description{align-items:flex-start}
+.ds-checkbox.is-disabled{cursor:not-allowed;opacity:.45}
+.ds-checkbox__input{position:absolute;opacity:0;width:0;height:0}
+.ds-checkbox__box{width:20px;height:20px;flex:none;display:grid;place-items:center;
+  background:var(--surface-card);border:var(--bw-strong) solid var(--border-subtle);
+  border-radius:var(--r-xs);color:var(--text-invert);transition:var(--t-control);
+  transform:scale(.96)}
+.ds-checkbox.has-description .ds-checkbox__box{margin-top:2px}
+@media (hover:hover){
+  .ds-checkbox:hover .ds-checkbox__box{border-color:var(--ink-500)}
+}
+.ds-checkbox.is-checked .ds-checkbox__box,
+.ds-checkbox.is-checked:hover .ds-checkbox__box{
+  background:var(--ink-950);border-color:var(--ink-950);transform:scale(1)}
+.ds-checkbox__text{display:grid;gap:2px;flex:1;min-width:0}
+.ds-checkbox__label{font:var(--type-body);font-size:var(--fs-body-s);color:var(--text-strong);
+  font-weight:var(--fw-regular)}
+.ds-checkbox.is-checked .ds-checkbox__label{font-weight:var(--fw-semibold)}
+.ds-checkbox__desc{font:var(--type-label);font-size:var(--fs-caption);font-weight:var(--fw-regular);
+  color:var(--text-muted)}
+.ds-checkbox__count{font:var(--type-code);color:var(--text-faint)}
+
+/* Switch — bundle:1671-1736. Stessa costruzione di Checkbox: input reale
+   nascosto, role="switch". Il sorgente non definisce alcuno stato hover per
+   track o pomello (a differenza di Checkbox), quindi qui non ne viene
+   aggiunto uno: niente conflitto is-checked/:hover da risolvere. Il pomello
+   si sposta con justify-content sul track (fedele al sorgente, che fa lo
+   stesso: la transition su transform dichiarata li' non anima nulla, perche'
+   il sorgente non tocca mai il transform del pomello). */
+.ds-switch{display:inline-flex;align-items:center;gap:10px;cursor:pointer}
+.ds-switch.is-disabled{cursor:not-allowed;opacity:.45}
+.ds-switch__input{position:absolute;opacity:0;width:0;height:0}
+.ds-switch__track{width:44px;height:26px;flex:none;box-sizing:border-box;border-radius:var(--r-pill);
+  padding:3px;background:var(--ink-200);border:var(--bw-strong) solid var(--ink-950);
+  display:flex;justify-content:flex-start;transition:background-color var(--dur-base) var(--ease-out)}
+.ds-switch__track.is-checked{background:var(--surface-brand);justify-content:flex-end}
+.ds-switch__thumb{width:16px;height:16px;border-radius:var(--r-pill);background:var(--paper-0);
+  box-shadow:var(--sh-1);transition:transform var(--dur-base) var(--ease-spring)}
+.ds-switch__label{font:var(--type-label);color:var(--text-strong)}
+
+/* FilterGroup — bundle:534-609. Cambio deliberato: <details defaultOpen>/
+   <summary> al posto di <section>/<button>+useState. Elimina JavaScript e
+   aggiunge tastiera nativa (Invio/Spazio su summary). Il riposo di
+   .ds-fg__summary NON usa all:unset (a differenza del sorgente), cosi'
+   l'anello di focus nativo del browser resta visibile — e' il punto stesso
+   di questo componente. Il chevron ruota 180deg in apertura: il sorgente
+   usa -90/0deg su un <button>, qui il riposo (chiuso) e' il down-chevron
+   non ruotato e l'apertura lo porta a puntare in su. Niente animazione
+   sull'altezza del corpo: <details> apre/chiude in modo nativo e istantaneo,
+   il sorgente animava max-height/opacity via JS che qui non esiste piu'. */
+.ds-fg{border-top:1px solid var(--border-hairline);padding:14px 0}
+.ds-fg__summary{display:flex;width:100%;box-sizing:border-box;align-items:center;gap:8px;
+  cursor:pointer;list-style:none;color:inherit;font:inherit}
+.ds-fg__summary::-webkit-details-marker{display:none}
+.ds-fg__title{font:var(--type-label);font-weight:var(--fw-bold);color:var(--text-strong);
+  letter-spacing:var(--ls-eyebrow);text-transform:uppercase;font-size:var(--fs-caption)}
+.ds-fg__count{display:grid;place-items:center;min-width:18px;height:18px;padding:0 5px;
+  box-sizing:border-box;border-radius:var(--r-pill);background:var(--surface-brand);
+  color:var(--text-invert);font:var(--type-code);font-size:var(--fs-micro)}
+.ds-fg__chev{margin-left:auto;color:var(--text-muted);display:grid;
+  transition:transform var(--dur-base) var(--ease-snap)}
+details.ds-fg[open] .ds-fg__chev{transform:rotate(180deg)}
+.ds-fg__body{display:grid;gap:2px;margin-top:10px}

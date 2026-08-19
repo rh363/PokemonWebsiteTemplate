@@ -22,6 +22,8 @@ import IconButton from '~/components/ds/IconButton.svelte'
 import Chip from '~/components/ds/Chip.svelte'
 import Panel from '~/components/ds/Panel.svelte'
 import Tooltip from '~/components/ds/Tooltip.svelte'
+import Input from '~/components/ds/Input.svelte'
+import DsForms from '~/components/islands/DsForms.svelte'
 
 const RARITA = ['common', 'uncommon', 'rare', 'holo', 'ultra', 'secret'] as const
 const COND = ['mint', 'near-mint', 'excellent', 'good', 'played'] as const
@@ -203,6 +205,30 @@ const TOOLTIP_LATI = ['top', 'bottom', 'left', 'right'] as const
           ))
         }
       </div>
+
+      <h1 style="font:var(--type-hero);letter-spacing:var(--ls-display-xl)">Task 11 — campi e filtri</h1>
+
+      <h2>Input — dimensioni, hint, errore, icona</h2>
+      <div class="g3" style="align-items:start">
+        <Input id="input-sm" label="Nome carta" size="sm" placeholder="Charizard" />
+        <Input id="input-md" label="Nome carta" hint="Cerca per nome esatto" placeholder="Charizard" />
+        <Input id="input-lg" label="Nome carta" size="lg" placeholder="Charizard" />
+        <Input id="input-error" label="Codice set" error="Codice non valido" value="ALB-999" />
+        <Input id="input-disabled" label="Non modificabile" value="Bloccato" disabled />
+        <Input id="input-icon" label="Prezzo" placeholder="0,00">
+          <Icon slot="icon" name="sparkles" size={16} />
+          <span slot="suffix" style="font:var(--type-code);color:var(--text-faint)">EUR</span>
+        </Input>
+      </div>
+
+      <h2>SearchField, Select, Checkbox, Switch, FilterGroup — isola con stato</h2>
+      <p style="font:var(--type-body);color:var(--text-muted);max-width:640px">
+        Questi cinque componenti hanno stato vero (valore, apertura): sono montati dentro
+        <code>DsForms.svelte</code>, l'unica isola idratata di questa galleria (<code>client:load</code>).
+        Prova la tastiera: Tab su ogni campo, Spazio su Checkbox/Switch, Invio sul titolo del
+        filtro, frecce + Invio + Esc nei suggerimenti della ricerca.
+      </p>
+      <DsForms client:load />
     </div>
   </body>
 </html>
