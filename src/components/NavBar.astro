@@ -9,6 +9,7 @@
 // catalogCount e lo inietta solo nella voce 'catalogo'.
 import { SITE } from '~/config/site'
 import { NAV } from '~/config/nav'
+import Icon from '~/components/ds/Icon.svelte'
 
 interface Props {
   active: string
@@ -42,13 +43,83 @@ const voci = NAV.map((v) => (v.id === 'catalogo' ? { ...v, count: catalogCount }
     <div class="ds-nav__right">
       <slot />
     </div>
+    <!--
+      Menu mobile — §6.4 della spec: un'isola idratata con client:idle puo'
+      arrivare dopo il primo tap dell'utente, e un tap perso prima
+      dell'idratazione non lascia traccia (era l'esito dello spike del
+      Task 2). Qui non c'e' nulla da idratare: <details>/<summary> e' aperto
+      e chiuso dal browser stesso, sempre, anche a JavaScript disattivato.
+      Il bottone "Chiedi una carta" dentro il pannello resta cablato dallo
+      script qui sotto (stesso meccanismo del bottone gemello nello slot
+      desktop), non da un'isola Svelte.
+    -->
+    <div class="ds-nav__mobile">
+      <a class="ds-iconbtn" data-variant="ghost" data-size="md" aria-label="Cerca una carta" href="/catalogo">
+        <Icon name="search" size={18} />
+      </a>
+      <details class="ds-nav__menu">
+        <summary class="ds-iconbtn" data-variant="secondary" data-size="md" aria-label="Menu">
+          <Icon name="list" size={18} />
+        </summary>
+        <div class="ds-nav__menu-panel">
+          <div class="ds-nav__menu-links">
+            {
+              voci.map((it) => (
+                <a
+                  href={it.href}
+                  class="ds-nav__menu-link"
+                  data-on={it.id === active}
+                  aria-current={it.id === active ? 'page' : undefined}
+                >
+                  <span>{it.label}</span>
+                  {it.count != null && <span class="ds-nav__count">{it.count}</span>}
+                  <Icon name="chevron-right" size={18} style="color:var(--text-faint)" />
+                </a>
+              ))
+            }
+          </div>
+          <button type="button" class="ds-btn ds-btn--full" data-variant="primary" data-size="md" data-chiedi-trigger>
+            <Icon name="instagram" size={16} />
+            Chiedi una carta
+          </button>
+        </div>
+      </details>
+    </div>
   </nav>
 </header>
 
 <script>
+  import { apriChiedi } from '~/stores/chrome'
+
   const el = document.querySelector<HTMLElement>('.ds-nav')
   const doc = document.scrollingElement || document.documentElement
   const sync = () => el?.setAttribute('data-scrolled', String(doc.scrollTop > 8))
   addEventListener('scroll', sync, { passive: true })
   sync()
+
+  // "Chiedi una carta": un <button> qualsiasi, non un'isola. Scrive
+  // direttamente nello store condiviso con SiteChrome (stesso modulo, stesso
+  // meccanismo verificato dal Task 2, §6.3) cosi' un tap arrivato prima che
+  // SiteChrome idrati non va perso: resta nello stato dello store, e
+  // SiteChrome lo trova gia' pronto al mount invece di perderlo come il
+  // contatore dello spike del Task 2.
+  document.querySelectorAll<HTMLElement>('[data-chiedi-trigger]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      apriChiedi(true)
+      btn.closest('details')?.removeAttribute('open')
+    })
+  })
+
+  // Arricchimento del menu nativo: <details> non chiude da solo su Escape o
+  // su click fuori (a differenza di <dialog>). Nessuna isola richiesta:
+  // qualche riga di JS puro basta, e funziona indipendentemente da SiteChrome.
+  const menu = document.querySelector<HTMLDetailsElement>('.ds-nav__menu')
+  if (menu) {
+    document.addEventListener('click', (e) => {
+      if (menu.open && !menu.contains(e.target as Node)) menu.removeAttribute('open')
+    })
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && menu.open) menu.removeAttribute('open')
+    })
+  }
 </script>

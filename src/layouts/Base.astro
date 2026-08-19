@@ -1,0 +1,65 @@
+---
+// Guscio del sito: NavBar e Footer statici (nessun client:), una sola isola
+// (SiteChrome) per il dialog "Chiedi una carta", la quick-view e i toast.
+// Il menu mobile non e' un'isola: e' un <details> nativo dentro NavBar.astro
+// — vedi §6.4 della spec e il commento li' per il perche'.
+import '~/styles/global.css'
+import { SITE } from '~/config/site'
+import { getAllSets } from '~/lib/catalog'
+import NavBar from '~/components/NavBar.astro'
+import Footer from '~/components/Footer.astro'
+import SiteChrome from '~/components/islands/SiteChrome.svelte'
+import Icon from '~/components/ds/Icon.svelte'
+
+interface Props {
+  title: string
+  description?: string
+  active: string
+  catalogCount?: number
+}
+const { title, description = SITE.seo.descrizione, active, catalogCount } = Astro.props as Props
+
+// SiteChrome ha bisogno delle espansioni per calcolare codice e nome
+// dell'espansione nella quick-view e nel messaggio di "Chiedi" (cardCode
+// vuole un CardSet, non solo l'id stringa che porta con se' la Card).
+const sets = await getAllSets()
+---
+
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="icon" href="/assets/logo-mark.svg" />
+    <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)} />
+  </head>
+  <body>
+    <div class="ds-shell">
+      <NavBar {active} {catalogCount}>
+        <a class="ds-iconbtn" data-variant="ghost" data-size="md" aria-label="Cerca una carta" href="/catalogo">
+          <Icon name="search" size={18} />
+        </a>
+        <button type="button" class="ds-btn" data-variant="primary" data-size="sm" data-chiedi-trigger>
+          <Icon name="instagram" size={16} />
+          Chiedi una carta
+        </button>
+      </NavBar>
+      <main class="ds-shell__main"><slot /></main>
+      <Footer />
+    </div>
+    <SiteChrome client:idle {sets} />
+  </body>
+</html>
+
+<style>
+  .ds-shell {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  .ds-shell__main {
+    flex: 1;
+  }
+</style>

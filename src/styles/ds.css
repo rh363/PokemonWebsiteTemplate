@@ -528,6 +528,31 @@ details.ds-fg[open] .ds-fg__chev{transform:rotate(0deg)}
 .ds-nav__count{margin-left:6px;font:var(--type-code);color:var(--text-faint)}
 .ds-nav__right{margin-left:auto;display:flex;align-items:center;gap:var(--sp-3)}
 
+/* Menu mobile — Task 15, §6.4: non ha equivalente nel bundle React (li' era
+   MenuMobile, un Sheet idratato). Qui e' un <details> nativo, sempre
+   apribile, nessuna isola. .ds-nav__right e .ds-nav__links spariscono sotto
+   1080px (stesso breakpoint di useMedia nel prototipo, gia' usato altrove in
+   layout.css) e .ds-nav__mobile prende il loro posto. */
+.ds-nav__mobile{display:none;align-items:center;gap:var(--sp-3);margin-left:auto}
+@media (max-width:1080px){
+  .ds-nav__links{display:none}
+  .ds-nav__right{display:none}
+  .ds-nav__mobile{display:flex}
+}
+.ds-nav__menu{position:relative}
+.ds-nav__menu>summary{cursor:pointer;list-style:none}
+.ds-nav__menu>summary::-webkit-details-marker{display:none}
+.ds-nav__menu-panel{position:absolute;top:calc(100% + 10px);right:0;z-index:60;
+  width:min(320px,calc(100vw - var(--gutter-lg) * 2));display:grid;gap:var(--sp-4);
+  padding:var(--sp-4);background:var(--surface-page);border:1px solid var(--border-subtle);
+  border-radius:var(--r-lg);box-shadow:var(--sh-3)}
+.ds-nav__menu-links{display:grid;gap:var(--sp-1)}
+.ds-nav__menu-link{display:flex;align-items:center;gap:var(--sp-3);min-height:52px;
+  padding:0 var(--sp-3);border-radius:var(--r-pill);text-decoration:none;
+  font:var(--fw-bold) var(--fs-title-s)/1.2 var(--font-display);color:var(--text-strong)}
+.ds-nav__menu-link span:first-child{flex:1}
+.ds-nav__menu-link[data-on="true"]{background:var(--surface-brand-soft)}
+
 /* Footer — design-reference/guscio.jsx, funzione Footer (righe 44-76).
    Componente Astro (src/components/Footer.astro). Le colonne usano .wrap.foot,
    la cui griglia e' gia' in layout.css. Stessa correzione anti-fuga sui link
