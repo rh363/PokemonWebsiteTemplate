@@ -261,7 +261,10 @@ const TOOLTIP_LATI = ['top', 'bottom', 'left', 'right'] as const
         <code>&lt;dialog&gt;</code> nativo: apri il Dialog e prova Tab — il focus non deve uscire verso
         questa pagina; Escape lo chiude; alla chiusura il focus torna sul bottone "Apri Dialog".
         Sheet usa la stessa meccanica ma sale dal basso (restringi la finestra sotto 480px per
-        vederlo a piena larghezza).
+        vederlo a piena larghezza). Entrambi accettano <code>style</code> in coda: il Dialog qui sotto
+        ha <code>width=620</code> ma <code>style="max-width:360px"</code> vince; lo Sheet ha il bordo
+        superiore forzato a blu via <code>style</code>. Guarda anche il velo dietro lo Sheet dissolversi
+        all'apertura — quello del Dialog compare di scatto, per fedeltà al sorgente.
       </p>
       <DsOverlay client:load />
 

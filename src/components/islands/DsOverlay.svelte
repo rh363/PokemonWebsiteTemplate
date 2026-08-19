@@ -37,6 +37,7 @@
   title="Charizard ex 042/198"
   width={620}
   onclose={() => (dialogOpen = false)}
+  style="max-width:360px"
 >
   {#snippet children()}
     <p>Prova: Tab non deve uscire dal dialog; Escape lo chiude; alla chiusura il focus torna su "Apri Dialog".</p>
@@ -47,7 +48,7 @@
   {/snippet}
 </Dialog>
 
-<Sheet open={sheetOpen} title="Charizard ex 042/198" onclose={() => (sheetOpen = false)}>
+<Sheet open={sheetOpen} title="Charizard ex 042/198" onclose={() => (sheetOpen = false)} style="border-top-color:#1454FF">
   {#snippet children()}
     <p>Su viewport stretto sale dal basso con l'animazione sheetUp e mostra la maniglia in alto.</p>
   {/snippet}

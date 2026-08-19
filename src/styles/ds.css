@@ -384,6 +384,8 @@ details.ds-fg[open] .ds-fg__chev{transform:rotate(0deg)}
   border-radius:var(--r-xl);box-shadow:var(--sh-3);padding:var(--sp-8);
   gap:var(--sp-5)}
 .ds-dialog[open]{display:grid}
+/* Nessuna animazione sul velo: il sorgente ha animation:"none" esplicito
+   sul wrapper (bundle:1030-1130) — a differenza di Sheet, che dissolve. */
 .ds-dialog::backdrop{background:var(--scrim-modal);backdrop-filter:blur(3px)}
 .ds-dialog__head{display:flex;align-items:flex-start;gap:var(--sp-4)}
 .ds-dialog__titles{display:grid;gap:6px;flex:1}
@@ -402,7 +404,13 @@ details.ds-fg[open] .ds-fg__chev{transform:rotate(0deg)}
    sovrascrivono inset/margin della UA con bottom:0 pieno-larghezza. L'anima-
    zione .sheet-in e la keyframe sheetUp restano quelle gia' in layout.css —
    non ridefinite qui. Stessa guardia [open] di Dialog sul display, per lo
-   stesso motivo (origine autore batte UA a parita' di normal/normal). */
+   stesso motivo (origine autore batte UA a parita' di normal/normal).
+   Il velo (::backdrop) invece NON e' uguale a quello di Dialog: nel
+   sorgente il wrapper di Sheet ha className="fade-in" (pezzi.jsx:48),
+   quindi si dissolve con la keyframe fadeIn gia' in layout.css; il wrapper
+   di Dialog ha animation:"none" esplicito (bundle:1030-1130) e resta senza
+   dissolvenza. E' una differenza voluta del sorgente, non una svista di
+   porting: va riprodotta, non uniformata. */
 .ds-sheet{position:fixed;inset:auto 0 0 0;margin:0;width:100%;max-height:86vh;
   box-sizing:border-box;color:inherit;flex-direction:column;
   background:var(--surface-card);border:none;
@@ -410,7 +418,8 @@ details.ds-fg[open] .ds-fg__chev{transform:rotate(0deg)}
   border-top-left-radius:var(--r-xl);border-top-right-radius:var(--r-xl);
   box-shadow:var(--sh-3);padding:0}
 .ds-sheet[open]{display:flex}
-.ds-sheet::backdrop{background:var(--scrim-modal);backdrop-filter:blur(3px)}
+.ds-sheet::backdrop{background:var(--scrim-modal);backdrop-filter:blur(3px);
+  animation:fadeIn 220ms var(--ease-out)}
 .ds-sheet__head{position:relative;display:flex;align-items:center;gap:var(--sp-4);
   padding:var(--sp-5) var(--sp-5) var(--sp-3)}
 .ds-sheet__handle{position:absolute;top:8px;left:50%;transform:translateX(-50%);

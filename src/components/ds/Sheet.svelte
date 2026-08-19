@@ -17,6 +17,7 @@
     onclose = undefined as (() => void) | undefined,
     children = undefined as Snippet | undefined,
     footer = undefined as Snippet | undefined,
+    style = '',
   } = $props()
 
   let el = $state<HTMLDialogElement | null>(null)
@@ -44,6 +45,7 @@
 <dialog
   bind:this={el}
   class="ds-sheet sheet-in"
+  style={style}
   aria-labelledby={title ? titleId : undefined}
   oncancel={(e) => {
     e.preventDefault()
