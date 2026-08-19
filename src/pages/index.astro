@@ -40,7 +40,32 @@ const srcCarta = (c: { image?: string }) => (fotoAttive && c.image ? urlImmagine
 // il fix in source.static.astro.ts): le prime carte in quell'ordine sono i
 // nuovi arrivi, esattamente come CARDS in design-reference/dati.jsx.
 const heroCards = cards.slice(0, 4)
-const arrivi = cards.slice(0, 10)
+
+// vetrina.jsx riga 32: window.CARDS.filter(<tab>).slice(0,10) — filtra POI
+// prende le prime dieci. Un'unica lista statica "cards.slice(0,10)" nascosta
+// via CSS (slice-poi-filtra) da' un conteggio diverso per tab quando i primi
+// dieci non sono rappresentativi del sottoinsieme (vedi fix-finale-report.md,
+// C2): con i dati demo, "Holo e oltre" scendeva a 8 tessere e "Vintage" a 2
+// invece di 10. Si rende quindi l'UNIONE delle prime dieci di ciascun tab
+// (al massimo 30 tessere, sempre statiche), e si marca ogni tessera con il
+// suo rango per tab (data-rank-tutte/-holo/-vintage). Il CSS sotto mostra
+// solo le tessere che hanno il rango del tab attivo. L'ordine della lista
+// unione segue l'ordine sorgente di `cards`: dato che filter() preserva
+// l'ordine relativo, il sottoinsieme visibile per un tab appare nell'ordine
+// giusto per quel tab senza bisogno di riordinare nel DOM.
+const holoOf = (c: (typeof cards)[number]) => c.rarity === 'holo' || c.rarity === 'ultra' || c.rarity === 'secret'
+const vintageOf = (c: (typeof cards)[number]) => setOf(c.set).year < 2010
+
+const topTutte = cards.slice(0, 10)
+const topHolo = cards.filter(holoOf).slice(0, 10)
+const topVintage = cards.filter(vintageOf).slice(0, 10)
+
+const rankTutte = new Map(topTutte.map((c, i) => [c.slug, i + 1]))
+const rankHolo = new Map(topHolo.map((c, i) => [c.slug, i + 1]))
+const rankVintage = new Map(topVintage.map((c, i) => [c.slug, i + 1]))
+
+const unione = new Set([...rankTutte.keys(), ...rankHolo.keys(), ...rankVintage.keys()])
+const arrivi = cards.filter((c) => unione.has(c.slug))
 
 // vetrina.jsx riga 17: la ternaria dentro onCerca(t==="Holo"||... ? t : t) e'
 // un no-op del sorgente — ricade sempre su t. onCerca(t) per ogni etichetta.
@@ -92,22 +117,23 @@ const PASSI: [string, string, string][] = [
           {
             heroCards.map((c, i) => (
               <div style={`transform:rotate(${i % 2 ? 1.5 : -1.5}deg)`}>
-                <CardTile
-                  name={c.name}
-                  code={cardCode(c, setOf(c.set))}
-                  set={setOf(c.set).name}
-                  rarity={c.rarity}
-                  src={srcCarta(c)}
-                  priority
-                  data-carta={c.slug}
-                  style="cursor:pointer"
-                >
-                  {c.nuovo && (
-                    <Badge slot="badge" tone="foil">
-                      Nuovo
-                    </Badge>
-                  )}
-                </CardTile>
+                <a href={`/carta/${c.slug}`} data-carta={c.slug} style="text-decoration:none;color:inherit">
+                  <CardTile
+                    name={c.name}
+                    code={cardCode(c, setOf(c.set))}
+                    set={setOf(c.set).name}
+                    rarity={c.rarity}
+                    src={srcCarta(c)}
+                    priority
+                    style="cursor:pointer"
+                  >
+                    {c.nuovo && (
+                      <Badge slot="badge" tone="foil">
+                        Nuovo
+                      </Badge>
+                    )}
+                  </CardTile>
+                </a>
               </div>
             ))
           }
@@ -123,26 +149,24 @@ const PASSI: [string, string, string][] = [
         {
           arrivi.map((c) => {
             const set = setOf(c.set)
-            const holo = c.rarity === 'holo' || c.rarity === 'ultra' || c.rarity === 'secret'
-            const vintage = set.year < 2010
             return (
-              <CardTile
-                name={c.name}
-                code={cardCode(c, set)}
-                set={set.name}
-                rarity={c.rarity}
-                src={srcCarta(c)}
+              <a
+                href={`/carta/${c.slug}`}
                 data-carta={c.slug}
-                data-holo={holo}
-                data-vintage={vintage}
-                style="cursor:pointer"
+                data-rank-tutte={rankTutte.get(c.slug)}
+                data-rank-holo={rankHolo.get(c.slug)}
+                data-rank-vintage={rankVintage.get(c.slug)}
+                class="cards__item"
+                style="text-decoration:none;color:inherit"
               >
-                {c.nuovo && (
-                  <Badge slot="badge" tone="foil">
-                    Nuovo
-                  </Badge>
-                )}
-              </CardTile>
+                <CardTile name={c.name} code={cardCode(c, set)} set={set.name} rarity={c.rarity} src={srcCarta(c)} style="cursor:pointer">
+                  {c.nuovo && (
+                    <Badge slot="badge" tone="foil">
+                      Nuovo
+                    </Badge>
+                  )}
+                </CardTile>
+              </a>
             )
           })
         }
@@ -242,16 +266,23 @@ const PASSI: [string, string, string][] = [
 </Base>
 
 <style>
-  /* NuoviArrivi: vetrina.jsx riga 32 — holo=rarita in holo/ultra/secret,
-     vintage=anno espansione<2010 (soglia diversa da /espansioni, dove
-     vintage e' anno<2023: sono davvero due concetti distinti nel sorgente).
-     L'HTML e' sempre completo, il CSS nasconde ciò che non serve. is:global
-     perche' data-holo/data-vintage stanno sul nodo reso da CardTile
-     (componente Svelte), fuori dalla portata dello scoping di Astro. */
-  #arrivi-list[data-tab='holo'] :global([data-holo='false']) {
+  /* NuoviArrivi: vetrina.jsx riga 32 — filter(<tab>).slice(0,10): holo=rarita
+     in holo/ultra/secret, vintage=anno espansione<2010 (soglia diversa da
+     /espansioni, dove vintage e' anno<2023: sono davvero due concetti
+     distinti nel sorgente). arrivi qui sopra e' gia' l'UNIONE delle prime
+     dieci di ciascun tab (fino a 30 tessere, C2 di fix-finale-report.md):
+     ogni tessera porta data-rank-<tab> solo se rientra nelle prime dieci di
+     quel tab, e il CSS nasconde le altre — cosi' ogni tab mostra sempre le
+     sue dieci tessere vere invece di un sottoinsieme di "tutte". .cards__item
+     e' l'ancora scritta direttamente in questo file (non dentro CardTile),
+     quindi lo scoping normale di Astro basta: non serve is:global. */
+  #arrivi-list[data-tab='tutte'] .cards__item:not([data-rank-tutte]) {
     display: none;
   }
-  #arrivi-list[data-tab='vintage'] :global([data-vintage='false']) {
+  #arrivi-list[data-tab='holo'] .cards__item:not([data-rank-holo]) {
+    display: none;
+  }
+  #arrivi-list[data-tab='vintage'] .cards__item:not([data-rank-vintage]) {
     display: none;
   }
 
