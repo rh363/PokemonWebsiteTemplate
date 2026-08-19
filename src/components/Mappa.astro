@@ -1,0 +1,34 @@
+---
+// Porting di design-reference/negozio.jsx, funzione Mappa() (righe 4-15): il
+// segnaposto del prototipo, non una mappa vera. Restare col segnaposto e'
+// una decisione (vedi task-17-brief.md): una mappa vera richiede l'indirizzo
+// reale del cliente e un iframe di terze parti che pesa sul pilastro 3
+// (performance) — da valutare con dati alla mano, non qui.
+import Panel from '~/components/ds/Panel.svelte'
+import Icon from '~/components/ds/Icon.svelte'
+import { SITE } from '~/config/site'
+---
+
+<Panel padding="0" style="overflow:hidden;position:relative;min-height:320px">
+  <div
+    style="position:absolute;inset:0;background:var(--pattern-grid) 0 0/var(--pattern-grid-size);background-color:var(--surface-sunken)"
+  >
+  </div>
+  <div
+    style="position:absolute;left:46%;top:44%;display:grid;place-items:center;gap:6px;transform:translate(-50%,-50%)"
+  >
+    <span
+      style="display:grid;place-items:center;width:44px;height:44px;border-radius:var(--r-pill);background:var(--surface-brand);border:var(--bw-strong) solid var(--ink-950);box-shadow:var(--sh-sticker);color:var(--text-invert)"
+    >
+      <Icon name="map-pin" size={20} />
+    </span>
+    <span
+      style="font:var(--type-code);color:var(--text-muted);background:var(--surface-card);padding:3px 8px;border-radius:var(--r-pill);border:1px solid var(--border-hairline)"
+      >{SITE.via}</span
+    >
+  </div>
+  <span
+    style="position:absolute;left:var(--sp-4);bottom:var(--sp-4);font:var(--type-label);font-size:var(--fs-caption);color:var(--text-faint)"
+    >Mappa segnaposto — da sostituire con la mappa vera</span
+  >
+</Panel>

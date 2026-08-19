@@ -103,8 +103,15 @@ const voci = NAV.map((v) => (v.id === 'catalogo' ? { ...v, count: catalogCount }
   // SiteChrome idrati non va perso: resta nello stato dello store, e
   // SiteChrome lo trova gia' pronto al mount invece di perderlo come il
   // contatore dello spike del Task 2.
+  //
+  // preventDefault sempre: design-reference/negozio.jsx applica lo stesso
+  // trigger ai tre Panel "Scrivici" (as="a" href="#"), dove il sorgente fa
+  // e.preventDefault() prima di onChiedi(true) — un placeholder "#" che non
+  // deve far saltare la pagina in cima. Su un <button> preventDefault e' un
+  // no-op innocuo.
   document.querySelectorAll<HTMLElement>('[data-chiedi-trigger]').forEach((btn) => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault()
       apriChiedi(true)
       btn.closest('details')?.removeAttribute('open')
     })
