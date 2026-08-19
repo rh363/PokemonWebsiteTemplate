@@ -1,7 +1,114 @@
 # Contenuti — come si aggiornano
 
-(Il Task 27 completa questo file con le altre sezioni: dati del negozio,
-carte, espansioni. Qui c'e' solo la parte sulle foto, scritta dal Task 23.)
+Questa guida è per chi aggiorna il negozio, le espansioni o le carte **senza
+toccare il codice**. Tre soli posti contano:
+
+- `src/config/site.ts` — nome, indirizzo, orari, social del negozio.
+- `src/content/sets.json` — l'elenco delle espansioni.
+- `src/content/cards.csv` — l'elenco delle carte. Si apre e si modifica con
+  Excel, Numbers o Google Sheets come un foglio di calcolo qualsiasi.
+
+Dopo ogni modifica: salva il file, fai commit e push. Il sito si ricostruisce
+da solo (vedi `README.md`, sezione Deploy) e il cambiamento va online in
+pochi minuti. Non serve installare nulla né lanciare comandi, **a meno che**
+tu non voglia vedere l'anteprima in locale prima di pubblicare — in quel
+caso vedi `pnpm dev` nel `README.md`.
+
+## Cambiare nome e indirizzo del negozio
+
+Apri `src/config/site.ts` e modifica questi campi:
+
+```ts
+nome: 'Cartafolia',
+citta: 'Ceccano',
+via: 'via Roma 12',
+cap: '03023 Ceccano (FR)',
+```
+
+Questi valori compaiono ovunque sul sito: nell'intestazione, nel piè di
+pagina, nella pagina "Il negozio" e nei dati strutturati che Google legge
+per mostrare l'indirizzo nei risultati di ricerca — non vanno cambiati in
+nessun altro file.
+
+## Cambiare gli orari
+
+Stesso file, campo `orari`: un elenco di coppie `[giorno, orario]`, nello
+stesso ordine in cui compaiono sul sito.
+
+```ts
+orari: [
+  ['Martedì – Sabato', '10:00 – 19:30'],
+  ['Domenica', '15:00 – 19:00'],
+  ['Lunedì', 'chiuso'],
+],
+```
+
+Scrivi `'chiuso'` (esattamente così, minuscolo) per i giorni di chiusura: è
+il valore che il sito riconosce per non mostrare un orario a un giorno
+chiuso.
+
+## Aggiungere un'espansione
+
+Apri `src/content/sets.json` e aggiungi un nuovo blocco all'elenco:
+
+```json
+{
+  "id": "nvl",
+  "name": "Nuova Alba",
+  "code": "NVL",
+  "year": 2026,
+  "total": 180,
+  "color": "var(--cyan-500)"
+}
+```
+
+- `id`: una sigla breve, minuscola, unica — è quella che le carte useranno
+  nella colonna `set` del CSV per appartenere a questa espansione.
+- `code`: la sigla mostrata sul sito (es. "NVL 042/180"), di solito `id` in
+  maiuscolo.
+- `total`: il numero totale di carte dell'espansione (non quante ne hai
+  schedate — quello lo conta il sito da solo contando le righe del CSV).
+- `color`: uno dei colori del design system già usati dalle altre
+  espansioni (es. `var(--cherry-500)`, `var(--lemon-500)`, `var(--cyan-500)`,
+  `var(--lime-500)`, `var(--grape-500)`) — copia un valore esistente, non
+  inventarne uno nuovo.
+
+**L'ordine delle espansioni nel file è l'ordine in cui compaiono sul sito**
+(pagina Espansioni, e sezione "Sei espansioni in negozio" della vetrina): per
+spostarne una, sposta il suo blocco nel file.
+
+## Aggiungere una carta
+
+Apri `src/content/cards.csv` e aggiungi una riga. Le colonne, in ordine:
+
+| Colonna | Cosa contiene | Esempio |
+|---|---|---|
+| `id` | Un numero progressivo, unico | `101` |
+| `slug` | L'indirizzo della pagina della carta, unico | `fulmine-di-notte-alb-042` |
+| `name` | Il nome della carta | `Fulmine di Notte` |
+| `set` | L'`id` dell'espansione (colonna `id` di `sets.json`) | `alb` |
+| `num` | Numero nell'espansione, come stampato sulla carta | `042/198` |
+| `rarity` | Una di: `common`, `uncommon`, `rare`, `holo`, `ultra`, `secret` | `holo` |
+| `cond` | Una di: `mint`, `near-mint`, `excellent`, `good`, `played` | `excellent` |
+| `lang` | Lingua della carta (di norma `Italiano`, `Inglese` o `Giapponese`) | `Italiano` |
+| `artist` | Nome dell'illustratore | `R. Colella` |
+| `nuovo` | `true` se va segnalata come new entry, altrimenti `false` | `true` |
+| `vetrina` | Un numero: quante copie sono esposte in vetrina | `4` |
+| `entrata` | Data di entrata in catalogo, come testo libero | `15 luglio` |
+| `ordine` | Un numero: più basso = mostrata prima fra le novità | `635` |
+| `image` | Nome del file su R2, oppure vuota (placeholder) — vedi sotto | *(vuota)* |
+
+Punti che contano:
+
+- **`id` e `slug` devono essere unici** in tutto il file: due carte con lo
+  stesso valore fermano il build (vedi l'ultima sezione).
+- **`rarity` e `cond` accettano solo i valori della tabella**, scritti
+  esattamente così (minuscolo, in inglese, coi trattini dove ci sono):
+  qualsiasi altro valore ferma il build.
+- **Non lasciare celle vuote** nelle colonne che richiedono un numero
+  (`vetrina`, `ordine`): una cella vuota non vale `0`, fa fermare il build.
+- La colonna `image` può restare vuota: la carta userà il disegno
+  segnaposto invece della foto vera (vedi la sezione sotto).
 
 ## Aggiungere la foto di una carta
 
@@ -48,3 +155,28 @@ della risposta sia `image/avif` o `image/webp`, **non** `image/jpeg` — se e'
 jpeg, le trasformazioni Cloudflare non sono abilitate sulla zona (dashboard
 → la zona del sito → Images → Transformations): tutto sembra funzionare lo
 stesso, solo piu' lentamente e con foto non ridimensionate.
+
+## Cosa succede se si sbaglia un campo
+
+**Il sito non pubblica mai un catalogo sbagliato in silenzio.** Se una riga
+di `cards.csv` o un campo di `sets.json` non è valido, il build si ferma con
+un errore che dice il file, la riga e il campo — invece di andare online con
+dati mancanti o sbagliati. Qualche esempio di come si presenta l'errore:
+
+```
+src/content/cards.csv, riga 42: "slug" duplicato — "fulmine-di-notte-alb-042" compare già alla riga 17.
+Ogni carta deve avere uno slug diverso.
+```
+
+```
+src/content/cards.csv, riga 8: rarity: Invalid option: expected one of "common"|"uncommon"|"rare"|"holo"|"ultra"|"secret"
+```
+
+```
+src/content/cards.csv, riga 15: cella vuota
+```
+
+Quando succede: apri il file alla riga indicata, correggi la cella, salva e
+riprova. Se l'errore compare durante il deploy automatico (dopo un push), il
+sito **in produzione resta quello di prima** — non viene mai sostituito da
+una versione rotta — finché il file corretto non viene pushato di nuovo.

@@ -131,10 +131,27 @@ futuro si vuole zero rete fino al primo filtro, e' un cambio dentro
 
 ## View Transitions
 
-`<ClientRouter />` (`astro:transitions`) e' attivo in `Base.astro`. Verificato
-con un browser reale (non a occhio): dopo una navigazione soft (link
-NavBar → NavBar), confermata dalla persistenza di un marker JS impostato
-prima del click:
+### Costo, non solo comportamento
+
+`<ClientRouter />` costa **16 286 byte (5611 gzip) su ogni pagina**,
+incluse quelle il cui pregio dichiarato era spedire zero JavaScript.
+`/chi-siamo` — zero isole proprie, solo `SiteChrome` condivisa — scarica ora
+circa 17 KB di script esterni contro un ideale di quasi nulla. Misurato sul
+`<script type="module" src="...">` che Astro inietta per `astro:transitions`
+nell'HTML costruito, non stimato dal peso del pacchetto npm.
+
+**Decisione: si tengono.** Il criterio "se rompono le isole, toglile" non
+scatta (verificato sotto: nessuna rottura), ma quel criterio da solo non
+pesava il costo — la scelta va quindi resa esplicita qui invece che spesa in
+silenzio sul budget di prestazioni del sito. Sono cache dal browser dopo la
+prima pagina vista (stesso URL su ogni pagina, hash nel nome) e reversibili
+con una riga: basta togliere l'`import { ClientRouter } from
+'astro:transitions'` e il tag da `Base.astro`.
+
+`<ClientRouter />` (`astro:transitions`) e' attivo in `Base.astro`.
+Verificato con un browser reale (non a occhio): dopo una navigazione soft
+(link NavBar → NavBar), confermata dalla persistenza di un marker JS
+impostato prima del click:
 
 - Il trigger "Chiedi una carta" del `<script>` inline di `NavBar.astro`
   continua a funzionare dopo la transizione (Astro re-inserisce/riesegue lo
