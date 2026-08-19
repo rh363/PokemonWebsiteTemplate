@@ -91,7 +91,7 @@ const setsVM = sets.map((s) => {
                 </div>
               </div>
 
-              <div style="display:flex;gap:var(--sp-2);flex-wrap:wrap;margin-top:var(--sp-1)">
+              <div class="set-miniature" style="display:flex;gap:var(--sp-2);flex-wrap:wrap;margin-top:var(--sp-1)">
                 {s.miniature.map((c) => (
                   <button
                     type="button"
@@ -164,6 +164,21 @@ const setsVM = sets.map((s) => {
     }
     #sets-list [data-panel='set-actions'] {
       justify-items: stretch;
+    }
+
+    /* espansioni.jsx riga 39: miniature.slice(0, mobile ? 4 : 6) — sotto
+       1080px il prototipo mostra 4 miniature, non 6. Qui il markup e' sempre
+       completo (fedele al pattern "HTML completo, CSS nasconde" di questo
+       file); sotto il breakpoint si nascondono la quinta e la sesta.
+       !important necessario: ogni bottone porta style="all:unset;..." inline
+       (per azzerare lo stile nativo di <button>), e uno stile inline vince
+       sempre su un selettore di foglio esterno indipendentemente dalla sua
+       specificita' — verificato in browser: senza !important restava
+       display:inline (il valore iniziale a cui "all:unset" resetta
+       display), le sei miniature restavano tutte visibili anche sotto
+       1080px. */
+    .set-miniature button:nth-child(n + 5) {
+      display: none !important;
     }
   }
 </style>
