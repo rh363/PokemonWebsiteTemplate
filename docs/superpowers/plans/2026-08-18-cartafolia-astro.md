@@ -2427,6 +2427,38 @@ e' in CSS, quindi la tessera resta corretta anche senza idratazione."
 ---
 # FASE 3 — Shell e pagine
 
+## I quattro helper di `pezzi.jsx` sono componenti, non stili da ricopiare
+
+Scoperto al Task 16 con un difetto vero: tre sezioni su cinque rendevano il testo in
+`#241D2C` invece di `#6B6178`, perche' nel ricopiare a mano gli stili inline di `Testo`
+era caduta la dichiarazione `color`, e i paragrafi ereditavano il colore del `Panel`.
+Il confronto a schermate non l'ha intercettato: a occhio un grigio scuro e un nero quasi
+si somigliano.
+
+`design-reference/pezzi.jsx` definisce **quattro componenti condivisi** che le pagine del
+prototipo usano ovunque:
+
+| Componente | Righe | Cosa incapsula |
+|---|---|---|
+| `Occhiello` | 9-11 | l'etichetta maiuscoletta sopra i titoli, con `tone` chiaro/scuro |
+| `Titolo` | 13-21 | quattro livelli (`hero`, `pagina`, `sezione`, `piccolo`), ognuno con font e tracking propri, e il tag HTML che ne consegue |
+| `Testo` | 23-25 | il paragrafo, con `grande`, `tone` e **sempre** un `color` esplicito |
+| `TestaSezione` | 27-36 | occhiello + titolo + testo + azione, con la loro spaziatura |
+
+Vanno portati **una volta sola, come componenti**, non inlineati in ogni pagina. E' anche
+la scelta piu' fedele: nel prototipo sono componenti, non stili sparsi.
+
+**Dove e come:** `src/components/{Occhiello,Titolo,Testo,TestaSezione}.svelte`. In Svelte e
+non in Astro perche' cosi' servono a entrambi i lati del confine — una pagina `.astro` li
+rende staticamente (nessuna direttiva `client:`, nessun JavaScript spedito), e un'isola
+puo' importarli come qualsiasi altro componente. `SiteChrome` ne usa gia' due inlineati e
+andra' allineato quando li si tocca.
+
+I Task 17-22 usano questi componenti. Se una pagina scrive a mano
+`style="font:var(--type-body);…"` per un paragrafo, sta reintroducendo il difetto.
+
+
+
 L'ordine delle pagine non è casuale: si parte dalla più semplice (`/chi-siamo`, zero interazione) per validare la catena layout → token → componenti su un caso senza variabili, e si finisce con la più complessa (`/catalogo`).
 
 ### Task 15: Layout di base e shell interattiva
