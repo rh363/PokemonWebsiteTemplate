@@ -12,7 +12,10 @@
     style = '',
   } = $props()
 
-  const caption = $derived(code == null ? '' : String(code).trim())
+  // Fedele a bundle:24 — un code non-stringa e falsy (0, NaN) rende stringa vuota.
+  const caption = $derived(
+    typeof code === 'string' ? code.trim() : code ? String(code) : '',
+  )
   const isFoil = $derived(
     foil || rarity === 'holo' || rarity === 'ultra' || rarity === 'secret',
   )

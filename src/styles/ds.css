@@ -53,7 +53,7 @@
   letter-spacing:var(--ls-eyebrow);text-transform:uppercase;color:var(--text-muted)}
 .ds-speclist__dd{margin:0;text-align:right;color:var(--text-strong);font:var(--type-body);
   font-size:var(--fs-body-s);font-weight:var(--fw-semibold)}
-.ds-speclist__dd--mono{font:var(--type-code);font-weight:var(--fw-medium)}
+.ds-speclist__dd--mono{font-family:var(--font-mono);font-weight:var(--fw-medium);line-height:1.3}
 
 /* Badge — bundle:300-377. La mappa TONES (neutral/brand/accent/success/warning/danger/
    foil/invert) resta in JS: bg/fg/bd dipendono dalla prop tone, sono dati. */
