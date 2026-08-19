@@ -51,9 +51,15 @@ import {
   LANGUAGES,
   SORT_LABELS,
 } from '~/lib/catalog'
+import { immaginiAttive, urlImmagine } from '~/lib/immagini'
 
 const [cards, sets] = await Promise.all([getIndexedCards(), getAllSets()])
 const setOf = (id: string) => sets.find((s) => s.id === id)!
+
+// Task 23: vedi lo stesso pattern in index.astro — con la configurazione
+// vuota srcCarta torna sempre undefined, output identico a prima.
+const fotoAttive = immaginiAttive()
+const srcCarta = (c: { image?: string }) => (fotoAttive && c.image ? urlImmagine(c.image, 300) : undefined)
 
 // spec §6.1: pagina 1, ordinamento "novita", nessun filtro — lo stato
 // iniziale esatto del prototipo all'apertura di /catalogo.
@@ -163,6 +169,7 @@ const ordinamentoOpzioni = Object.entries(SORT_LABELS).map(([value, label]) => (
                     code={cardCode(c, setOf(c.set))}
                     set={setOf(c.set).name}
                     rarity={c.rarity}
+                    src={srcCarta(c)}
                     style="cursor:pointer"
                   >
                     {c.nuovo && (

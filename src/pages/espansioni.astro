@@ -26,6 +26,11 @@ import SetFilter from '~/components/islands/SetFilter.svelte'
 import { SITE } from '~/config/site'
 import { getAllSets, getAllCards } from '~/lib/catalog'
 import { inVetrina } from '~/lib/catalog/labels'
+import { immaginiAttive, urlImmagine } from '~/lib/immagini'
+
+// Task 23: vedi lo stesso pattern in index.astro/catalogo.astro.
+const fotoAttive = immaginiAttive()
+const srcCarta = (c: { image?: string }) => (fotoAttive && c.image ? urlImmagine(c.image, 150) : undefined)
 
 // L'ordine di visualizzazione (quello di sets.json) e' gia' garantito da
 // getAllSets(): vedi il commento in src/lib/catalog/source.static.astro.ts.
@@ -91,7 +96,7 @@ const setsVM = sets.map((s) => {
                     aria-label={c.name}
                     style="all:unset;cursor:pointer;width:52px;border-radius:var(--r-cardart)"
                   >
-                    <CardArt rarity={c.rarity} />
+                    <CardArt rarity={c.rarity} src={srcCarta(c)} />
                   </button>
                 ))}
               </div>

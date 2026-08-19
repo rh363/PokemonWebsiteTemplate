@@ -32,6 +32,10 @@
     onclick = undefined as ((e: MouseEvent) => void) | undefined,
     badge = undefined as Snippet | undefined,
     tilt = true,
+    // Task 23: solo le tessere sopra la piega (le prime dell'hero) lo
+    // passano true — fa caricare la foto reale (quando c'e') eager/alta
+    // priorita' invece che lazy. Non tocca il ramo placeholder di CardArt.
+    priority = false,
     style = '',
     ...rest
   }: {
@@ -45,6 +49,7 @@
     onclick?: (e: MouseEvent) => void
     badge?: Snippet
     tilt?: boolean
+    priority?: boolean
     style?: string
     [key: string]: unknown
   } = $props()
@@ -112,6 +117,8 @@
       {rarity}
       {code}
       sheen={hover ? 1 : 0}
+      loading={priority ? 'eager' : 'lazy'}
+      fetchpriority={priority ? 'high' : undefined}
       style={`transform:rotateX(${rx}deg) rotateY(${ry}deg) scale(${hover ? 1.02 : 1});transform-style:preserve-3d;transition:transform var(--dur-base) var(--ease-out)`}
     />
   </div>

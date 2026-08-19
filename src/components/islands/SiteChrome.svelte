@@ -29,6 +29,11 @@
   import type { Card, CardSet } from '~/lib/catalog/types'
   import { getCatalog } from '~/stores/catalog'
   import { SITE } from '~/config/site'
+  // Task 23: ~/lib/immagini importa solo SITE, mai la barrel ~/lib/catalog —
+  // sicuro in quest'isola per lo stesso motivo di ~/lib/catalog/labels sopra.
+  import { immaginiAttive, urlImmagine } from '~/lib/immagini'
+
+  const fotoAttive = immaginiAttive()
 
   // Le espansioni (sets) servono per il codice (es. "ALB 042/198") e per il
   // nome dell'espansione nella quick-view e nel messaggio di "Chiedi". Dal
@@ -185,7 +190,11 @@
   {#if quickCard}
     <div style="display:flex;gap:var(--sp-5);flex-wrap:{mobile ? 'wrap' : 'nowrap'}">
       <div style="width:{mobile ? 120 : 150}px;flex:none">
-        <CardArt rarity={quickCard.rarity} code={quickCodice} />
+        <CardArt
+          rarity={quickCard.rarity}
+          code={quickCodice}
+          src={fotoAttive && quickCard.image ? urlImmagine(quickCard.image, 300) : undefined}
+        />
       </div>
       <dl class="ds-speclist" style="flex:1;min-width:180px">
         <div class="ds-speclist__row">

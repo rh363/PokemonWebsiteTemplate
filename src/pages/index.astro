@@ -24,9 +24,16 @@ import NuoviArrivi from '~/components/islands/NuoviArrivi.svelte'
 import { SITE } from '~/config/site'
 import { getAllCards, getAllSets } from '~/lib/catalog'
 import { cardCode, inVetrina } from '~/lib/catalog/labels'
+import { immaginiAttive, urlImmagine } from '~/lib/immagini'
 
 const [sets, cards] = await Promise.all([getAllSets(), getAllCards()])
 const setOf = (id: string) => sets.find((s) => s.id === id)!
+
+// Task 23: con la configurazione immagini vuota immaginiAttive() e' sempre
+// falso, quindi srcCarta torna sempre undefined — CardTile ricade su
+// CardArt senza src, identico a prima che questo file sapesse di R2.
+const fotoAttive = immaginiAttive()
+const srcCarta = (c: { image?: string }) => (fotoAttive && c.image ? urlImmagine(c.image, 300) : undefined)
 
 // vetrina.jsx: window.CARDS.slice(0,4) e window.CARDS.filter(...).slice(0,10).
 // getAllCards() torna nell'ordine "di arrivo" del CSV (id in sequenza, vedi
@@ -90,6 +97,8 @@ const PASSI: [string, string, string][] = [
                   code={cardCode(c, setOf(c.set))}
                   set={setOf(c.set).name}
                   rarity={c.rarity}
+                  src={srcCarta(c)}
+                  priority
                   data-carta={c.slug}
                   style="cursor:pointer"
                 >
@@ -122,6 +131,7 @@ const PASSI: [string, string, string][] = [
                 code={cardCode(c, set)}
                 set={set.name}
                 rarity={c.rarity}
+                src={srcCarta(c)}
                 data-carta={c.slug}
                 data-holo={holo}
                 data-vintage={vintage}

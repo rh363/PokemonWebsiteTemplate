@@ -61,6 +61,13 @@ const storeJsonLd = {
 
     <script type="application/ld+json" set:html={JSON.stringify(storeJsonLd)} />
 
+    {
+      /* Task 23: preload della foto grande della scheda carta, quando c'e'.
+         Slot dedicato invece di affidarsi all'hoisting automatico di Astro,
+         cosi' resta prevedibile anche dietro il condizionale del chiamante. */
+    }
+    <slot name="head" />
+
     <ClientRouter />
   </head>
   <body>

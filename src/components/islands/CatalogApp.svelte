@@ -44,6 +44,10 @@
   import { parseQuery, toSearchParams } from '~/lib/catalog/url'
   import { getCatalog, type CatalogPayload } from '~/stores/catalog'
   import { apriQuick, avviso } from '~/stores/chrome'
+  // Task 23: ~/lib/immagini importa solo SITE, mai la barrel ~/lib/catalog —
+  // sicuro da portare nel bundle di quest'isola (stesso motivo del commento
+  // sopra su labels/types/query/url).
+  import { immaginiAttive, urlImmagine } from '~/lib/immagini'
 
   // Forma di /api/search-index.json (Task 8): ripetuta qui invece che
   // importata da ~/lib/catalog/source.static per lo stesso motivo per cui
@@ -122,6 +126,13 @@
   }
   function contaLingua(l: string): number {
     return datiCards.filter((c) => c.lang === l).length
+  }
+
+  // Task 23: stesso pattern delle pagine statiche — con la configurazione
+  // vuota torna sempre undefined, CardTile/CardArt ricadono sul placeholder.
+  const fotoAttive = immaginiAttive()
+  function srcCarta(c: { image?: string }): string | undefined {
+    return fotoAttive && c.image ? urlImmagine(c.image, 300) : undefined
   }
 
   function toggle<T>(arr: T[], v: T): T[] {
@@ -551,6 +562,7 @@
                 code={set ? cardCode(c, set) : c.num}
                 set={set?.name}
                 rarity={c.rarity}
+                src={srcCarta(c)}
                 style="cursor:pointer"
                 onclick={(e: MouseEvent) => apriQuickDaTessera(e, c.slug)}
               >
@@ -567,7 +579,7 @@
               href={`/carta/${c.slug}`}
               style={`display:flex;align-items:center;gap:var(--sp-4);padding:var(--sp-3) var(--sp-4);min-height:64px;text-decoration:none;color:inherit;${i ? 'border-top:1px solid var(--border-hairline)' : ''}`}
             >
-              <div style="width:40px;flex:none"><CardArt rarity={c.rarity} /></div>
+              <div style="width:40px;flex:none"><CardArt rarity={c.rarity} src={srcCarta(c)} /></div>
               <div style="flex:1;min-width:0;display:grid;gap:2px">
                 <span style="font:var(--type-card-title);color:var(--text-strong);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{c.name}</span>
                 <span style="font:var(--type-code);color:var(--text-faint)">{set ? cardCode(c, set) : c.num} · {c.lang}</span>

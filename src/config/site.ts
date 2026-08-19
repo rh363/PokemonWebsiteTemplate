@@ -23,4 +23,18 @@ export const SITE = {
     locale: 'it_IT',
   },
   anno: 2026,
+  /** Foto delle carte su Cloudflare R2, dietro le trasformazioni di
+   *  Cloudflare Images (spec §13, Task 23). Con `origine` o `zona` vuoti,
+   *  CardImage ricade sempre sul placeholder foil: lo sviluppo locale
+   *  funziona senza credenziali e senza rete, e il sito non si rompe mai
+   *  per una configurazione mancante. Vedi docs/CONTENUTI.md per come
+   *  aggiungere la foto di una carta una volta compilati questi campi. */
+  immagini: {
+    /** Dominio personalizzato del bucket R2. Vuoto = niente foto, si usa il placeholder. */
+    origine: '', // es. 'https://img.cartafolia.it'
+    /** Zona su cui girano le trasformazioni: di norma il dominio del sito. */
+    zona: '', // es. 'https://cartafolia.it'
+    larghezze: [150, 300, 450],
+    qualita: 82,
+  },
 } as const

@@ -27,10 +27,12 @@ import Titolo from '~/components/Titolo.svelte'
 import Testo from '~/components/Testo.svelte'
 import CardViewer from '~/components/islands/CardViewer.svelte'
 import CardActions from '~/components/islands/CardActions.svelte'
+import CardImage from '~/components/CardImage.astro'
 import { SITE } from '~/config/site'
 import { NOTE_CONDIZIONE } from '~/config/condizioni'
 import { getAllCards, getAllSets, cardCode, CONDITION_LABELS } from '~/lib/catalog'
 import type { Card, CardSet } from '~/lib/catalog/types'
+import { immaginiAttive, srcsetImmagine, urlImmagine } from '~/lib/immagini'
 
 export async function getStaticPaths() {
   // Una sola lettura del catalogo per l'intera rotta (100 pagine), non una
@@ -63,9 +65,28 @@ interface Props {
 const { card, set, simili, catalogCount } = Astro.props as Props
 
 const codice = cardCode(card, set)
+
+// Task 23: la carta grande. Con la configurazione immagini vuota
+// mostraFoto e' sempre falso, quindi si rende sempre <CardViewer> come
+// prima — il ramo <CardImage> qui sotto e' morto finche' il proprietario
+// non compila src/config/site.ts#immagini. Il tilt di CardViewer resta
+// riservato al placeholder foil: su una foto vera non avrebbe senso.
+const mostraFoto = Boolean(card.image) && immaginiAttive()
+const cardSizes = '(max-width:1080px) 86vw, 380px'
+
+// "Nella stessa vetrina": stesso pattern src delle altre pagine.
+const fotoAttive = immaginiAttive()
+const srcCarta = (c: { image?: string }) => (fotoAttive && c.image ? urlImmagine(c.image, 150) : undefined)
 ---
 
 <Base title={`${card.name} — ${SITE.nome}`} active="catalogo" {catalogCount}>
+  {
+    mostraFoto && (
+      <Fragment slot="head">
+        <link rel="preload" as="image" imagesrcset={srcsetImmagine(card.image!)} sizes={cardSizes} />
+      </Fragment>
+    )
+  }
   <div class="wrap" style="padding-top:var(--sp-8);padding-bottom:var(--section-y)">
     <Breadcrumb
       style="margin-bottom:var(--sp-8)"
@@ -79,7 +100,13 @@ const codice = cardCode(card, set)
 
     <div class="det">
       <div class="det-fix">
-        <CardViewer client:load rarity={card.rarity} code={codice} />
+        {
+          mostraFoto ? (
+            <CardImage card={card} set={set} sizes={cardSizes} priority />
+          ) : (
+            <CardViewer client:load rarity={card.rarity} code={codice} />
+          )
+        }
         <div style="display:flex;gap:var(--sp-2);align-items:center;justify-content:center">
           <Icon name="info" size={14} style="color:var(--text-faint)" />
           <span class="hint hint--desktop">Muovi il mouse sulla carta per vedere il riflesso</span>
@@ -143,7 +170,7 @@ const codice = cardCode(card, set)
             {
               simili.map(({ card: c, code: cCode }) => (
                 <a href={`/carta/${c.slug}`} style="text-decoration:none;color:inherit">
-                  <CardTile name={c.name} code={cCode} rarity={c.rarity} />
+                  <CardTile name={c.name} code={cCode} rarity={c.rarity} src={srcCarta(c)} />
                 </a>
               ))
             }

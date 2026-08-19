@@ -8,3 +8,6 @@ playwright-report/
 .env.*
 !.env.example
 .DS_Store
+
+# Foto delle carte: mai nel repository (Task 23, docs/CONTENUTI.md).
+/foto-carte/
