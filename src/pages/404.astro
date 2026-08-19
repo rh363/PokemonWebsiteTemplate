@@ -1,0 +1,32 @@
+---
+// Pagina 404: Astro la serve automaticamente per ogni rotta sconosciuta
+// (convenzione di src/pages/404.astro, vedi la doc di Astro). Nessuna
+// isola: un EmptyState statico dentro il guscio del sito (NavBar/Footer),
+// stesso schema di negozio.astro/chi-siamo.astro.
+import Base from '~/layouts/Base.astro'
+import EmptyState from '~/components/ds/EmptyState.svelte'
+import Button from '~/components/ds/Button.svelte'
+import Icon from '~/components/ds/Icon.svelte'
+import { SITE } from '~/config/site'
+---
+
+<Base title={`Pagina non trovata — ${SITE.nome}`} active="">
+  <div class="wrap" style="padding-top:var(--sp-16);padding-bottom:var(--sp-16)">
+    <EmptyState
+      title="Questa carta non è in vetrina"
+      description="La pagina che cerchi non esiste, o l'abbiamo spostata."
+      style="max-width:480px;margin:0 auto"
+    >
+      <div slot="action" style="display:flex;gap:var(--sp-3);flex-wrap:wrap;justify-content:center">
+        <Button as="a" href="/">
+          <Icon slot="icon" name="arrow-left" size={16} />
+          Torna alla vetrina
+        </Button>
+        <Button variant="secondary" as="a" href="/catalogo">
+          <Icon slot="icon" name="search" size={16} />
+          Sfoglia il catalogo
+        </Button>
+      </div>
+    </EmptyState>
+  </div>
+</Base>
