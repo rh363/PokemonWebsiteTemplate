@@ -19,6 +19,7 @@
   import CardArt from '../ds/CardArt.svelte'
   import RarityBadge from '../ds/RarityBadge.svelte'
   import ConditionBadge from '../ds/ConditionBadge.svelte'
+  import Testo from '../Testo.svelte'
   import { chiedi, quick, toast as toastStore, chiudiChiedi, chiudiQuick, apriChiedi, avviso } from '~/stores/chrome'
   // Import diretto da labels/types, non dal barrel '~/lib/catalog': quel
   // barrel ri-esporta anche source.static.astro.ts, che importa astro:content
@@ -85,11 +86,7 @@
 
 {#snippet contenutoChiedi()}
   <div style="display:grid;gap:var(--sp-5)">
-    <p
-      style="font:var(--type-body);font-size:var(--fs-body-m);line-height:var(--lh-body-m);color:var(--text-muted);max-width:62ch;text-wrap:pretty"
-    >
-      Scrivici e ti diciamo se è ancora in vetrina. Rispondiamo negli orari di apertura, di solito in giornata.
-    </p>
+    <Testo>Scrivici e ti diciamo se è ancora in vetrina. Rispondiamo negli orari di apertura, di solito in giornata.</Testo>
     <div
       style="display:grid;gap:var(--sp-2);padding:var(--sp-4);background:var(--surface-sunken);border-radius:var(--r-md);border:1px solid var(--border-hairline)"
     >
