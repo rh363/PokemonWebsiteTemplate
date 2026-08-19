@@ -2129,7 +2129,7 @@ controlli funzionano in pagine che non idratano nulla."
 | `Select` | `bundle:1597-1670` | Resta un `<select>` nativo: accessibile e senza JS di posizionamento |
 | `Checkbox` | `bundle:1323-1410` | `<input type="checkbox">` reale nascosto + riquadro disegnato, così Tab e Spazio funzionano da soli |
 | `Switch` | `bundle:1671-1736` | `<input type="checkbox" role="switch">` |
-| `FilterGroup` | `bundle:534-609` | L'apertura era `useState`. Usare `<details open={defaultOpen}>` + `<summary>`: apre e chiude **senza JavaScript**, con tastiera funzionante di serie. Il chevron ruota con `details[open] .ds-fg__chev{transform:rotate(180deg)}` |
+| `FilterGroup` | `bundle:534-609` | L'apertura era `useState`. Usare `<details open={defaultOpen}>` + `<summary>`: apre e chiude **senza JavaScript**, con tastiera funzionante di serie. Il chevron riproduce i valori del sorgente (`bundle:592`): `transform: open ? "rotate(0deg)" : "rotate(-90deg)"` su un glifo `chevron-down`, cioe' **chiuso punta a destra, aperto punta in basso** — la convenzione classica. In CSS: `.ds-fg__chev{transform:rotate(-90deg)}` e `details.ds-fg[open] .ds-fg__chev{transform:rotate(0deg)}`. **Non** `rotate(180deg)`, che darebbe un chevron in basso da chiuso e in alto da aperto: entrambi gli stati sbagliati |
 
 **`SearchField` — due miglioramenti dichiarati.** Il prototipo (`bundle:1483-1596`) chiude il pannello dei suggerimenti con `onBlur: () => setTimeout(() => setFocus(false), 120)` e li seleziona con `onMouseDown`. Sono due limiti reali:
 
