@@ -11,6 +11,7 @@
   // che ri-esporta source.static.astro.ts e trascinerebbe astro:content nel
   // bundle del browser (stesso motivo gia' documentato in SiteChrome.svelte
   // e HeroSearch.svelte).
+  import { untrack } from 'svelte'
   import SearchField from '../ds/SearchField.svelte'
   import FilterGroup from '../ds/FilterGroup.svelte'
   import Checkbox from '../ds/Checkbox.svelte'
@@ -322,7 +323,14 @@
     const tracciate = { q, setsSel, raritySel, condSel, langSel, foil, sort }
     void tracciate
 
-    syncUrl('replace')
+    // syncUrl() -> urlPer() -> statoQuery() legge anche `page` (per costruire
+    // l'URL completo, non solo i sette campi sopra): senza untrack quella
+    // lettura indiretta renderebbe `page` una dipendenza reattiva di QUESTO
+    // effetto, e ogni clic di paginazione lo farebbe ripartire da capo —
+    // mostraApp/loading/skeleton compresi — esattamente il difetto che i
+    // commenti qui sopra dicono di escludere. untrack rompe quel filo: le
+    // uniche dipendenze restano i sette campi letti esplicitamente sopra.
+    untrack(() => syncUrl('replace'))
 
     const eraPrimoGiro = primoGiro
     primoGiro = false
@@ -555,7 +563,7 @@
               <!-- Decorativo: l'intera riga e' gia' il link (vedi sopra), un
                    <button> IconButton qui dentro anniderebbe interattivo
                    dentro interattivo — HTML non valido. -->
-              <Icon name="chevron-right" size={18} style="color:var(--text-faint)" />
+              <Icon name="chevron-right" size={16} style="color:var(--text-faint)" />
             </a>
           {/each}
         </Panel>
