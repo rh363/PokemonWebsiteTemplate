@@ -45,6 +45,7 @@
     // Nessun setTimeout: la selezione via pointerdown (sotto) intercetta e
     // annulla l'evento prima che il blur possa correre contro il click.
     focused = false
+    activeIndex = -1
   }
 
   function pick(s: Suggerimento) {
@@ -70,6 +71,7 @@
       if (open) {
         e.preventDefault()
         closedByEsc = true
+        activeIndex = -1
       }
     }
   }
@@ -84,7 +86,7 @@
       role="combobox"
       aria-expanded={open}
       aria-controls={`${uid}-list`}
-      aria-activedescendant={activeIndex >= 0 ? `${uid}-opt-${activeIndex}` : undefined}
+      aria-activedescendant={open && activeIndex >= 0 ? `${uid}-opt-${activeIndex}` : undefined}
       {value}
       {placeholder}
       oninput={handleInput}
