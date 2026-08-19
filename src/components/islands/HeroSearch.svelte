@@ -30,7 +30,20 @@
       suggestions = []
       return
     }
-    if (!catalog) catalog = await getCatalog()
+    if (!catalog) {
+      // getCatalog() puo' rifiutare (Finding 1): questa funzione e' invocata
+      // come `void aggiornaSuggerimenti(v)`, quindi un rifiuto non gestito
+      // qui diventerebbe una unhandled promise rejection. Niente toast per
+      // un suggerimento mancato — non vale l'interruzione — ma non deve
+      // esplodere: si rinuncia in silenzio e il prossimo carattere digitato
+      // fa ripartire il tentativo (getCatalog() non mette in cache i rifiuti).
+      try {
+        catalog = await getCatalog()
+      } catch {
+        suggestions = []
+        return
+      }
+    }
     // Guardia contro risposte in ordine sparso: se l'utente ha gia' digitato
     // altro mentre la fetch era in corso, questo risultato e' superato.
     if (query !== q) return

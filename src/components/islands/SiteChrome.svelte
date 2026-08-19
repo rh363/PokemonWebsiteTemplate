@@ -73,6 +73,16 @@
   // gia' la Card in memoria). Qui si risolve lo slug in Card interrogando
   // /api/catalog.json — una sola volta per pagina, vedi ~/stores/catalog —
   // e solo la prima volta che serve un quick-view, non al mount dell'isola.
+  //
+  // Round di fix (Finding 1): getCatalog() puo' rifiutare (rete assente,
+  // risposta non-ok) — prima questo rifiuto non era gestito da nessuno dei
+  // due chiamanti, quindi un click su una tessera non produceva ne' dialog
+  // ne' errore: un bottone morto, indistinguibile da un bug. Ora un
+  // fallimento chiude la quick-view (resta chiusa, non si apre vuota) e
+  // avvisa con un toast — e siccome getCatalog() non mette piu' in cache un
+  // rifiuto, il prossimo click sulla stessa carta riprova la fetch da zero.
+  // Uno slug assente nel payload (carta rimossa, link vecchio) e' un caso
+  // diverso — non e' un errore di rete — e riceve un messaggio suo.
   let quickCard = $state<Card | null>(null)
   $effect(() => {
     const slug = $quick
@@ -80,12 +90,25 @@
       quickCard = null
       return
     }
-    getCatalog().then((data) => {
-      // Guardia contro risposte in ordine sparso: se nel frattempo lo slug
-      // richiesto e' cambiato (o la quick-view e' stata chiusa), questa
-      // risoluzione e' superata e non deve sovrascrivere lo stato corrente.
-      if ($quick === slug) quickCard = data.cards.find((c) => c.slug === slug) ?? null
-    })
+    getCatalog()
+      .then((data) => {
+        // Guardia contro risposte in ordine sparso: se nel frattempo lo slug
+        // richiesto e' cambiato (o la quick-view e' stata chiusa), questa
+        // risoluzione e' superata e non deve sovrascrivere lo stato corrente.
+        if ($quick !== slug) return
+        const trovata = data.cards.find((c) => c.slug === slug) ?? null
+        if (!trovata) {
+          avviso('Carta non trovata', 'Questa scheda non è più nel catalogo.', 'info')
+          chiudiQuick()
+          return
+        }
+        quickCard = trovata
+      })
+      .catch(() => {
+        if ($quick !== slug) return
+        avviso('Impossibile caricare la scheda', 'Controlla la connessione e riprova cliccando di nuovo sulla carta.', 'info')
+        chiudiQuick()
+      })
   })
 
   const quickSet = $derived(quickCard ? setOf(quickCard.set) : null)
