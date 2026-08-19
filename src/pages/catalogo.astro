@@ -1,0 +1,194 @@
+---
+// Porting di design-reference/catalogo.jsx, funzione Catalogo() — la pagina
+// piu' complessa del sito: cinque facet di filtro con conteggi dal vivo,
+// chip rimovibili, ordinamento, vista griglia/lista, skeleton, stato vuoto,
+// paginazione su un centinaio di carte.
+//
+// Il vincolo di /catalogo con output:'static': esiste un solo HTML per
+// questa rotta, la querystring non e' nota al build. Qui si rende
+// staticamente SOLO la pagina 1 dell'ordinamento "novita" senza filtri —
+// esattamente cio' che il prototipo mostra all'apertura — cosi' il primo
+// paint e' immediato, indicizzabile, e corretto a JavaScript disattivato
+// (24 tessere vere, i FilterGroup sono <details> nativi: si aprono e
+// chiudono senza JS, anche se spuntare una casella non filtra nulla senza
+// idratazione — la spunta e' un controllo statico, non collegato).
+//
+// CatalogApp (client:load) IDRATA e SOSTITUISCE questo blocco intero non
+// appena e' pronta: sul mount legge location.search, e se rappresenta
+// qualcosa di diverso dal default lo idrata subito mostrando lo skeleton
+// (mai la lista sbagliata); se l'URL e' il default puro, scalda la cache in
+// requestIdleCallback senza toccare nulla — il contenuto sarebbe identico,
+// quindi non c'e' nulla da "correggere" agli occhi di chi guarda. Da quel
+// momento la griglia, i filtri e la paginazione sono tutti resi da Svelte,
+// che parla solo con /api/catalog.json e /api/search-index.json (mai col
+// filesystem, mai con la barrel ~/lib/catalog — vedi il commento in cima a
+// CatalogApp.svelte).
+import Base from '~/layouts/Base.astro'
+import Occhiello from '~/components/Occhiello.svelte'
+import Titolo from '~/components/Titolo.svelte'
+import FilterGroup from '~/components/ds/FilterGroup.svelte'
+import Checkbox from '~/components/ds/Checkbox.svelte'
+import Switch from '~/components/ds/Switch.svelte'
+import Select from '~/components/ds/Select.svelte'
+import Tabs from '~/components/ds/Tabs.svelte'
+import SearchField from '~/components/ds/SearchField.svelte'
+import CardTile from '~/components/ds/CardTile.svelte'
+import Badge from '~/components/ds/Badge.svelte'
+import Pagination from '~/components/ds/Pagination.svelte'
+import CatalogApp from '~/components/islands/CatalogApp.svelte'
+import { SITE } from '~/config/site'
+import {
+  getAllSets,
+  getIndexedCards,
+  queryCards,
+  toSearchParams,
+  cardCode,
+  PER_PAGE,
+  RARITY_LABELS,
+  CONDITION_LABELS,
+  LANGUAGES,
+  SORT_LABELS,
+} from '~/lib/catalog'
+
+const [cards, sets] = await Promise.all([getIndexedCards(), getAllSets()])
+const setOf = (id: string) => sets.find((s) => s.id === id)!
+
+// spec §6.1: pagina 1, ordinamento "novita", nessun filtro — lo stato
+// iniziale esatto del prototipo all'apertura di /catalogo.
+const iniziale = queryCards(cards, sets, { sort: 'novita', page: 1, perPage: PER_PAGE })
+
+// I conteggi per facet sono un conto semplice sull'intero catalogo (fedele
+// a conta() del prototipo: window.CARDS.filter(c=>c[k]===v).length), non
+// incrociati con gli altri filtri — qui non ce ne sono comunque, il default
+// e' sempre a zero filtri attivi.
+const contaRarita = (r: string) => cards.filter((c) => c.rarity === r).length
+const contaSet = (id: string) => cards.filter((c) => c.set === id).length
+const contaCond = (c: string) => cards.filter((x) => x.cond === c).length
+const contaLingua = (l: string) => cards.filter((c) => c.lang === l).length
+
+const ordinamentoOpzioni = Object.entries(SORT_LABELS).map(([value, label]) => ({ value, label }))
+---
+
+<Base title={`Catalogo — ${SITE.nome}`} active="catalogo" catalogCount={cards.length}>
+  <div class="wrap" style="padding-top:var(--sp-10);padding-bottom:var(--section-y)">
+    <div style="display:grid;gap:var(--sp-4)">
+      <Occhiello>{cards.length} carte schedate</Occhiello>
+      <Titolo livello="pagina">Catalogo</Titolo>
+    </div>
+
+    <!-- Occhiello e Titolo restano sempre statici (non cambiano mai con i
+         filtri): solo da qui in giu' CatalogApp sostituisce. Il campo di
+         ricerca vive dentro #cat-static insieme alla griglia, non fuori,
+         perche' deve poter tornare interattivo quando l'isola prende il
+         controllo — margin-top/bottom espliciti al posto del gap del grid
+         del prototipo (che qui non puo' comprendere Occhiello/Titolo)
+         riproducono lo stesso ritmo verticale: sp-4 sopra, sp-8 sotto. -->
+    <div id="cat-static">
+      <div style="max-width:640px;margin-top:var(--sp-4);margin-bottom:var(--sp-8)">
+        <!-- Fallback senza JS: un GET puro su /catalogo. Siccome l'HTML e'
+             uno solo per l'intera rotta, la ricerca non filtra nulla senza
+             idratazione — ricarica la stessa pagina di default, col termine
+             gia' nell'URL per quando CatalogApp prendera' il controllo. -->
+        <form method="get" action="/catalogo">
+          <SearchField size="md" name="q" placeholder="Cerca per nome, codice, espansione, condizione…" />
+        </form>
+      </div>
+      <div class="cat">
+        <aside class="side">
+          <div style="display:grid;gap:var(--sp-2)">
+            <div style="display:flex;align-items:center;justify-content:space-between;min-height:32px">
+              <span style="font:var(--type-label);font-weight:var(--fw-bold);color:var(--text-strong)">Filtri</span>
+            </div>
+            <Switch checked={false} label="Solo foil" style="margin:var(--sp-2) 0" />
+            <FilterGroup title="Rarità">
+              {
+                Object.entries(RARITY_LABELS).map(([id, label]) => (
+                  <Checkbox checked={false} label={label} count={contaRarita(id)} />
+                ))
+              }
+            </FilterGroup>
+            <FilterGroup title="Espansione">
+              {
+                sets.map((s) => (
+                  <Checkbox checked={false} label={s.name} description={`${s.code} · ${s.year}`} count={contaSet(s.id)} />
+                ))
+              }
+            </FilterGroup>
+            <FilterGroup title="Condizione" defaultOpen={false}>
+              {
+                Object.entries(CONDITION_LABELS).map(([id, label]) => (
+                  <Checkbox checked={false} label={label} count={contaCond(id)} />
+                ))
+              }
+            </FilterGroup>
+            <FilterGroup title="Lingua" defaultOpen={false}>
+              {LANGUAGES.map((l) => <Checkbox checked={false} label={l} count={contaLingua(l)} />)}
+            </FilterGroup>
+          </div>
+        </aside>
+
+        <div style="display:grid;gap:var(--sp-5);min-width:0">
+          <div style="display:flex;align-items:center;gap:var(--sp-3);flex-wrap:wrap">
+            <span style="font:var(--type-code);font-size:var(--fs-body-s);color:var(--text-muted)">{iniziale.total} carte</span>
+            <div style="margin-left:auto;display:flex;align-items:center;gap:var(--sp-3)">
+              <Select size="sm" value="novita" options={ordinamentoOpzioni} />
+              <Tabs variant="pill" items={[{ id: 'griglia', label: 'Griglia' }, { id: 'lista', label: 'Lista' }]} value="griglia" />
+            </div>
+          </div>
+
+          <div class="cards">
+            {
+              iniziale.items.map((c) => (
+                <a href={`/carta/${c.slug}`} data-carta={c.slug} style="text-decoration:none;color:inherit">
+                  <CardTile
+                    name={c.name}
+                    code={cardCode(c, setOf(c.set))}
+                    set={setOf(c.set).name}
+                    rarity={c.rarity}
+                    style="cursor:pointer"
+                  >
+                    {c.nuovo && (
+                      <Badge slot="badge" tone="foil">
+                        Nuovo
+                      </Badge>
+                    )}
+                  </CardTile>
+                </a>
+              ))
+            }
+          </div>
+
+          <div style="display:flex;justify-content:center;padding-top:var(--sp-6)">
+            <Pagination
+              page={1}
+              pages={iniziale.pages}
+              hrefFor={(n: number) => {
+                const s = toSearchParams({ sort: 'novita', page: n }).toString()
+                return s ? `/catalogo?${s}` : '/catalogo'
+              }}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script is:inline>
+      // Evita di mostrare per una frazione di secondo la lista di default
+      // quando l'URL porta gia' dei filtri (un link condiviso, un Indietro
+      // del browser): CatalogApp (client:load) idratera' comunque fra un
+      // istante, ma questo script e' classico e sincrono — corre qui,
+      // subito dopo #cat-static nell'HTML, PRIMA che il browser dipinga —
+      // stesso trucco di chi evita il flash del tema chiaro/scuro. is:inline
+      // perche' deve restare un tag <script> classico: un Astro <script>
+      // normale diventa type="module" e quindi differito a documento
+      // completo, troppo tardi per evitare il flash. Nessuna dipendenza
+      // dall'isola: se location.search e' vuota non tocca nulla.
+      if (location.search) {
+        document.getElementById('cat-static')?.setAttribute('hidden', '')
+      }
+    </script>
+
+    <CatalogApp client:load />
+  </div>
+</Base>
+
