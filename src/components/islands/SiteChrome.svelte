@@ -26,7 +26,8 @@
   // — un modulo server-only che rompe la build se finisce nel bundle client
   // di questa isola.
   import { cardCode } from '~/lib/catalog/labels'
-  import type { CardSet } from '~/lib/catalog/types'
+  import type { Card, CardSet } from '~/lib/catalog/types'
+  import { getCatalog } from '~/stores/catalog'
   import { SITE } from '~/config/site'
 
   // Il set di una carta serve per il codice (es. "ALB 042/198") e per il nome
@@ -67,12 +68,32 @@
     avviso('Messaggio copiato', 'Incollalo su Instagram o WhatsApp.')
   }
 
-  const quickSet = $derived($quick ? setOf($quick.set) : null)
-  const quickCodice = $derived($quick && quickSet ? cardCode($quick, quickSet) : '')
+  // $quick e' lo slug (Task 19, retrofit del quick-view: le tessere che lo
+  // aprono sono HTML statico con data-carta="<slug>", non isole che tengono
+  // gia' la Card in memoria). Qui si risolve lo slug in Card interrogando
+  // /api/catalog.json — una sola volta per pagina, vedi ~/stores/catalog —
+  // e solo la prima volta che serve un quick-view, non al mount dell'isola.
+  let quickCard = $state<Card | null>(null)
+  $effect(() => {
+    const slug = $quick
+    if (!slug) {
+      quickCard = null
+      return
+    }
+    getCatalog().then((data) => {
+      // Guardia contro risposte in ordine sparso: se nel frattempo lo slug
+      // richiesto e' cambiato (o la quick-view e' stata chiusa), questa
+      // risoluzione e' superata e non deve sovrascrivere lo stato corrente.
+      if ($quick === slug) quickCard = data.cards.find((c) => c.slug === slug) ?? null
+    })
+  })
+
+  const quickSet = $derived(quickCard ? setOf(quickCard.set) : null)
+  const quickCodice = $derived(quickCard && quickSet ? cardCode(quickCard, quickSet) : '')
 
   // guscio.jsx riga 127: chiude la quick-view e apre "Chiedi" sulla stessa carta.
   function chiediDaQuick() {
-    if ($quick) apriChiedi($quick)
+    if (quickCard) apriChiedi(quickCard)
     chiudiQuick()
   }
 
@@ -117,10 +138,10 @@
 {/snippet}
 
 {#snippet anteprimaQuick()}
-  {#if $quick}
+  {#if quickCard}
     <div style="display:flex;gap:var(--sp-5);flex-wrap:{mobile ? 'wrap' : 'nowrap'}">
       <div style="width:{mobile ? 120 : 150}px;flex:none">
-        <CardArt rarity={$quick.rarity} code={quickCodice} />
+        <CardArt rarity={quickCard.rarity} code={quickCodice} />
       </div>
       <dl class="ds-speclist" style="flex:1;min-width:180px">
         <div class="ds-speclist__row">
@@ -133,19 +154,19 @@
         </div>
         <div class="ds-speclist__row ds-speclist__row--rule">
           <dt class="ds-speclist__dt">Rarità</dt>
-          <dd class="ds-speclist__dd"><RarityBadge rarity={$quick.rarity} size="sm" /></dd>
+          <dd class="ds-speclist__dd"><RarityBadge rarity={quickCard.rarity} size="sm" /></dd>
         </div>
         <div class="ds-speclist__row ds-speclist__row--rule">
           <dt class="ds-speclist__dt">Condizione</dt>
-          <dd class="ds-speclist__dd"><ConditionBadge condition={$quick.cond} compact /></dd>
+          <dd class="ds-speclist__dd"><ConditionBadge condition={quickCard.cond} compact /></dd>
         </div>
         <div class="ds-speclist__row ds-speclist__row--rule">
           <dt class="ds-speclist__dt">Lingua</dt>
-          <dd class="ds-speclist__dd">{$quick.lang}</dd>
+          <dd class="ds-speclist__dd">{quickCard.lang}</dd>
         </div>
         <div class="ds-speclist__row ds-speclist__row--rule">
           <dt class="ds-speclist__dt">In vetrina</dt>
-          <dd class="ds-speclist__dd">vetrina {$quick.vetrina}</dd>
+          <dd class="ds-speclist__dd">vetrina {quickCard.vetrina}</dd>
         </div>
       </dl>
     </div>
@@ -154,7 +175,7 @@
 
 {#snippet azioniQuick()}
   <Button variant="secondary" onclick={chiediDaQuick}>Chiedila in negozio</Button>
-  <Button as="a" href={$quick ? `/carta/${$quick.slug}` : '#'}>Vedi la scheda</Button>
+  <Button as="a" href={quickCard ? `/carta/${quickCard.slug}` : '#'}>Vedi la scheda</Button>
 {/snippet}
 
 {#if mobile}
@@ -168,14 +189,14 @@
 {/if}
 
 {#if mobile}
-  <Sheet open={$quick !== null} title={$quick?.name ?? ''} onclose={chiudiQuick}>
+  <Sheet open={quickCard !== null} title={quickCard?.name ?? ''} onclose={chiudiQuick}>
     {#snippet children()}{@render anteprimaQuick()}{/snippet}
     {#snippet footer()}{@render azioniQuick()}{/snippet}
   </Sheet>
 {:else}
   <Dialog
-    open={$quick !== null}
-    title={$quick?.name ?? ''}
+    open={quickCard !== null}
+    title={quickCard?.name ?? ''}
     eyebrow={quickSet?.name ?? ''}
     onclose={chiudiQuick}
     width={620}

@@ -9,7 +9,7 @@
 //
 // Solo stato, niente DOM: questo file non tocca mai window/document.
 import { writable } from 'svelte/store'
-import type { Card } from '~/lib/catalog'
+import type { Card } from '~/lib/catalog/types'
 
 export interface Toast {
   title: string
@@ -21,7 +21,13 @@ export interface Toast {
 // precisa), un oggetto Card = richiesta nata da una carta specifica, null =
 // dialog chiuso. Rispecchia lo stato `chiedi` di design-reference/guscio.jsx.
 export const chiedi = writable<Card | true | null>(null)
-export const quick = writable<Card | null>(null)
+
+// La quick-view e' per slug, non per Card intera: dal Task 19 la tessera che
+// la apre e' HTML statico con un attributo data-carta="<slug>" — stesso
+// schema di data-chiedi-trigger — non un'isola che tiene gia' l'oggetto Card
+// in memoria. SiteChrome risolve lo slug in Card interrogando
+// /api/catalog.json tramite ~/stores/catalog, la prima volta che serve.
+export const quick = writable<string | null>(null)
 export const toast = writable<Toast | null>(null)
 
 /** Apre il dialog "Chiedi una carta". Senza argomento (o `true`) e' la
@@ -34,9 +40,9 @@ export function chiudiChiedi(): void {
   chiedi.set(null)
 }
 
-/** Apre l'anteprima rapida di una carta. */
-export function apriQuick(card: Card): void {
-  quick.set(card)
+/** Apre l'anteprima rapida della carta identificata da questo slug. */
+export function apriQuick(slug: string): void {
+  quick.set(slug)
 }
 
 export function chiudiQuick(): void {

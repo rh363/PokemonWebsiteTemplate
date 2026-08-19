@@ -89,7 +89,7 @@ const voci = NAV.map((v) => (v.id === 'catalogo' ? { ...v, count: catalogCount }
 </header>
 
 <script>
-  import { apriChiedi } from '~/stores/chrome'
+  import { apriChiedi, apriQuick } from '~/stores/chrome'
 
   const el = document.querySelector<HTMLElement>('.ds-nav')
   const doc = document.scrollingElement || document.documentElement
@@ -114,6 +114,21 @@ const voci = NAV.map((v) => (v.id === 'catalogo' ? { ...v, count: catalogCount }
       e.preventDefault()
       apriChiedi(true)
       btn.closest('details')?.removeAttribute('open')
+    })
+  })
+
+  // Quick-view (Task 19, retrofit del seam): ogni tessera statica porta
+  // data-carta="<slug>", stesso schema esatto di data-chiedi-trigger sopra —
+  // il click scrive lo slug nello store condiviso, SiteChrome lo risolve in
+  // Card interrogando /api/catalog.json la prima volta che serve (vedi
+  // ~/stores/catalog). Un delegato unico qui, non un listener per tessera,
+  // perche' le tessere sono HTML statico (CardTile, CardArt) senza isola
+  // propria: nessun client:* le idrata, quindi nessun onclick Svelte si
+  // attaccherebbe da solo.
+  document.querySelectorAll<HTMLElement>('[data-carta]').forEach((el) => {
+    el.addEventListener('click', (e) => {
+      e.preventDefault()
+      apriQuick(el.dataset.carta!)
     })
   })
 
