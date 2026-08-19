@@ -1,0 +1,54 @@
+---
+// NavBar — bundle:1793-1907. L'unico stato del sorgente era `scrolled`
+// (uno useState su scroll > 8px): qui e' un attributo data-scrolled
+// sincronizzato da dieci righe di script inline, non un'isola Svelte. Cosi'
+// la barra resta HTML statico su ogni pagina del sito (nessun client:).
+//
+// count del catalogo: il produttore (questo componente) non conosce il
+// numero reale di carte, lo riceve dalla pagina che lo monta via prop
+// catalogCount e lo inietta solo nella voce 'catalogo'.
+import { SITE } from '~/config/site'
+import { NAV } from '~/config/nav'
+
+interface Props {
+  active: string
+  catalogCount?: number
+}
+const { active, catalogCount } = Astro.props as Props
+const voci = NAV.map((v) => (v.id === 'catalogo' ? { ...v, count: catalogCount } : v))
+---
+
+<header class="ds-nav" data-scrolled="false">
+  <nav class="ds-nav__inner">
+    <a class="ds-nav__brand" href="/">
+      <img src="/assets/logo-mark.svg" alt="" width="32" height="32" />
+      <span class="ds-nav__brandname">{SITE.brand}</span>
+    </a>
+    <div class="ds-nav__links">
+      {
+        voci.map((it) => (
+          <a
+            href={it.href}
+            class="ds-nav__link"
+            data-on={it.id === active}
+            aria-current={it.id === active ? 'page' : undefined}
+          >
+            {it.label}
+            {it.count != null && <span class="ds-nav__count">{it.count}</span>}
+          </a>
+        ))
+      }
+    </div>
+    <div class="ds-nav__right">
+      <slot />
+    </div>
+  </nav>
+</header>
+
+<script>
+  const el = document.querySelector<HTMLElement>('.ds-nav')
+  const doc = document.scrollingElement || document.documentElement
+  const sync = () => el?.setAttribute('data-scrolled', String(doc.scrollTop > 8))
+  addEventListener('scroll', sync, { passive: true })
+  sync()
+</script>

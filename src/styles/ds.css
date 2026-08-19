@@ -432,3 +432,116 @@ details.ds-fg[open] .ds-fg__chev{transform:rotate(0deg)}
 .ds-toast__desc{font:var(--type-label);font-size:var(--fs-caption);
   font-weight:var(--fw-regular);opacity:.8}
 .ds-toast__close{all:unset;cursor:pointer;opacity:.7;display:grid;place-items:center}
+
+/* Tabs — bundle:1993-2050. Due varianti come [data-variant]. Il sorgente non
+   definisce alcun hover (nessun useState, nessun :hover nell'oggetto style):
+   non ne viene aggiunto uno qui, fedele all'assenza (lezione Task 11 — copiare
+   i valori del sorgente, non la sua intenzione). is-selected e' lo stato
+   persistente; essendo l'unico stato scritto (niente hover in conflitto),
+   non serve la variante :hover della regola come per Checkbox/NavBar. */
+.ds-tabs{display:flex}
+.ds-tabs[data-variant="underline"]{gap:var(--sp-5);border-bottom:1px solid var(--border-hairline);
+  background:transparent;padding:0;border-radius:0;width:auto}
+.ds-tabs[data-variant="pill"]{gap:6px;border-bottom:none;background:var(--surface-sunken);
+  padding:4px;border-radius:var(--r-pill);width:fit-content}
+.ds-tabs__tab{all:unset;cursor:pointer;box-sizing:border-box;display:inline-flex;align-items:center;
+  gap:7px;font:var(--type-label);color:var(--text-muted);transition:var(--t-control)}
+.ds-tabs[data-variant="underline"] .ds-tabs__tab{padding:12px 2px;border-radius:0;
+  border-bottom:3px solid transparent;margin-bottom:-1px}
+.ds-tabs[data-variant="pill"] .ds-tabs__tab{padding:8px 16px;border-radius:var(--r-pill)}
+.ds-tabs__tab.is-selected{color:var(--text-strong)}
+.ds-tabs[data-variant="underline"] .ds-tabs__tab.is-selected{border-bottom-color:var(--surface-brand)}
+.ds-tabs[data-variant="pill"] .ds-tabs__tab.is-selected{background:var(--surface-card);box-shadow:var(--sh-1)}
+.ds-tabs__count{font:var(--type-code);color:var(--text-faint)}
+
+/* Pagination — bundle:1908-1992. Il sorgente usava <button onClick> per ogni
+   pagina e per le frecce; nel catalogo diventa navigazione vera con <a href>.
+   Essendo <a> reali, ereditano a{color}/a:hover{color} da tokens/base.css:
+   il sorgente non ha alcun colore diverso in hover, quindi ogni regola qui
+   ridichiara esplicitamente il colore anche in :hover per neutralizzare
+   quella fuga (stessa famiglia di difetto della regola persistente-vs-hover,
+   generalizzata al colore di default degli <a>). is-current e' lo stato
+   persistente e vince anche sopra il proprio :hover. */
+.ds-pagination{display:flex;align-items:center;gap:8px}
+.ds-pagination__ellipsis{font:var(--type-code);color:var(--text-faint);padding:0 2px}
+.ds-pagination__page{all:unset;box-sizing:border-box;cursor:pointer;min-width:34px;height:34px;
+  display:grid;place-items:center;border-radius:var(--r-pill);background:transparent;
+  color:var(--text-body);font:var(--type-label);transition:var(--t-control);text-align:center}
+.ds-pagination__page:hover{color:var(--text-body)}
+.ds-pagination__page.is-current,
+.ds-pagination__page.is-current:hover{background:var(--ink-950);color:var(--text-invert)}
+.ds-pagination__arrow{display:inline-grid;place-items:center;width:32px;height:32px;
+  border-radius:var(--r-pill);background:var(--surface-card);color:var(--text-strong);
+  border:var(--bw-strong) solid var(--ink-950);text-decoration:none;transition:var(--t-control)}
+.ds-pagination__arrow:hover{color:var(--text-strong)}
+@media (hover:hover){
+  .ds-pagination__arrow:not(.is-disabled):hover{background:var(--surface-card);
+    box-shadow:var(--sh-sticker-sm);transform:translateY(-2px)}
+}
+.ds-pagination__arrow:not(.is-disabled):active{box-shadow:none;transform:translate(2px,2px)}
+.ds-pagination__arrow.is-disabled{opacity:.4;cursor:not-allowed}
+
+/* Breadcrumb — bundle:1737-1792. Il sorgente aveva gia' aria-label="Percorso"
+   e aria-current="page" sull'ultima voce: nessuna lacuna da colmare qui,
+   a differenza di Dialog. Cambia solo onNavigate/preventDefault, sostituito
+   da <a href> reali — stessa fuga di colore in hover di Pagination, stessa
+   correzione. */
+.ds-breadcrumb{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.ds-breadcrumb__current{font:var(--type-label);font-size:var(--fs-body-s);color:var(--text-strong)}
+.ds-breadcrumb__link{font:var(--type-label);font-size:var(--fs-body-s);font-weight:var(--fw-medium);
+  color:var(--text-muted);text-decoration:none}
+.ds-breadcrumb__link:hover{color:var(--text-muted)}
+
+/* NavBar — bundle:1793-1907. componente Astro (src/components/NavBar.astro),
+   non Svelte: l'unico stato del sorgente era scrolled (scroll>8px), sostituito
+   da data-scrolled sincronizzato da uno script inline di dieci righe — vedi
+   NavBar.astro. Valori dello sfondo/bordo a scrolled=true verificati contro
+   bundle:1817-1823. data-on e' lo stato persistente (voce corrente): vince
+   anche sopra il proprio :hover, e sopra la fuga di colore di a:hover
+   (stessa correzione di Pagination/Breadcrumb, perche' i link sono <a> reali). */
+.ds-nav{position:sticky;top:0;z-index:50;background:var(--surface-page);backdrop-filter:none;
+  border-bottom:1px solid transparent;
+  transition:background-color var(--dur-base) var(--ease-out),border-color var(--dur-base) var(--ease-out)}
+.ds-nav[data-scrolled="true"]{background:var(--glass-bg);backdrop-filter:var(--glass-blur);
+  border-bottom:1px solid var(--border-subtle)}
+.ds-nav__inner{max-width:var(--page-max);margin:0 auto;padding:14px var(--gutter);
+  display:flex;align-items:center;gap:var(--sp-6)}
+.ds-nav__brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+.ds-nav__brand img{display:block}
+.ds-nav__brandname{font:var(--fw-black) var(--fs-title-s)/1 var(--font-display);
+  letter-spacing:-0.04em;color:var(--text-strong)}
+.ds-nav__links{display:flex;align-items:center;gap:2px;margin-left:var(--sp-4)}
+.ds-nav__link{position:relative;padding:8px 14px;border-radius:var(--r-pill);text-decoration:none;
+  font:var(--type-label);color:var(--text-muted);background:transparent;transition:var(--t-control)}
+.ds-nav__link:hover{color:var(--text-muted)}
+.ds-nav__link[data-on="true"],
+.ds-nav__link[data-on="true"]:hover{color:var(--text-strong);background:var(--surface-brand-soft)}
+.ds-nav__count{margin-left:6px;font:var(--type-code);color:var(--text-faint)}
+.ds-nav__right{margin-left:auto;display:flex;align-items:center;gap:var(--sp-3)}
+
+/* Footer — design-reference/guscio.jsx, funzione Footer (righe 44-76).
+   Componente Astro (src/components/Footer.astro). Le colonne usano .wrap.foot,
+   la cui griglia e' gia' in layout.css. Stessa correzione anti-fuga sui link
+   reali di Sito/Scrivici. */
+.ds-foot{background:var(--surface-invert);color:var(--text-invert-muted);margin-top:var(--sp-16)}
+.ds-foot__top{padding-top:var(--sp-12);padding-bottom:var(--sp-12)}
+.ds-foot__col{display:grid;gap:var(--sp-3);align-content:start}
+.ds-foot__brand{display:flex;align-items:center;gap:10px}
+.ds-foot__brandname{font:var(--fw-black) var(--fs-title-s)/1 var(--font-display);
+  letter-spacing:-0.04em;color:var(--text-invert)}
+.ds-foot__desc{font:var(--type-body);font-size:var(--fs-body-s);max-width:320px}
+.ds-foot__label{font:var(--type-eyebrow);letter-spacing:var(--ls-eyebrow);text-transform:uppercase;
+  color:var(--ink-400)}
+.ds-foot__link{font:var(--type-body);font-size:var(--fs-body-s);color:var(--text-invert-muted);
+  text-decoration:none}
+.ds-foot__link:hover{color:var(--text-invert-muted)}
+.ds-foot__hours{font:var(--type-body);font-size:var(--fs-body-s)}
+.ds-foot__hours-value{font:var(--type-code);color:var(--ink-400)}
+.ds-foot__social{display:flex;align-items:center;gap:8px;font:var(--type-body);
+  font-size:var(--fs-body-s);color:var(--text-invert-muted);text-decoration:none}
+.ds-foot__social:hover{color:var(--text-invert-muted)}
+.ds-foot__bottom{border-top:1px solid var(--border-invert)}
+.ds-foot__bottom-inner{padding-top:var(--sp-4);padding-bottom:var(--sp-4);display:flex;
+  justify-content:space-between;gap:var(--sp-4);flex-wrap:wrap}
+.ds-foot__copy{font:var(--type-code);color:var(--ink-500)}
+.ds-foot__rights{font:var(--type-code);color:var(--ink-500)}

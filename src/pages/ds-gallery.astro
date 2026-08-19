@@ -25,6 +25,23 @@ import Tooltip from '~/components/ds/Tooltip.svelte'
 import Input from '~/components/ds/Input.svelte'
 import DsForms from '~/components/islands/DsForms.svelte'
 import DsOverlay from '~/components/islands/DsOverlay.svelte'
+import Tabs from '~/components/ds/Tabs.svelte'
+import Pagination from '~/components/ds/Pagination.svelte'
+import Breadcrumb from '~/components/ds/Breadcrumb.svelte'
+import NavBar from '~/components/NavBar.astro'
+import Footer from '~/components/Footer.astro'
+
+const TABS_ITEMS = [
+  { id: 'tutte', label: 'Tutte', count: 128 },
+  { id: 'foil', label: 'Foil', count: 12 },
+  { id: 'vetrina', label: 'In vetrina', count: 34 },
+]
+
+const BREADCRUMB_ITEMS = [
+  { label: 'Catalogo', href: '/catalogo' },
+  { label: 'Alba Cromatica', href: '/catalogo?set=alba-cromatica' },
+  { label: 'Charizard ex 042/198' },
+]
 
 const RARITA = ['common', 'uncommon', 'rare', 'holo', 'ultra', 'secret'] as const
 const COND = ['mint', 'near-mint', 'excellent', 'good', 'played'] as const
@@ -49,6 +66,12 @@ const TOOLTIP_LATI = ['top', 'bottom', 'left', 'right'] as const
     <title>DS — galleria primitivi</title>
   </head>
   <body>
+    <NavBar active="catalogo" catalogCount={128}>
+      <IconButton icon="search" variant="ghost" label="Cerca" />
+      <Button size="sm">
+        {'Chiedi una carta'}
+      </Button>
+    </NavBar>
     <div class="wrap sez" style="display:grid;gap:var(--sp-8)">
       <h1 style="font:var(--type-hero);letter-spacing:var(--ls-display-xl)">Galleria DS — Task 9-10</h1>
 
@@ -241,6 +264,27 @@ const TOOLTIP_LATI = ['top', 'bottom', 'left', 'right'] as const
         vederlo a piena larghezza).
       </p>
       <DsOverlay client:load />
+
+      <h1 style="font:var(--type-hero);letter-spacing:var(--ls-display-xl)">Task 13 — navigazione</h1>
+
+      <h2>Tabs — underline e pill, due valori selezionati per mostrare lo stato persistente</h2>
+      <div style="display:grid;gap:var(--sp-6)">
+        <Tabs items={TABS_ITEMS} value="tutte" variant="underline" onchange={() => {}} />
+        <Tabs items={TABS_ITEMS} value="foil" variant="underline" onchange={() => {}} />
+        <Tabs items={TABS_ITEMS} value="vetrina" variant="pill" onchange={() => {}} />
+      </div>
+
+      <h2>Pagination — a inizio, in mezzo e a fine intervallo</h2>
+      <div style="display:grid;gap:var(--sp-4)">
+        <Pagination page={1} pages={9} />
+        <Pagination page={5} pages={9} />
+        <Pagination page={9} pages={9} />
+      </div>
+
+      <h2>Breadcrumb</h2>
+      <Breadcrumb items={BREADCRUMB_ITEMS} />
     </div>
+
+    <Footer />
   </body>
 </html>
