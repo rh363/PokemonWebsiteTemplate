@@ -363,3 +363,72 @@
   transform:rotate(-90deg);transition:transform var(--dur-base) var(--ease-snap)}
 details.ds-fg[open] .ds-fg__chev{transform:rotate(0deg)}
 .ds-fg__body{display:grid;gap:2px;margin-top:10px}
+
+/* Dialog — bundle:1030-1130. Il sorgente gestiva solo Escape a mano, senza
+   focus trap ne' ripristino del focus, e usava aria-label invece di
+   collegare il titolo. Qui e' <dialog> nativo con showModal(): focus trap,
+   Escape e scrim inerte arrivano dal browser. Lo scrim (outer wrapper del
+   sorgente: background scrim-modal, backdrop-filter blur 3px, padding sp-6
+   per la distanza dai bordi) diventa ::backdrop; l'inner div del sorgente
+   (width 100%, maxWidth width, overflow auto, background/border/radius/
+   shadow/padding/gap) e' il <dialog> stesso. width:calc(100% - sp-6*2)
+   riproduce la distanza dai bordi che il padding del wrapper dava.
+   display:grid e' su .ds-dialog[open], non su .ds-dialog: l'origine autore
+   batte sempre l'origine user-agent a parita' di normal/normal, quindi un
+   display impostato senza la guardia [open] avrebbe reso il dialog chiuso
+   ugualmente visibile, scavalcando la regola UA dialog:not([open]){display:
+   none} indipendentemente dalla specificita'. */
+.ds-dialog{position:fixed;inset:0;margin:auto;width:calc(100% - var(--sp-6) * 2);
+  max-height:86vh;overflow:auto;box-sizing:border-box;color:inherit;
+  background:var(--surface-card);border:var(--bw-strong) solid var(--ink-950);
+  border-radius:var(--r-xl);box-shadow:var(--sh-3);padding:var(--sp-8);
+  gap:var(--sp-5)}
+.ds-dialog[open]{display:grid}
+.ds-dialog::backdrop{background:var(--scrim-modal);backdrop-filter:blur(3px)}
+.ds-dialog__head{display:flex;align-items:flex-start;gap:var(--sp-4)}
+.ds-dialog__titles{display:grid;gap:6px;flex:1}
+.ds-dialog__eyebrow{font:var(--type-eyebrow);letter-spacing:var(--ls-eyebrow);
+  text-transform:uppercase;color:var(--text-brand)}
+.ds-dialog__title{font:var(--fw-bold) var(--fs-title-m)/var(--lh-title-m) var(--font-display);
+  letter-spacing:var(--ls-title-m)}
+.ds-dialog__body{font:var(--type-body);color:var(--text-body)}
+.ds-dialog__foot{display:flex;gap:var(--sp-3);justify-content:flex-end;flex-wrap:wrap}
+
+/* Sheet — design-reference/pezzi.jsx, funzione Sheet (non sta nel bundle).
+   Stessa logica di Dialog: <dialog> nativo al posto del div hand-rolled,
+   scrim su ::backdrop, aria-labelledby al posto di aria-label. La differenza
+   e' il posizionamento: il sorgente allineava il pannello in basso
+   (align-items:"flex-end" sul wrapper) invece di centrarlo, quindi qui si
+   sovrascrivono inset/margin della UA con bottom:0 pieno-larghezza. L'anima-
+   zione .sheet-in e la keyframe sheetUp restano quelle gia' in layout.css —
+   non ridefinite qui. Stessa guardia [open] di Dialog sul display, per lo
+   stesso motivo (origine autore batte UA a parita' di normal/normal). */
+.ds-sheet{position:fixed;inset:auto 0 0 0;margin:0;width:100%;max-height:86vh;
+  box-sizing:border-box;color:inherit;flex-direction:column;
+  background:var(--surface-card);border:none;
+  border-top:var(--bw-strong) solid var(--ink-950);
+  border-top-left-radius:var(--r-xl);border-top-right-radius:var(--r-xl);
+  box-shadow:var(--sh-3);padding:0}
+.ds-sheet[open]{display:flex}
+.ds-sheet::backdrop{background:var(--scrim-modal);backdrop-filter:blur(3px)}
+.ds-sheet__head{position:relative;display:flex;align-items:center;gap:var(--sp-4);
+  padding:var(--sp-5) var(--sp-5) var(--sp-3)}
+.ds-sheet__handle{position:absolute;top:8px;left:50%;transform:translateX(-50%);
+  width:44px;height:5px;border-radius:var(--r-pill);background:var(--ink-100)}
+.ds-sheet__title{flex:1;font:var(--fw-bold) var(--fs-title-s)/var(--lh-title-s) var(--font-display);
+  color:var(--text-strong)}
+.ds-sheet__body{flex:1;overflow:auto;padding:var(--sp-2) var(--sp-5) var(--sp-6)}
+.ds-sheet__foot{padding:var(--sp-4) var(--sp-5);border-top:1px solid var(--border-hairline);
+  display:flex;gap:var(--sp-3);background:var(--surface-card)}
+
+/* Toast — bundle:1230-1322. La mappa TONES (bg/fg/icon) resta dati: il
+   colore dipende dalla prop tone, passato come --toast-bg/--toast-fg
+   inline, stesso pattern di --btn-bg su Button. */
+.ds-toast{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;
+  background:var(--toast-bg);color:var(--toast-fg);border-radius:var(--r-md);
+  box-shadow:var(--sh-3);min-width:280px;max-width:420px}
+.ds-toast__text{display:grid;gap:3px;flex:1}
+.ds-toast__title{font:var(--type-label)}
+.ds-toast__desc{font:var(--type-label);font-size:var(--fs-caption);
+  font-weight:var(--fw-regular);opacity:.8}
+.ds-toast__close{all:unset;cursor:pointer;opacity:.7;display:grid;place-items:center}

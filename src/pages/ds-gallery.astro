@@ -24,6 +24,7 @@ import Panel from '~/components/ds/Panel.svelte'
 import Tooltip from '~/components/ds/Tooltip.svelte'
 import Input from '~/components/ds/Input.svelte'
 import DsForms from '~/components/islands/DsForms.svelte'
+import DsOverlay from '~/components/islands/DsOverlay.svelte'
 
 const RARITA = ['common', 'uncommon', 'rare', 'holo', 'ultra', 'secret'] as const
 const COND = ['mint', 'near-mint', 'excellent', 'good', 'played'] as const
@@ -229,6 +230,17 @@ const TOOLTIP_LATI = ['top', 'bottom', 'left', 'right'] as const
         filtro, frecce + Invio + Esc nei suggerimenti della ricerca.
       </p>
       <DsForms client:load />
+
+      <h1 style="font:var(--type-hero);letter-spacing:var(--ls-display-xl)">Task 12 — overlay</h1>
+
+      <h2>Dialog, Sheet, Toast — isola con stato</h2>
+      <p style="font:var(--type-body);color:var(--text-muted);max-width:640px">
+        <code>&lt;dialog&gt;</code> nativo: apri il Dialog e prova Tab — il focus non deve uscire verso
+        questa pagina; Escape lo chiude; alla chiusura il focus torna sul bottone "Apri Dialog".
+        Sheet usa la stessa meccanica ma sale dal basso (restringi la finestra sotto 480px per
+        vederlo a piena larghezza).
+      </p>
+      <DsOverlay client:load />
     </div>
   </body>
 </html>
