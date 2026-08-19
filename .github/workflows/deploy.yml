@@ -17,6 +17,13 @@ jobs:
       # rotto non arrivano mai in produzione.
       - run: pnpm check
       - run: pnpm test
+      # test:e2e (Task 25) guarda il sito COSTRUITO (playwright.config.ts fa
+      # esso stesso `pnpm build && pnpm preview`): e' l'unico test che
+      # verifica "/catalogo rende 24 tessere vere a JavaScript disattivato",
+      # la decisione architetturale centrale del branch — prima di questo fix
+      # girava solo in locale, mai in CI.
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm test:e2e
       - run: pnpm build
       - uses: cloudflare/wrangler-action@v3
         with:
