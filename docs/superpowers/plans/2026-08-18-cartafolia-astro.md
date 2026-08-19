@@ -1681,6 +1681,32 @@ Ogni componente segue gli stessi cinque passi. Non vengono ripetuti in ogni task
 4. **Verificare affiancato** contro `http://localhost:4322/index.html`, sia a riposo sia in hover sia in focus da tastiera.
 5. **Commit** a fine task.
 
+### Il trabocchetto degli shorthand CSS
+
+Emerso al Task 9 con un difetto vero e invisibile ai controlli automatici. **Leggerlo prima di dividere una regola in base + modificatore.**
+
+Quando si separa uno stile React in una classe base e una classe modificatore, il modificatore che usa uno **shorthand** (`font`, `border`, `background`, `margin`, `padding`, `grid`, `flex`) **azzera silenziosamente tutte le longhand che quello shorthand copre** — comprese quelle dichiarate solo nella regola base. A parità di specificità vince la regola dichiarata dopo.
+
+Il caso reale: `SpecList` nel sorgente fa
+
+```js
+font:     it.mono ? "var(--type-code)"  : "var(--type-body)",
+fontSize: it.mono ? "var(--fs-body-s)"  : "var(--fs-body-s)",   // lo STESSO valore nei due rami
+```
+
+In React `fontSize` viene dopo `font` nello stesso oggetto, quindi vince sempre: il testo è 14px in entrambi i casi. Diviso in CSS diventava
+
+```css
+.ds-speclist__dd       { font:var(--type-body); font-size:var(--fs-body-s) }
+.ds-speclist__dd--mono { font:var(--type-code) }   /* ← reimposta font-size a --fs-caption, 12px */
+```
+
+e ogni riga mono rendeva a 12px invece di 14.
+
+**Regola:** un valore che il sorgente mantiene costante fra i rami di un ternario va **ridichiarato esplicitamente in ogni regola modificatore** che usa uno shorthand. In alternativa, e più sicuro: nel modificatore usare le longhand (`font-family`, `font-weight`, `line-height`) invece dello shorthand.
+
+**Come accorgersene:** dopo aver diviso, chiedersi per ogni shorthand del modificatore quali longhand implica, e se la regola base ne dichiarava qualcuna.
+
 ### Convenzioni comuni a tutti i componenti
 
 - Props tipizzate con `$props()` e destrutturazione con valori di default identici a quelli React.
@@ -1711,7 +1737,10 @@ Sorgente: `design-reference/_ds/_ds_bundle.js:11-90`. È il modello per Badge, R
     style = '',
   } = $props()
 
-  const caption = $derived(code == null ? '' : String(code).trim())
+  // Fedele a bundle:24 — un code non-stringa e falsy (0, NaN) rende stringa vuota.
+  const caption = $derived(
+    typeof code === 'string' ? code.trim() : code ? String(code) : '',
+  )
   const isFoil = $derived(
     foil || rarity === 'holo' || rarity === 'ultra' || rarity === 'secret',
   )
