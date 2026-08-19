@@ -8,9 +8,15 @@ import EmptyState from '~/components/ds/EmptyState.svelte'
 import Button from '~/components/ds/Button.svelte'
 import Icon from '~/components/ds/Icon.svelte'
 import { SITE } from '~/config/site'
+import { getAllCards } from '~/lib/catalog'
+
+// Fix finale, voce "anche fix" della review: senza catalogCount la 404 era
+// l'unica pagina la cui NavBar non mostrava il numero di carte accanto alla
+// voce "Catalogo" — stesso pattern gia' usato da chi-siamo.astro/negozio.astro.
+const cards = await getAllCards()
 ---
 
-<Base title={`Pagina non trovata — ${SITE.nome}`} active="">
+<Base title={`Pagina non trovata — ${SITE.nome}`} active="" catalogCount={cards.length}>
   <div class="wrap" style="padding-top:var(--sp-16);padding-bottom:var(--sp-16)">
     <EmptyState
       title="Questa carta non è in vetrina"
