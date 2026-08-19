@@ -83,3 +83,136 @@
 .ds-emptystate__title{font:var(--fw-bold) var(--fs-title-s)/var(--lh-title-s) var(--font-display);
   color:var(--text-strong)}
 .ds-emptystate__desc{font:var(--type-body);font-size:var(--fs-body-s);color:var(--text-muted)}
+
+/* Button — bundle:378-498. hover/press erano useState, qui sono :hover/:active. */
+.ds-btn{display:inline-flex;align-items:center;justify-content:center;
+  font:var(--type-label);font-weight:var(--fw-bold);letter-spacing:-.01em;
+  text-decoration:none;white-space:nowrap;border-radius:var(--r-control);cursor:pointer;
+  transition:var(--t-control);
+  background:var(--btn-bg);color:var(--btn-fg);border:var(--btn-bd);box-shadow:var(--btn-sh)}
+
+.ds-btn[data-size="sm"]{padding:8px 16px;font-size:var(--fs-body-s);gap:6px;min-height:36px}
+.ds-btn[data-size="md"]{padding:12px 22px;font-size:var(--fs-body-m);gap:8px;min-height:46px}
+.ds-btn[data-size="lg"]{padding:16px 30px;font-size:var(--fs-body-l);gap:10px;min-height:56px}
+
+.ds-btn[data-variant="primary"]{--btn-bg:var(--surface-brand);--btn-fg:var(--text-invert);
+  --btn-bd:var(--bw-strong) solid var(--ink-950);--btn-sh:var(--sh-sticker-sm);
+  --btn-bg-hover:var(--surface-brand-hover)}
+.ds-btn[data-variant="secondary"]{--btn-bg:var(--surface-card);--btn-fg:var(--text-strong);
+  --btn-bd:var(--bw-strong) solid var(--ink-950);--btn-sh:var(--sh-sticker-sm);
+  --btn-bg-hover:var(--paper-100)}
+.ds-btn[data-variant="ghost"]{--btn-bg:transparent;--btn-fg:var(--text-strong);
+  --btn-bd:var(--bw-strong) solid transparent;--btn-sh:none;--btn-bg-hover:var(--ink-50)}
+.ds-btn[data-variant="foil"]{--btn-bg:var(--foil);--btn-fg:var(--ink-950);
+  --btn-bd:var(--bw-strong) solid var(--ink-950);--btn-sh:var(--sh-sticker-sm);
+  --btn-bg-hover:var(--foil)}
+.ds-btn[data-variant="invert"]{--btn-bg:var(--surface-invert);--btn-fg:var(--text-invert);
+  --btn-bd:var(--bw-strong) solid var(--ink-950);--btn-sh:none;--btn-bg-hover:var(--ink-800)}
+
+@media (hover:hover){
+  .ds-btn:not(:disabled):hover{background:var(--btn-bg-hover);
+    box-shadow:var(--sh-sticker);transform:translateY(-2px)}
+}
+.ds-btn:not(:disabled):active{box-shadow:none;transform:translate(2px,2px)}
+.ds-btn:disabled,.ds-btn[aria-disabled="true"]{opacity:.4;cursor:not-allowed;
+  box-shadow:none;transform:none}
+.ds-btn--full{width:100%}
+
+/* IconButton — bundle:674-754. Stessa struttura di Button ma quadrato, sempre
+   <button>. shadow di base e' sempre "none" nel sorgente (varia solo in hover);
+   variant="ghost" non prende mai ombra, nemmeno in hover. active (aria-pressed)
+   e' persistente e vince su hover/base, ma non tocca shadow/transform. */
+.ds-iconbtn{display:inline-grid;place-items:center;border-radius:var(--r-pill);
+  cursor:pointer;transition:var(--t-control);
+  background:var(--icbtn-bg);color:var(--icbtn-fg);border:var(--icbtn-bd);box-shadow:none}
+
+.ds-iconbtn[data-size="sm"]{width:32px;height:32px}
+.ds-iconbtn[data-size="md"]{width:40px;height:40px}
+.ds-iconbtn[data-size="lg"]{width:48px;height:48px}
+
+.ds-iconbtn[data-variant="secondary"]{--icbtn-bg:var(--surface-card);--icbtn-fg:var(--text-strong);
+  --icbtn-bd:var(--bw-strong) solid var(--ink-950);
+  --icbtn-bg-hover:var(--surface-card);--icbtn-sh-hover:var(--sh-sticker-sm)}
+.ds-iconbtn[data-variant="ghost"]{--icbtn-bg:transparent;--icbtn-fg:var(--text-muted);
+  --icbtn-bd:var(--bw-strong) solid transparent;
+  --icbtn-bg-hover:var(--ink-50);--icbtn-sh-hover:none}
+.ds-iconbtn[data-variant="brand"]{--icbtn-bg:var(--surface-brand);--icbtn-fg:var(--text-invert);
+  --icbtn-bd:var(--bw-strong) solid var(--ink-950);
+  --icbtn-bg-hover:var(--surface-brand);--icbtn-sh-hover:var(--sh-sticker-sm)}
+.ds-iconbtn[data-variant="invert"]{--icbtn-bg:var(--ink-800);--icbtn-fg:var(--text-invert);
+  --icbtn-bd:var(--bw-strong) solid transparent;
+  --icbtn-bg-hover:var(--ink-800);--icbtn-sh-hover:var(--sh-sticker-sm)}
+
+@media (hover:hover){
+  .ds-iconbtn:not(:disabled):hover{background:var(--icbtn-bg-hover);
+    box-shadow:var(--icbtn-sh-hover);transform:translateY(-2px)}
+  .ds-iconbtn[aria-pressed="true"]:not(:disabled):hover{background:var(--surface-brand-soft)}
+}
+.ds-iconbtn:not(:disabled):active{box-shadow:none;transform:translate(2px,2px)}
+.ds-iconbtn:disabled{opacity:.4;cursor:not-allowed;box-shadow:none;transform:none}
+.ds-iconbtn[aria-pressed="true"]{background:var(--surface-brand-soft);color:var(--text-brand)}
+
+/* Chip — bundle:610-673. Nessuno stato press/shadow nel sorgente: solo hover
+   (bg + lift 1px), e solo se interactive (onClick o onRemove presenti). Il
+   bottone di rimozione e' annidato con onclick che ferma la propagazione
+   (bundle:651), altrimenti scatta anche il click del chip. */
+.ds-chip{display:inline-flex;align-items:center;gap:7px;padding:7px 14px;min-height:36px;
+  background:var(--surface-card);color:var(--text-body);
+  border:var(--bw-hairline) solid var(--border-subtle);border-radius:var(--r-pill);
+  font:var(--type-label);cursor:default;transition:var(--t-control)}
+.ds-chip--interactive{cursor:pointer}
+.ds-chip--selected{background:var(--ink-950);color:var(--text-invert);border-color:var(--ink-950)}
+.ds-chip:disabled{cursor:not-allowed;opacity:.45}
+
+@media (hover:hover){
+  .ds-chip--interactive:not(:disabled):hover{background:var(--paper-100);transform:translateY(-1px)}
+  .ds-chip--interactive.ds-chip--selected:not(:disabled):hover{background:var(--ink-950)}
+}
+.ds-chip__count{font:var(--type-code);opacity:.6}
+.ds-chip__remove{display:inline-grid;place-items:center;margin-right:-4px;opacity:.7}
+
+/* Panel — bundle:902-965. Cinque SKINS come custom property, sul modello di
+   Button. hoverLift diventa .ds-panel--lift: solo quella classe attiva
+   :hover, esattamente come nel sorgente solo hoverLift attacca i listener.
+   sticker/foil hanno l'ombra hover piena 6px anziche' var(--sh-3). */
+.ds-panel{border-radius:var(--r-card);transition:var(--t-card);
+  background:var(--panel-bg);color:var(--panel-fg);border:var(--panel-bd);box-shadow:var(--panel-sh)}
+
+.ds-panel[data-variant="card"]{--panel-bg:var(--surface-card);--panel-fg:var(--text-body);
+  --panel-bd:var(--bw-hairline) solid var(--border-hairline);--panel-sh:var(--sh-1)}
+.ds-panel[data-variant="sunken"]{--panel-bg:var(--surface-sunken);--panel-fg:var(--text-body);
+  --panel-bd:var(--bw-hairline) solid var(--border-hairline);--panel-sh:none}
+.ds-panel[data-variant="sticker"]{--panel-bg:var(--surface-card);--panel-fg:var(--text-body);
+  --panel-bd:var(--bw-strong) solid var(--ink-950);--panel-sh:var(--sh-sticker)}
+.ds-panel[data-variant="invert"]{--panel-bg:var(--surface-invert);--panel-fg:var(--text-invert);
+  --panel-bd:var(--bw-hairline) solid var(--border-invert);--panel-sh:none}
+.ds-panel[data-variant="foil"]{--panel-bg:var(--foil);--panel-fg:var(--ink-950);
+  --panel-bd:var(--bw-strong) solid var(--ink-950);--panel-sh:var(--sh-sticker)}
+
+@media (hover:hover){
+  .ds-panel--lift:hover{transform:var(--lift-hover);box-shadow:var(--sh-3)}
+  .ds-panel--lift[data-variant="sticker"]:hover,
+  .ds-panel--lift[data-variant="foil"]:hover{box-shadow:6px 6px 0 var(--ink-950)}
+}
+
+/* Tooltip — bundle:966-1029. open era useState su mouse *e* focus: qui sono
+   necessari sia :hover sia :focus-within, altrimenti il Tooltip non si apre
+   da tastiera. Le quattro posizioni diventano [data-side]. */
+.ds-tooltip{position:relative;display:inline-flex}
+.ds-tooltip__bubble{position:absolute;z-index:60;pointer-events:none;opacity:0;
+  background:var(--ink-950);color:var(--text-invert);padding:6px 10px;
+  border-radius:var(--r-xs);font:var(--type-label);font-size:var(--fs-caption);
+  white-space:nowrap;box-shadow:var(--sh-2);
+  transition:opacity var(--dur-fast) var(--ease-out),transform var(--dur-fast) var(--ease-snap)}
+.ds-tooltip__bubble[data-side="top"]{bottom:calc(100% + 8px);left:50%;transform:translateX(-50%) translateY(4px)}
+.ds-tooltip__bubble[data-side="bottom"]{top:calc(100% + 8px);left:50%;transform:translateX(-50%) translateY(-4px)}
+.ds-tooltip__bubble[data-side="left"]{right:calc(100% + 8px);top:50%;transform:translateY(-50%)}
+.ds-tooltip__bubble[data-side="right"]{left:calc(100% + 8px);top:50%;transform:translateY(-50%)}
+.ds-tooltip:hover .ds-tooltip__bubble[data-side="top"],
+.ds-tooltip:focus-within .ds-tooltip__bubble[data-side="top"]{opacity:1;transform:translateX(-50%) translateY(0)}
+.ds-tooltip:hover .ds-tooltip__bubble[data-side="bottom"],
+.ds-tooltip:focus-within .ds-tooltip__bubble[data-side="bottom"]{opacity:1;transform:translateX(-50%) translateY(0)}
+.ds-tooltip:hover .ds-tooltip__bubble[data-side="left"],
+.ds-tooltip:focus-within .ds-tooltip__bubble[data-side="left"],
+.ds-tooltip:hover .ds-tooltip__bubble[data-side="right"],
+.ds-tooltip:focus-within .ds-tooltip__bubble[data-side="right"]{opacity:1}

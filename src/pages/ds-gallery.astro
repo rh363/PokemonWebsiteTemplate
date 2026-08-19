@@ -17,6 +17,11 @@ import SpecList from '~/components/ds/SpecList.svelte'
 import Skeleton from '~/components/ds/Skeleton.svelte'
 import EmptyState from '~/components/ds/EmptyState.svelte'
 import Icon from '~/components/ds/Icon.svelte'
+import Button from '~/components/ds/Button.svelte'
+import IconButton from '~/components/ds/IconButton.svelte'
+import Chip from '~/components/ds/Chip.svelte'
+import Panel from '~/components/ds/Panel.svelte'
+import Tooltip from '~/components/ds/Tooltip.svelte'
 
 const RARITA = ['common', 'uncommon', 'rare', 'holo', 'ultra', 'secret'] as const
 const COND = ['mint', 'near-mint', 'excellent', 'good', 'played'] as const
@@ -27,6 +32,12 @@ const SPEC_ITEMS = [
   { label: 'Numero', value: '042/198', mono: true },
   { label: 'Lingua', value: 'Italiano' },
 ]
+
+const BTN_VARIANTI = ['primary', 'secondary', 'ghost', 'foil', 'invert'] as const
+const BTN_TAGLIE = ['sm', 'md', 'lg'] as const
+const ICONBTN_VARIANTI = ['secondary', 'ghost', 'brand', 'invert'] as const
+const PANEL_VARIANTI = ['card', 'sunken', 'sticker', 'invert', 'foil'] as const
+const TOOLTIP_LATI = ['top', 'bottom', 'left', 'right'] as const
 ---
 
 <html lang="it">
@@ -36,7 +47,7 @@ const SPEC_ITEMS = [
   </head>
   <body>
     <div class="wrap sez" style="display:grid;gap:var(--sp-8)">
-      <h1 style="font:var(--type-hero);letter-spacing:var(--ls-display-xl)">Galleria DS — Task 9</h1>
+      <h1 style="font:var(--type-hero);letter-spacing:var(--ls-display-xl)">Galleria DS — Task 9-10</h1>
 
       <h2>CardArt — una per rarità</h2>
       <div class="cards">
@@ -98,6 +109,100 @@ const SPEC_ITEMS = [
       <EmptyState title="Catalogo vuoto" description="Aggiungi carte per iniziare.">
         <Badge slot="action" tone="brand">Aggiungi carta</Badge>
       </EmptyState>
+
+      <h1 style="font:var(--type-hero);letter-spacing:var(--ls-display-xl)">Task 10 — controlli</h1>
+
+      <h2>Button — 5 varianti × 3 taglie</h2>
+      {
+        BTN_VARIANTI.map((v) => (
+          <div style="display:flex;gap:var(--sp-3);flex-wrap:wrap;align-items:center;margin-bottom:8px">
+            {BTN_TAGLIE.map((s) => (
+              <Button id={`btn-${v}-${s}`} variant={v} size={s}>
+                {v} {s}
+              </Button>
+            ))}
+          </div>
+        ))
+      }
+      <h3>Button — disabled e fullWidth</h3>
+      <div style="display:flex;gap:var(--sp-3);flex-wrap:wrap;align-items:center">
+        <Button variant="primary" disabled>
+          Non disponibile
+        </Button>
+        <Button variant="secondary" href="#link">
+          Link come bottone
+        </Button>
+      </div>
+      <div style="max-width:360px">
+        <Button variant="primary" fullWidth>
+          Larghezza piena
+        </Button>
+      </div>
+
+      <h2>IconButton — 4 varianti × 3 taglie</h2>
+      {
+        ICONBTN_VARIANTI.map((v) => (
+          <div style="display:flex;gap:var(--sp-3);flex-wrap:wrap;align-items:center;margin-bottom:8px">
+            {BTN_TAGLIE.map((s) => (
+              <IconButton id={`iconbtn-${v}-${s}`} variant={v} size={s} icon="heart" label={`${v} ${s}`} />
+            ))}
+          </div>
+        ))
+      }
+      <h3>IconButton — active e disabled</h3>
+      <div style="display:flex;gap:var(--sp-3);flex-wrap:wrap;align-items:center">
+        <IconButton variant="secondary" icon="heart" label="Preferito attivo" active />
+        <IconButton variant="secondary" icon="heart" label="Non disponibile" disabled />
+      </div>
+
+      <h2>Chip — con e senza rimozione</h2>
+      <div style="display:flex;gap:var(--sp-3);flex-wrap:wrap;align-items:center">
+        <Chip onclick={() => {}}>Alba Cromatica</Chip>
+        <Chip onclick={() => {}} selected>
+          Selezionato
+        </Chip>
+        <Chip onclick={() => {}} count={12}>
+          Con contatore
+        </Chip>
+        <Chip onclick={() => {}} onRemove={() => {}}>
+          Rimovibile
+        </Chip>
+        <Chip disabled>Disabilitato</Chip>
+        <Chip>Non interattivo</Chip>
+      </div>
+
+      <h2>Panel — 5 skin, con e senza hoverLift</h2>
+      <div class="g3">
+        {
+          PANEL_VARIANTI.map((v) => (
+            <Panel id={`panel-${v}`} variant={v} hoverLift>
+              <strong>{v}</strong> — hoverLift
+            </Panel>
+          ))
+        }
+      </div>
+      <div class="g3">
+        {
+          PANEL_VARIANTI.map((v) => (
+            <Panel variant={v}>
+              <strong>{v}</strong> — senza hoverLift
+            </Panel>
+          ))
+        }
+      </div>
+
+      <h2>Tooltip — 4 lati</h2>
+      <div style="display:flex;gap:var(--sp-16);flex-wrap:wrap;align-items:center;padding:var(--sp-16) 0">
+        {
+          TOOLTIP_LATI.map((s) => (
+            <Tooltip label={`Lato ${s}`} side={s}>
+              <Button id={s === 'top' ? 'tooltip-top-trigger' : undefined} variant="secondary" size="sm">
+                {s}
+              </Button>
+            </Tooltip>
+          ))
+        }
+      </div>
     </div>
   </body>
 </html>
