@@ -1707,6 +1707,22 @@ e ogni riga mono rendeva a 12px invece di 14.
 
 **Come accorgersene:** dopo aver diviso, chiedersi per ogni shorthand del modificatore quali longhand implica, e se la regola base ne dichiarava qualcuna.
 
+### Stati persistenti contro `:hover` — conflitto di specificità
+
+Emerso al Task 10. Un componente con uno stato **persistente** (`active` su `IconButton`, `selected` su `Chip`, la voce corrente di `Tabs` o di `NavBar`) ha una regola che deve **sopravvivere all'hover**, non essere sostituita da esso.
+
+Se la regola dello stato persistente e quella di `:hover` hanno la stessa specificità, vince quella dichiarata dopo — di solito `:hover`, e lo stato attivo sparisce appena ci passi sopra il mouse. Il prototipo non ha questo problema perché in React lo stile è un unico oggetto calcolato, dove l'ordine delle chiavi decide.
+
+**Regola:** la regola dello stato persistente deve avere specificità **maggiore** di quella di hover, e va scritta anche nella sua variante hover. Per esempio:
+
+```css
+@media (hover:hover){ .ds-iconbtn:hover{ … } }
+.ds-iconbtn.is-active,
+.ds-iconbtn.is-active:hover{ … }   /* vince su entrambi gli stati */
+```
+
+Riguarda i Task 11 (`Checkbox`, `Switch`), 13 (`Tabs`, `NavBar`) e 14 (`CardTile` con `liked`).
+
 ### Convenzioni comuni a tutti i componenti
 
 - Props tipizzate con `$props()` e destrutturazione con valori di default identici a quelli React.
