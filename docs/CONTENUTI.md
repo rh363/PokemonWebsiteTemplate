@@ -14,6 +14,16 @@ pochi minuti. Non serve installare nulla né lanciare comandi, **a meno che**
 tu non voglia vedere l'anteprima in locale prima di pubblicare — in quel
 caso vedi `pnpm dev` nel `README.md`.
 
+**"Fai commit e push" senza installare nulla, sul serio:** si può modificare
+uno di questi tre file interamente dal browser, senza clonare il repository
+né aprire un terminale. Su GitHub, apri il file (es. `src/content/cards.csv`),
+clicca l'icona a forma di matita ("Edit this file") in alto a destra,
+modifica il testo, poi scorri in fondo alla pagina — lì c'è un riquadro
+"Commit changes" già pronto: scrivi una riga che dica cosa hai cambiato e
+clicca "Commit changes" (con "Commit directly to the `main` branch"
+selezionato). Quel click *è* il commit e push di cui sopra: il deploy parte
+da solo, non serve altro.
+
 ## Cambiare nome e indirizzo del negozio
 
 Apri `src/config/site.ts` e modifica questi campi:
@@ -29,6 +39,25 @@ Questi valori compaiono ovunque sul sito: nell'intestazione, nel piè di
 pagina, nella pagina "Il negozio" e nei dati strutturati che Google legge
 per mostrare l'indirizzo nei risultati di ricerca — non vanno cambiati in
 nessun altro file.
+
+### Cambiare i social
+
+Stesso file, campo `social`:
+
+```ts
+social: [
+  { id: 'instagram', icon: 'instagram', label: 'Instagram', valore: '@cartafolia.ceccano', href: '#' },
+  { id: 'tiktok', icon: 'sparkles', label: 'TikTok', valore: '@cartafolia', href: '#' },
+  { id: 'whatsapp', icon: 'message-circle', label: 'WhatsApp', valore: '+39 000 000 0000', href: '#' },
+],
+```
+
+Nel template `href` è ancora `'#'` per tutti e tre: va sostituito col link
+vero (profilo Instagram/TikTok, `https://wa.me/<numero>` per WhatsApp) prima
+di andare online. Questi tre link non sono un dettaglio a sé: sono quelli
+che compongono il dialog "Chiedi una carta" (il bottone che appare su ogni
+pagina), quindi finché restano `'#'` quel dialog rimanda a link che non
+portano da nessuna parte.
 
 ## Cambiare gli orari
 
@@ -109,6 +138,21 @@ Punti che contano:
   (`vetrina`, `ordine`): una cella vuota non vale `0`, fa fermare il build.
 - La colonna `image` può restare vuota: la carta userà il disegno
   segnaposto invece della foto vera (vedi la sezione sotto).
+
+### Cosa fa comparire una carta nei "Nuovi arrivi" della vetrina
+
+**La sezione "Appena entrate in vetrina" della homepage mostra le prime
+dieci righe del file `cards.csv`, nell'ordine in cui compaiono nel file —
+non le carte più recenti per data, e non quelle con `nuovo: true`.**
+`nuovo: true` fa comparire il badge "Nuovo" sulla tessera e fa ordinare la
+carta per prima nel catalogo (colonna `ordine`), ma **da sola non basta** a
+farla apparire in homepage.
+
+Per far comparire una carta nuova in vetrina: **inserisci la riga in cima al
+file** (subito dopo l'intestazione), non in fondo. Una riga aggiunta in
+fondo al file, per quanto recente o marcata `nuovo: true`, non compare nella
+homepage finché non finisce fra le prime dieci — cosa che, aggiunta in
+fondo, non succede mai.
 
 ## Aggiungere la foto di una carta
 
