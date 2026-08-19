@@ -9,6 +9,7 @@ import NavBar from '~/components/NavBar.astro'
 import Footer from '~/components/Footer.astro'
 import SiteChrome from '~/components/islands/SiteChrome.svelte'
 import Icon from '~/components/ds/Icon.svelte'
+import { ClientRouter } from 'astro:transitions'
 
 interface Props {
   title: string
@@ -17,6 +18,28 @@ interface Props {
   catalogCount?: number
 }
 const { title, description = SITE.seo.descrizione, active, catalogCount } = Astro.props as Props
+
+const canonicalUrl = new URL(Astro.url.pathname, Astro.site)
+
+// Dati strutturati del negozio (schema.org Store): per un'attivita' fisica
+// locale valgono piu' di ogni altra ottimizzazione SEO in questo task — sono
+// cio' che fa comparire indirizzo e orari nei risultati di ricerca. Costruiti
+// da SITE (src/config/site.ts), non da valori scritti qui, cosi' restano
+// veri quando il cliente cambia orari o indirizzo.
+const storeJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Store',
+  name: SITE.nome,
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: SITE.via,
+    addressLocality: SITE.citta,
+    postalCode: SITE.cap.split(' ')[0],
+    addressCountry: 'IT',
+  },
+  openingHours: SITE.orari.filter(([, h]) => h !== 'chiuso').map(([g, h]) => `${g} ${h}`),
+  url: Astro.site?.href,
+}
 ---
 
 <!doctype html>
@@ -27,7 +50,18 @@ const { title, description = SITE.seo.descrizione, active, catalogCount } = Astr
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="icon" href="/assets/logo-mark.svg" />
-    <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)} />
+    <link rel="canonical" href={canonicalUrl} />
+
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:locale" content={SITE.seo.locale} />
+    <meta name="twitter:card" content="summary" />
+
+    <script type="application/ld+json" set:html={JSON.stringify(storeJsonLd)} />
+
+    <ClientRouter />
   </head>
   <body>
     <div class="ds-shell">
