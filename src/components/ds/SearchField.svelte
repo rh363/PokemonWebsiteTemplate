@@ -81,10 +81,12 @@
     <input
       class="ds-search__input"
       type="text"
+      role="combobox"
+      aria-expanded={open}
+      aria-controls={`${uid}-list`}
+      aria-activedescendant={activeIndex >= 0 ? `${uid}-opt-${activeIndex}` : undefined}
       {value}
       {placeholder}
-      aria-expanded={open}
-      aria-activedescendant={activeIndex >= 0 ? `${uid}-opt-${activeIndex}` : undefined}
       oninput={handleInput}
       onfocus={handleFocus}
       onblur={handleBlur}

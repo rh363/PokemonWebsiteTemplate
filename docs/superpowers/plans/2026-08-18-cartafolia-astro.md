@@ -21,7 +21,14 @@ Questi vincoli valgono per **ogni** task. Non vengono ripetuti nei singoli task.
 - **Nessun valore hardcoded al posto di un token.** Se il prototipo scrive `var(--sp-4)`, il porting scrive `var(--sp-4)`, non `16px`. Fanno eccezione i valori che il prototipo stesso scrive come numeri nudi (per esempio `gap: 12` in `CardTile`, `padding: "8px 16px"` in `Button`): quelli si copiano così come sono. La regola è **fedeltà letterale alla sorgente**, non normalizzazione.
 - **Lingua dell'interfaccia: italiano.** Tutte le stringhe visibili, gli `aria-label` e i messaggi di errore sono in italiano, copiati alla lettera dal prototipo.
 - **Fonte di verità per il porting:** `design-reference/_ds/_ds_bundle.js` e i file `.jsx` in `design-reference/`. Ogni task che porta un componente cita l'intervallo di righe esatto.
-- **TypeScript strict.** `astro check` deve passare senza errori a ogni commit.
+- **TypeScript strict.** `pnpm check` deve passare senza errori a ogni commit — e deve
+  comprendere **sia** `astro check` **sia** `svelte-check`.
+
+  > Scoperto al Task 11: `astro check` **non controlla i tipi dentro i file `.svelte`**.
+  > Verificato iniettando `const errore: number = "una stringa"` in un componente e
+  > ottenendo «0 errors». Senza `svelte-check`, la garanzia «TypeScript strict» non
+  > copre nessuno dei 26 componenti del design system, cioe' la maggior parte del codice
+  > scritto in questo progetto.
 - **Commit frequenti**, uno per task completato, messaggio in italiano, corpo che spiega il perché.
 - **Nessun segreto nel repository.** `CLOUDFLARE_API_TOKEN` e `CLOUDFLARE_ACCOUNT_ID` vivono solo nei GitHub Secrets.
 - **Alias di import:** `~/` → `src/`. Configurato in `tsconfig.json`.
