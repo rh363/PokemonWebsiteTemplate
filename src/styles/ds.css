@@ -95,6 +95,11 @@
 .ds-btn[data-size="md"]{padding:12px 22px;font-size:var(--fs-body-m);gap:8px;min-height:46px}
 .ds-btn[data-size="lg"]{padding:16px 30px;font-size:var(--fs-body-l);gap:10px;min-height:56px}
 
+/* Fallback: il sorgente fa VARIANTS[variant] || VARIANTS.primary, quindi una
+   variante sconosciuta deve rendere come primary, non senza stile. */
+.ds-btn{--btn-bg:var(--surface-brand);--btn-fg:var(--text-invert);
+  --btn-bd:var(--bw-strong) solid var(--ink-950);--btn-sh:var(--sh-sticker-sm);
+  --btn-bg-hover:var(--surface-brand-hover)}
 .ds-btn[data-variant="primary"]{--btn-bg:var(--surface-brand);--btn-fg:var(--text-invert);
   --btn-bd:var(--bw-strong) solid var(--ink-950);--btn-sh:var(--sh-sticker-sm);
   --btn-bg-hover:var(--surface-brand-hover)}
