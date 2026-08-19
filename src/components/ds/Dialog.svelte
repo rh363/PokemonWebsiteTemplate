@@ -44,7 +44,17 @@
     onclose?.()
   }}
   onclick={(e) => {
-    if (e.target === el) onclose?.()
+    // e.target === el e' vero sia per un click sul backdrop (fuori dal box
+    // del dialog) sia per un click dentro il proprio padding var(--sp-8)
+    // (nessun figlio lo copre): senza distinguerli, chiudere sul primo
+    // chiudeva anche sul secondo. Il prototipo evitava il problema fermando
+    // la propagazione sul pannello interno; qui si confronta invece la
+    // posizione del click col rettangolo del dialog — dentro (anche sul
+    // padding) non chiude, fuori (il vero backdrop) chiude.
+    if (e.target !== el) return
+    const r = el!.getBoundingClientRect()
+    const dentroIlBox = e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom
+    if (!dentroIlBox) onclose?.()
   }}
 >
   <div class="ds-dialog__head">
