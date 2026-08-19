@@ -1,0 +1,103 @@
+---
+// Galleria di verifica per i primitivi del design system (Task 9).
+// Sviluppo soltanto: rimossa alla pulizia finale. Non e' una pagina del sito.
+//
+// Nota: il piano indicava `src/pages/__ds.astro`, ma Astro esclude dal
+// routing qualunque file di pagina il cui nome inizia con underscore (vedi
+// astro/dist/core/routing/create-manifest.js: e' il meccanismo con cui si
+// co-locano file non-pagina dentro src/pages/). Con quel nome la rotta
+// risponderebbe sempre 404, sia in dev che in build. Rinominato in
+// `ds-gallery.astro`, servito su /ds-gallery.
+import '~/styles/global.css'
+import CardArt from '~/components/ds/CardArt.svelte'
+import RarityBadge from '~/components/ds/RarityBadge.svelte'
+import ConditionBadge from '~/components/ds/ConditionBadge.svelte'
+import Badge from '~/components/ds/Badge.svelte'
+import SpecList from '~/components/ds/SpecList.svelte'
+import Skeleton from '~/components/ds/Skeleton.svelte'
+import EmptyState from '~/components/ds/EmptyState.svelte'
+import Icon from '~/components/ds/Icon.svelte'
+
+const RARITA = ['common', 'uncommon', 'rare', 'holo', 'ultra', 'secret'] as const
+const COND = ['mint', 'near-mint', 'excellent', 'good', 'played'] as const
+const TONI = ['neutral', 'brand', 'accent', 'success', 'warning', 'danger', 'foil', 'invert'] as const
+
+const SPEC_ITEMS = [
+  { label: 'Espansione', value: 'Alba Cromatica' },
+  { label: 'Numero', value: '042/198', mono: true },
+  { label: 'Lingua', value: 'Italiano' },
+]
+---
+
+<html lang="it">
+  <head>
+    <meta charset="utf-8" />
+    <title>DS — galleria primitivi</title>
+  </head>
+  <body>
+    <div class="wrap sez" style="display:grid;gap:var(--sp-8)">
+      <h1 style="font:var(--type-hero);letter-spacing:var(--ls-display-xl)">Galleria DS — Task 9</h1>
+
+      <h2>CardArt — una per rarità</h2>
+      <div class="cards">
+        {RARITA.map((r) => <CardArt rarity={r} code="ALB 042/198" />)}
+      </div>
+
+      <h2>RarityBadge — md e sm</h2>
+      <div style="display:flex;gap:var(--sp-3);flex-wrap:wrap">
+        {RARITA.map((r) => <RarityBadge rarity={r} />)}
+      </div>
+      <div style="display:flex;gap:var(--sp-3);flex-wrap:wrap">
+        {RARITA.map((r) => <RarityBadge rarity={r} size="sm" />)}
+      </div>
+      <div style="display:flex;gap:var(--sp-3);flex-wrap:wrap">
+        {RARITA.map((r) => <RarityBadge rarity={r} showLabel={false} />)}
+      </div>
+
+      <h2>ConditionBadge — pieno e compatto</h2>
+      <div style="display:flex;gap:var(--sp-3);flex-wrap:wrap">
+        {COND.map((c) => <ConditionBadge condition={c} />)}
+      </div>
+      <div style="display:flex;gap:var(--sp-3);flex-wrap:wrap">
+        {COND.map((c) => <ConditionBadge condition={c} compact />)}
+      </div>
+
+      <h2>SpecList — piena e compatta</h2>
+      <div class="g2" style="max-width:640px">
+        <SpecList items={SPEC_ITEMS} />
+        <SpecList items={SPEC_ITEMS} dense />
+      </div>
+
+      <h2>Badge — tutti i toni</h2>
+      <div style="display:flex;gap:var(--sp-3);flex-wrap:wrap;align-items:center">
+        {TONI.map((t) => <Badge tone={t}>{t}</Badge>)}
+      </div>
+      <div style="display:flex;gap:var(--sp-3);flex-wrap:wrap;align-items:center">
+        <Badge tone="brand" uppercase={false}>senza maiuscolo</Badge>
+        <Badge tone="success">
+          <Icon slot="icon" name="check" size={12} />
+          con icona
+        </Badge>
+      </div>
+
+      <h2>Skeleton — forme</h2>
+      <div class="cards">
+        <Skeleton shape="card" />
+        <div style="display:grid;gap:8px">
+          <Skeleton shape="title" />
+          <Skeleton count={3} />
+        </div>
+        <Skeleton shape="circle" width={56} height={56} />
+      </div>
+
+      <h2>EmptyState — pieno e compatto, con azione</h2>
+      <div class="g2">
+        <EmptyState title="Nessuna carta trovata" description="Prova a modificare i filtri di ricerca." />
+        <EmptyState title="Nessun risultato" compact />
+      </div>
+      <EmptyState title="Catalogo vuoto" description="Aggiungi carte per iniziare.">
+        <Badge slot="action" tone="brand">Aggiungi carta</Badge>
+      </EmptyState>
+    </div>
+  </body>
+</html>

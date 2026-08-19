@@ -2,3 +2,84 @@
    Popolato dai Task 9-14, un blocco per componente, in aggiunta.
    Nessun task riscrive questo file: ognuno accoda il proprio blocco
    preceduto da un commento che cita la sorgente nel bundle. */
+
+/* CardArt — bundle:11-90 */
+.ds-cardart{position:relative;aspect-ratio:var(--card-aspect);width:100%;overflow:hidden;
+  background:linear-gradient(160deg,var(--ink-100),var(--paper-100));
+  box-shadow:var(--sh-inset-hairline)}
+.ds-cardart.is-foil{background:var(--foil)}
+.ds-cardart__img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.ds-cardart__ph{position:absolute;inset:0;display:grid;place-items:center;container-type:inline-size;
+  background:var(--pattern-dots) 0 0/var(--pattern-dots-size)}
+.ds-cardart.is-foil .ds-cardart__ph{
+  background:radial-gradient(120% 90% at 30% 15%,rgba(255,255,255,.65),transparent 60%)}
+.ds-cardart__code{font:var(--type-code);letter-spacing:var(--ls-eyebrow);text-transform:uppercase;
+  color:var(--text-faint);text-align:center;padding:0 8px;max-width:100%;overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap;font-size:clamp(7px,14cqw,12px);container-type:inline-size}
+.ds-cardart.is-foil .ds-cardart__code{color:rgba(14,11,18,.5)}
+.ds-cardart__sheen{position:absolute;inset:0;background:var(--foil-sheen);mix-blend-mode:screen;
+  pointer-events:none;
+  transition:opacity var(--dur-base) var(--ease-out),transform var(--dur-slow) var(--ease-out)}
+
+/* ConditionBadge — bundle:91-167. La mappa COND (label/short/level/color) e i trattini
+   height/background restano in JS: sono una formula sull'indice, non stile statico. */
+.ds-condbadge{display:inline-flex;align-items:center;gap:8px;padding:5px 10px;
+  border-radius:var(--r-xs);background:var(--surface-sunken);font:var(--type-code);
+  color:var(--text-body);white-space:nowrap}
+.ds-condbadge__bars{display:inline-flex;gap:2px;align-items:flex-end;height:12px}
+.ds-condbadge__bar{width:3px;border-radius:1px}
+
+/* RarityBadge — bundle:168-250. La mappa RARITY (label/color/dots) resta in JS: colore
+   e conteggio pallini dipendono dalla prop rarity, sono dati. size cambia solo layout
+   statico (padding, font-size, diametro pallino) e va in CSS via [data-size]. */
+.ds-raritybadge{display:inline-flex;align-items:center;gap:7px;border-radius:var(--r-pill);
+  background:var(--surface-card);border:var(--bw-hairline) solid;font:var(--type-label);
+  letter-spacing:var(--ls-eyebrow);text-transform:uppercase;white-space:nowrap}
+.ds-raritybadge[data-size="md"]{padding:5px 11px;font-size:var(--fs-caption)}
+.ds-raritybadge[data-size="sm"]{padding:3px 9px;font-size:var(--fs-micro)}
+.ds-raritybadge__dots{display:inline-flex;gap:2px}
+.ds-raritybadge__dot{border-radius:var(--r-pill)}
+.ds-raritybadge[data-size="md"] .ds-raritybadge__dot{width:6px;height:6px}
+.ds-raritybadge[data-size="sm"] .ds-raritybadge__dot{width:5px;height:5px}
+
+/* SpecList — bundle:251-299. Struttura dl/div/dt/dd semantica, invariata. it.mono
+   cambia solo il font della dd. */
+.ds-speclist{display:grid;gap:0;margin:0}
+.ds-speclist__row{display:flex;align-items:baseline;justify-content:space-between;gap:16px;
+  padding:11px 0}
+.ds-speclist__row--dense{padding:7px 0}
+.ds-speclist__row--rule{border-top:1px solid var(--border-hairline)}
+.ds-speclist__dt{font:var(--type-label);font-size:var(--fs-caption);font-weight:var(--fw-semibold);
+  letter-spacing:var(--ls-eyebrow);text-transform:uppercase;color:var(--text-muted)}
+.ds-speclist__dd{margin:0;text-align:right;color:var(--text-strong);font:var(--type-body);
+  font-size:var(--fs-body-s);font-weight:var(--fw-semibold)}
+.ds-speclist__dd--mono{font:var(--type-code);font-weight:var(--fw-medium)}
+
+/* Badge — bundle:300-377. La mappa TONES (neutral/brand/accent/success/warning/danger/
+   foil/invert) resta in JS: bg/fg/bd dipendono dalla prop tone, sono dati. */
+.ds-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border:1px solid;
+  border-radius:var(--r-pill);font-family:var(--font-body);font-size:var(--fs-micro);
+  font-weight:var(--fw-bold);line-height:1.3;white-space:nowrap;letter-spacing:0;
+  text-transform:none}
+.ds-badge--upper{letter-spacing:var(--ls-eyebrow);text-transform:uppercase}
+
+/* Skeleton — bundle:1192-1229. L'animazione di pulsazione era un <style> iniettato nel
+   prototipo, qui e' un @keyframes statico in ds.css. */
+.ds-skeleton{display:grid;gap:8px}
+.ds-skeleton__box{background:linear-gradient(90deg,var(--ink-100) 25%,var(--paper-100) 37%,
+  var(--ink-100) 63%);background-size:400% 100%;animation:cf-shimmer 1.4s var(--ease-in-out) infinite}
+@keyframes cf-shimmer{0%{background-position:100% 0}100%{background-position:0 0}}
+
+/* EmptyState — bundle:1131-1191. compact e' un booleano chiuso: diventa una classe. */
+.ds-emptystate{display:grid;gap:var(--sp-4);justify-items:center;text-align:center;
+  padding:var(--sp-16) var(--sp-8);background:var(--surface-sunken);
+  border:1px dashed var(--border-subtle);border-radius:var(--r-lg)}
+.ds-emptystate--compact{padding:var(--sp-8)}
+.ds-emptystate__icon{display:grid;place-items:center;width:56px;height:56px;
+  border-radius:var(--r-pill);background:var(--surface-card);
+  border:var(--bw-strong) solid var(--ink-950);box-shadow:var(--sh-sticker-sm);
+  color:var(--text-strong)}
+.ds-emptystate__text{display:grid;gap:6px;max-width:420px}
+.ds-emptystate__title{font:var(--fw-bold) var(--fs-title-s)/var(--lh-title-s) var(--font-display);
+  color:var(--text-strong)}
+.ds-emptystate__desc{font:var(--type-body);font-size:var(--fs-body-s);color:var(--text-muted)}
