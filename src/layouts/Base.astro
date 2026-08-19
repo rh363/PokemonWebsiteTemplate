@@ -5,7 +5,6 @@
 // — vedi §6.4 della spec e il commento li' per il perche'.
 import '~/styles/global.css'
 import { SITE } from '~/config/site'
-import { getAllSets } from '~/lib/catalog'
 import NavBar from '~/components/NavBar.astro'
 import Footer from '~/components/Footer.astro'
 import SiteChrome from '~/components/islands/SiteChrome.svelte'
@@ -18,11 +17,6 @@ interface Props {
   catalogCount?: number
 }
 const { title, description = SITE.seo.descrizione, active, catalogCount } = Astro.props as Props
-
-// SiteChrome ha bisogno delle espansioni per calcolare codice e nome
-// dell'espansione nella quick-view e nel messaggio di "Chiedi" (cardCode
-// vuole un CardSet, non solo l'id stringa che porta con se' la Card).
-const sets = await getAllSets()
 ---
 
 <!doctype html>
@@ -49,7 +43,7 @@ const sets = await getAllSets()
       <main class="ds-shell__main"><slot /></main>
       <Footer />
     </div>
-    <SiteChrome client:idle {sets} />
+    <SiteChrome client:idle />
   </body>
 </html>
 

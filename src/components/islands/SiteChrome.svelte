@@ -30,10 +30,31 @@
   import { getCatalog } from '~/stores/catalog'
   import { SITE } from '~/config/site'
 
-  // Il set di una carta serve per il codice (es. "ALB 042/198") e per il nome
-  // dell'espansione nella quick-view: la pagina che monta il layout li
-  // conosce gia' (content collection), l'isola no — glieli passa Base.astro.
-  let { sets = [] as CardSet[] } = $props()
+  // Le espansioni (sets) servono per il codice (es. "ALB 042/198") e per il
+  // nome dell'espansione nella quick-view e nel messaggio di "Chiedi". Dal
+  // Task 18 la regola del progetto e' che un'isola prende i dati dal seam
+  // /api/catalog.json, mai da prop di idratazione — SiteChrome era l'unica
+  // isola rimasta a violarla (1441 byte di props su ogni pagina). Qui
+  // niente prop `sets`: si popola da getCatalog(), la stessa fetch gia'
+  // condivisa con quick-view e "Chiedi".
+  //
+  // E' sicuro farlo pigramente (solo quando serve, non al mount) perche' le
+  // uniche due vie che valorizzano `chiedi` con una Card vera (non `true`)
+  // sono chiediDaQuick qui sotto (quickCard e' gia' risolta via
+  // getCatalog()) e CardActions.svelte (che a sua volta fa await
+  // getCatalog() prima di chiamare apriChiedi(carta)) — in entrambi i casi
+  // la promise e' gia' risolta quando questo effect la richiama, quindi la
+  // risoluzione di `sets` e' immediata, non un fetch percepibile.
+  let sets = $state<CardSet[]>([])
+  $effect(() => {
+    if (($chiedi || $quick) && sets.length === 0) {
+      getCatalog()
+        .then((data) => {
+          sets = data.sets
+        })
+        .catch(() => {})
+    }
+  })
 
   // guscio.jsx riga 97: const mobile = useMedia("(max-width:1080px)").
   let mobile = $state(false)
