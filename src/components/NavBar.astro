@@ -91,57 +91,75 @@ const voci = NAV.map((v) => (v.id === 'catalogo' ? { ...v, count: catalogCount }
 <script>
   import { apriChiedi, apriQuick } from '~/stores/chrome'
 
-  const el = document.querySelector<HTMLElement>('.ds-nav')
-  const doc = document.scrollingElement || document.documentElement
-  const sync = () => el?.setAttribute('data-scrolled', String(doc.scrollTop > 8))
-  addEventListener('scroll', sync, { passive: true })
-  sync()
+  // <ClientRouter /> (Base.astro) trasforma la navigazione interna in uno
+  // swap soft: Astro reinserisce questo <script> nel nuovo documento, ma un
+  // browser non rivaluta mai un URL di modulo gia' valutato in precedenza —
+  // quindi il corpo qui sotto non ripartirebbe da solo dopo il primo swap.
+  // 'astro:page-load' spara sia al primo caricamento sia dopo ogni swap, ed
+  // e' il rimpiazzo raccomandato da Astro per il codice che deve rieseguirsi
+  // a ogni navigazione. I due listener a livello di document (Escape,
+  // click-fuori del menu) restano fuori: sono attaccati una volta sola, piu'
+  // sotto, e ri-cercano il loro elemento al momento dell'evento invece di
+  // chiudersi su un riferimento che lo swap potrebbe aver scartato.
+  document.addEventListener('astro:page-load', () => {
+    const doc = document.scrollingElement || document.documentElement
+    const sync = () => {
+      const nav = document.querySelector<HTMLElement>('.ds-nav')
+      nav?.setAttribute('data-scrolled', String(doc.scrollTop > 8))
+    }
+    addEventListener('scroll', sync, { passive: true })
+    sync()
 
-  // "Chiedi una carta": un <button> qualsiasi, non un'isola. Scrive
-  // direttamente nello store condiviso con SiteChrome (stesso modulo, stesso
-  // meccanismo verificato dal Task 2, §6.3) cosi' un tap arrivato prima che
-  // SiteChrome idrati non va perso: resta nello stato dello store, e
-  // SiteChrome lo trova gia' pronto al mount invece di perderlo come il
-  // contatore dello spike del Task 2.
-  //
-  // preventDefault sempre: design-reference/negozio.jsx applica lo stesso
-  // trigger ai tre Panel "Scrivici" (as="a" href="#"), dove il sorgente fa
-  // e.preventDefault() prima di onChiedi(true) — un placeholder "#" che non
-  // deve far saltare la pagina in cima. Su un <button> preventDefault e' un
-  // no-op innocuo.
-  document.querySelectorAll<HTMLElement>('[data-chiedi-trigger]').forEach((btn) => {
-    btn.addEventListener('click', (e) => {
-      e.preventDefault()
-      apriChiedi(true)
-      btn.closest('details')?.removeAttribute('open')
+    // "Chiedi una carta": un <button> qualsiasi, non un'isola. Scrive
+    // direttamente nello store condiviso con SiteChrome (stesso modulo, stesso
+    // meccanismo verificato dal Task 2, §6.3) cosi' un tap arrivato prima che
+    // SiteChrome idrati non va perso: resta nello stato dello store, e
+    // SiteChrome lo trova gia' pronto al mount invece di perderlo come il
+    // contatore dello spike del Task 2.
+    //
+    // preventDefault sempre: design-reference/negozio.jsx applica lo stesso
+    // trigger ai tre Panel "Scrivici" (as="a" href="#"), dove il sorgente fa
+    // e.preventDefault() prima di onChiedi(true) — un placeholder "#" che non
+    // deve far saltare la pagina in cima. Su un <button> preventDefault e' un
+    // no-op innocuo.
+    document.querySelectorAll<HTMLElement>('[data-chiedi-trigger]').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault()
+        apriChiedi(true)
+        btn.closest('details')?.removeAttribute('open')
+      })
     })
-  })
 
-  // Quick-view (Task 19, retrofit del seam): ogni tessera statica porta
-  // data-carta="<slug>", stesso schema esatto di data-chiedi-trigger sopra —
-  // il click scrive lo slug nello store condiviso, SiteChrome lo risolve in
-  // Card interrogando /api/catalog.json la prima volta che serve (vedi
-  // ~/stores/catalog). Un delegato unico qui, non un listener per tessera,
-  // perche' le tessere sono HTML statico (CardTile, CardArt) senza isola
-  // propria: nessun client:* le idrata, quindi nessun onclick Svelte si
-  // attaccherebbe da solo.
-  document.querySelectorAll<HTMLElement>('[data-carta]').forEach((tessera) => {
-    tessera.addEventListener('click', (e) => {
-      e.preventDefault()
-      apriQuick(tessera.dataset.carta!)
+    // Quick-view (Task 19, retrofit del seam): ogni tessera statica porta
+    // data-carta="<slug>", stesso schema esatto di data-chiedi-trigger sopra —
+    // il click scrive lo slug nello store condiviso, SiteChrome lo risolve in
+    // Card interrogando /api/catalog.json la prima volta che serve (vedi
+    // ~/stores/catalog). Un delegato unico qui, non un listener per tessera,
+    // perche' le tessere sono HTML statico (CardTile, CardArt) senza isola
+    // propria: nessun client:* le idrata, quindi nessun onclick Svelte si
+    // attaccherebbe da solo.
+    document.querySelectorAll<HTMLElement>('[data-carta]').forEach((tessera) => {
+      tessera.addEventListener('click', (e) => {
+        e.preventDefault()
+        apriQuick(tessera.dataset.carta!)
+      })
     })
   })
 
   // Arricchimento del menu nativo: <details> non chiude da solo su Escape o
   // su click fuori (a differenza di <dialog>). Nessuna isola richiesta:
   // qualche riga di JS puro basta, e funziona indipendentemente da SiteChrome.
-  const menu = document.querySelector<HTMLDetailsElement>('.ds-nav__menu')
-  if (menu) {
-    document.addEventListener('click', (e) => {
-      if (menu.open && !menu.contains(e.target as Node)) menu.removeAttribute('open')
-    })
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && menu.open) menu.removeAttribute('open')
-    })
-  }
+  // Attaccati una volta sola (non dentro 'astro:page-load', altrimenti si
+  // accumulerebbero a ogni swap): ri-cercano .ds-nav__menu a ogni evento
+  // cosi' seguono il nodo reinserito dallo swap invece di chiudersi su
+  // quello scartato.
+  document.addEventListener('click', (e) => {
+    const menu = document.querySelector<HTMLDetailsElement>('.ds-nav__menu')
+    if (menu?.open && !menu.contains(e.target as Node)) menu.removeAttribute('open')
+  })
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return
+    const menu = document.querySelector<HTMLDetailsElement>('.ds-nav__menu')
+    if (menu?.open) menu.removeAttribute('open')
+  })
 </script>

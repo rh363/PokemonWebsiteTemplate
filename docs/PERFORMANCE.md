@@ -140,6 +140,18 @@ circa 17 KB di script esterni contro un ideale di quasi nulla. Misurato sul
 `<script type="module" src="...">` che Astro inietta per `astro:transitions`
 nell'HTML costruito, non stimato dal peso del pacchetto npm.
 
+Il costo non e' solo quel peso in byte. Con le transizioni soft attive, un
+browser non rivaluta mai un URL di modulo che ha gia' eseguito: un
+`<script>` di pagina reinserito dopo lo swap non riparte da solo. Questo
+significa che **ogni script non-isola deve essere scritto per sopravvivere
+a uno swap** — non con l'ipotesi implicita "viene rieseguito", ma
+esplicitamente, ascoltando `astro:page-load` per il codice che deve
+rieseguirsi a ogni navigazione, e tenendo fuori da quel listener (attaccati
+una volta sola, con ri-query dell'elemento al momento dell'evento) i
+listener globali sul `document` che altrimenti si accumulerebbero a ogni
+swap. Il bug corretto in `NavBar.astro` (sotto) e' esattamente questa
+classe di errore.
+
 **Decisione: si tengono.** Il criterio "se rompono le isole, toglile" non
 scatta (verificato sotto: nessuna rottura), ma quel criterio da solo non
 pesava il costo — la scelta va quindi resa esplicita qui invece che spesa in
@@ -153,9 +165,22 @@ Verificato con un browser reale (non a occhio): dopo una navigazione soft
 (link NavBar → NavBar), confermata dalla persistenza di un marker JS
 impostato prima del click:
 
-- Il trigger "Chiedi una carta" del `<script>` inline di `NavBar.astro`
-  continua a funzionare dopo la transizione (Astro re-inserisce/riesegue lo
-  script sul nuovo documento).
+- **Smentito due volte in un browser reale, poi corretto:** una prima stesura
+  di questa nota affermava che "il trigger 'Chiedi una carta' del `<script>`
+  inline di `NavBar.astro` continua a funzionare dopo la transizione (Astro
+  re-inserisce/riesegue lo script sul nuovo documento)". Falso: un browser
+  non rivaluta mai un URL di modulo gia' valutato, quindi lo script non
+  ripartiva da solo dopo il primo swap, e con esso morivano anche il
+  trattamento vetro/blur/bordo della navbar allo scroll (`data-scrolled`
+  restava bloccato su `false`) e Escape/click-fuori sul menu mobile. Corretto
+  ascoltando `astro:page-load` per la parte che deve rieseguirsi a ogni
+  navigazione, e tenendo i due listener sul `document` (Escape, click-fuori)
+  fuori da quel callback, attaccati una volta sola con ri-query
+  dell'elemento al momento dell'evento. Riverificato dopo il fix: il trigger
+  della NavBar apre il dialog, i tre pannelli "Scrivici" di `/negozio` aprono
+  il dialog invece di saltare a `#`, una tessera `[data-carta]` apre la
+  quick-view, e `data-scrolled` torna `"true"` allo scroll — tutto dopo una
+  navigazione soft, senza reload.
 - `CatalogApp` si rimonta e filtra correttamente su `/catalogo` raggiunta via
   transizione (`rar=rare` → 9 carte, invariato rispetto a un caricamento
   pieno).
