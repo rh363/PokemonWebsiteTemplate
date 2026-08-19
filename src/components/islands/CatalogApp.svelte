@@ -372,6 +372,22 @@
     return () => window.removeEventListener('popstate', onPop)
   })
 
+  // Un link condiviso o un preferito puo' portare un `p` che non esiste piu'
+  // (il catalogo si e' ristretto, o l'URL era gia' sbagliato in partenza):
+  // paginate() (query.ts) aggancia gia' risultato.page all'ultima pagina
+  // valida invece di restituire un elenco vuoto sotto un `total` > 0. Qui si
+  // riallinea lo stato `page` — e quindi l'URL — a quel valore corretto,
+  // cosi' /catalogo?...&p=99 si autocorregge invece di restare silenziosamente
+  // sbagliato. Effetto dedicato e volutamente separato da quello sopra: DEVE
+  // leggere `page` (per confrontarlo), e non tocca `loading`/`mostraApp` —
+  // e' una correzione dell'URL, non un nuovo giro di caricamento.
+  $effect(() => {
+    if (risultato && risultato.page !== page) {
+      page = risultato.page
+      syncUrl('replace')
+    }
+  })
+
   // Nasconde #cat-static una sola volta, quando questa isola ha finalmente
   // qualcosa da mostrare al suo posto (mai il contrario: non c'e' un motivo
   // per farla ricomparire dopo).

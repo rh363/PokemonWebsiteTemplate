@@ -38,10 +38,17 @@ export function sortCards(cards: IndexedCard[], sort: SortKey, sets: CardSet[]):
 
 export function paginate<T>(items: T[], page: number, perPage: number): Page<T> {
   const pages = Math.max(1, Math.ceil(items.length / perPage))
-  const from = (page - 1) * perPage
-  // Una pagina oltre il limite produce naturalmente un elenco vuoto:
-  // slice() oltre la fine non esplode, quindi non serve nessun caso speciale.
-  return { items: items.slice(from, from + perPage), total: items.length, page, pages }
+  // Una `page` oltre l'ultima esistente (link condiviso o preferito diventato
+  // stantio dopo che il catalogo si e' ristretto) si aggancia all'ultima
+  // pagina valida invece di restituire un elenco vuoto sotto un `total` > 0:
+  // quel disaccoppiamento e' esattamente il difetto — griglia vuota con
+  // un'etichetta "N carte" che dice il contrario. `page` nel risultato
+  // riflette la pagina EFFETTIVAMENTE servita, cosi' chi chiama (Pagination,
+  // la querystring) puo' riallinearsi ad essa invece di restare su un numero
+  // che non esiste piu'.
+  const pagina = Math.min(Math.max(1, page), pages)
+  const from = (pagina - 1) * perPage
+  return { items: items.slice(from, from + perPage), total: items.length, page: pagina, pages }
 }
 
 export function queryCards(

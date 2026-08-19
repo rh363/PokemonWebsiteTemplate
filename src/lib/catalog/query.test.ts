@@ -100,8 +100,8 @@ describe('paginate', () => {
     expect(paginate([], 1, 4)).toEqual({ items: [], total: 0, page: 1, pages: 1 })
   })
 
-  it('una pagina oltre il limite restituisce elenco vuoto senza esplodere', () => {
-    expect(paginate(items, 99, 4).items).toEqual([])
+  it('una pagina oltre il limite si aggancia all ultima pagina valida invece di restituire un elenco vuoto', () => {
+    expect(paginate(items, 99, 4)).toEqual({ items: [8, 9], total: 10, page: 3, pages: 3 })
   })
 })
 
