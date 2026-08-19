@@ -35,6 +35,8 @@ import SearchField from '~/components/ds/SearchField.svelte'
 import CardTile from '~/components/ds/CardTile.svelte'
 import Badge from '~/components/ds/Badge.svelte'
 import Pagination from '~/components/ds/Pagination.svelte'
+import Button from '~/components/ds/Button.svelte'
+import Icon from '~/components/ds/Icon.svelte'
 import CatalogApp from '~/components/islands/CatalogApp.svelte'
 import { SITE } from '~/config/site'
 import {
@@ -130,6 +132,22 @@ const ordinamentoOpzioni = Object.entries(SORT_LABELS).map(([value, label]) => (
         <div style="display:grid;gap:var(--sp-5);min-width:0">
           <div style="display:flex;align-items:center;gap:var(--sp-3);flex-wrap:wrap">
             <span style="font:var(--type-code);font-size:var(--fs-body-s);color:var(--text-muted)">{iniziale.total} carte</span>
+            <!-- Stessa affordance di CatalogApp (finding 2 del task-20-report):
+                 sotto 1080px .side sparisce (layout.css) e questo pulsante
+                 e' l'unico modo per aprire i filtri. Deve esistere gia' qui,
+                 non solo dopo l'idratazione, altrimenti la toolbar cambia
+                 forma nel momento in cui l'isola monta. Non puo' aprire lo
+                 Sheet (non esiste staticamente, e senza JS non c'e' nulla da
+                 aprire): resta inerte finche' CatalogApp non idrata, stesso
+                 trattamento gia' riservato alle checkbox statiche qui sopra
+                 (visibili, non ancora collegate). -->
+            <div class="only-mob">
+              <Button size="sm" variant="secondary">
+                <Icon slot="icon" name="filter" size={16} />
+                Filtri
+              </Button>
+            </div>
+            <div class="hide-mob" style="display:flex;gap:var(--sp-2);flex-wrap:wrap"></div>
             <div style="margin-left:auto;display:flex;align-items:center;gap:var(--sp-3)">
               <Select size="sm" value="novita" options={ordinamentoOpzioni} />
               <Tabs variant="pill" items={[{ id: 'griglia', label: 'Griglia' }, { id: 'lista', label: 'Lista' }]} value="griglia" />
