@@ -185,7 +185,26 @@ scan lineare. Riproduce la semantica di ricerca del prototipo alla lettera ed è
 istantaneo fino a qualche migliaio di carte. Oltre quella soglia si sostituisce con un
 indice invertito o si passa a ricerca server-side; il seam HTTP copre entrambi i casi.
 
-### 5.4 Limite noto dell'output statico
+### 5.4 La facade vale per il server, non per le isole
+
+Scoperto al Task 15, e non ovvio: `src/lib/catalog/index.ts` ri-esporta anche
+`source.static.astro.ts`, che importa `astro:content`. Un'isola idratata che importi dal
+barrel si trascina quindi `astro:content` **nel bundle del browser**, dove non ha senso e
+dove fa fallire il build.
+
+La regola ha due metà:
+
+| Chi importa | Da dove |
+|---|---|
+| Pagine `.astro`, endpoint, codice di build | `~/lib/catalog` — la facade |
+| Componenti Svelte montati con `client:` | `~/lib/catalog/labels`, `/types`, `/query`, `/search` — i moduli puri |
+
+Non è un'eccezione alla regola «le pagine importano solo dalla facade»: è la sua
+precisazione. La facade è il confine del **server**. Le isole vivono dall'altra parte di
+un confine diverso — quello del browser — e possono usare solo la parte pura dello strato
+dati, che è esattamente la parte progettata per non toccare I/O.
+
+### 5.5 Limite noto dell'output statico
 
 Con `output: 'static'` ogni carta è una pagina HTML prerenderizzata. Il limite Cloudflare
 sul piano free è 20.000 file per versione (25 MiB per file), quindi ~5.000 carte stanno
