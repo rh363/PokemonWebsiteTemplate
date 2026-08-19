@@ -1,0 +1,47 @@
+---
+// Porting di design-reference/espansioni.jsx, funzione Espansioni(). Le sei
+// espansioni sono renderizzate tutte, sempre: SetFilter.svelte (l'isola)
+// monta i Tabs e il contenitore data-tab, ma e' comunque pre-renderizzato a
+// HTML statico in fase di build come ogni isola client:* — la pagina e'
+// completa senza JavaScript, il filtro Tabs e' l'unica cosa che richiede
+// idratazione.
+import Base from '~/layouts/Base.astro'
+import Occhiello from '~/components/Occhiello.svelte'
+import Titolo from '~/components/Titolo.svelte'
+import Testo from '~/components/Testo.svelte'
+import SetFilter from '~/components/islands/SetFilter.svelte'
+import { SITE } from '~/config/site'
+import { getAllSets, getAllCards } from '~/lib/catalog'
+
+const [setsRaw, cards] = await Promise.all([getAllSets(), getAllCards()])
+
+// getCollection('sets') non garantisce l'ordine di src/content/sets.json (il
+// content layer di Astro lo restituisce alfabetico per id, non per
+// inserimento). design-reference/dati.jsx elenca le espansioni piu' recenti
+// per prime — ordine che qui va ricostruito esplicitamente, non ereditato
+// dalla collection: piu' anno, non un ID fisso, cosi' regge anche
+// un'espansione aggiunta in futuro.
+const sets = setsRaw.toSorted((a, b) => b.year - a.year)
+
+// carte.length del sorgente (design-reference/espansioni.jsx riga 24): il
+// conteggio reale delle carte schedate in quell'espansione, non la stima
+// inVetrina() che alimenta solo la barra di riempimento.
+const setsVM = sets.map((s) => {
+  const carte = cards.filter((c) => c.set === s.id)
+  return { ...s, count: carte.length, cards: carte.slice(0, 6) }
+})
+---
+
+<Base title={`Espansioni — ${SITE.nome}`} active="espansioni" catalogCount={cards.length}>
+  <div class="wrap" style="padding-top:var(--sp-10);padding-bottom:var(--section-y)">
+    <div style="display:grid;gap:var(--sp-4);margin-bottom:var(--sp-8)">
+      <Occhiello>{sets.length} espansioni</Occhiello>
+      <Titolo livello="pagina">Espansioni</Titolo>
+      <Testo grande>
+        Teniamo in vetrina una parte di ogni espansione. Qui vedi quante carte abbiamo schedato, e da lì entri nel
+        catalogo già filtrato.
+      </Testo>
+    </div>
+    <SetFilter client:visible sets={setsVM} />
+  </div>
+</Base>
