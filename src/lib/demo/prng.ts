@@ -12,5 +12,5 @@ export function createRng(seed = 7) {
 
 export const createPick =
   (rng: () => number) =>
-  <T,>(arr: readonly T[]): T =>
+  <T>(arr: readonly T[]): T =>
     arr[Math.floor(rng() * arr.length)]!

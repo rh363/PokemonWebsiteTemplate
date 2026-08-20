@@ -30,9 +30,21 @@ export const SITE = {
     ['Lunedì', 'chiuso'],
   ] as const,
   social: [
-    { id: 'instagram', icon: 'instagram', label: 'Instagram', valore: '@cartafolia.ceccano', href: '#' },
+    {
+      id: 'instagram',
+      icon: 'instagram',
+      label: 'Instagram',
+      valore: '@cartafolia.ceccano',
+      href: '#',
+    },
     { id: 'tiktok', icon: 'sparkles', label: 'TikTok', valore: '@cartafolia', href: '#' },
-    { id: 'whatsapp', icon: 'message-circle', label: 'WhatsApp', valore: '+39 000 000 0000', href: '#' },
+    {
+      id: 'whatsapp',
+      icon: 'message-circle',
+      label: 'WhatsApp',
+      valore: '+39 000 000 0000',
+      href: '#',
+    },
   ],
   seo: {
     titolo: 'Cartafolia — vetrina e catalogo, Ceccano',

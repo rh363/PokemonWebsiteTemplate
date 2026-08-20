@@ -19,5 +19,5 @@
   style="font:var(--type-eyebrow);letter-spacing:var(--ls-eyebrow);text-transform:uppercase;color:{tone ===
   'invert'
     ? 'var(--cyan-400)'
-    : 'var(--text-brand)'};{style}"
->{@render children?.()}</span>
+    : 'var(--text-brand)'};{style}">{@render children?.()}</span
+>

@@ -15,7 +15,17 @@ const file = readdirSync(cartella).filter((f) => /\.(jpe?g|png|webp|avif)$/i.tes
 for (const f of file) {
   execFileSync(
     'pnpm',
-    ['exec', 'wrangler', 'r2', 'object', 'put', `${bucket}/${f}`, '--file', join(cartella, f), '--remote'],
+    [
+      'exec',
+      'wrangler',
+      'r2',
+      'object',
+      'put',
+      `${bucket}/${f}`,
+      '--file',
+      join(cartella, f),
+      '--remote',
+    ],
     { stdio: 'inherit' },
   )
   console.log('caricato', f)

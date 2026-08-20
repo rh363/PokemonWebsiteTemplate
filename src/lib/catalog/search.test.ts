@@ -3,15 +3,28 @@ import { buildHaystack, cardCode, matches, normalizeQuery } from './search'
 import type { Card, CardSet } from './types'
 
 const set: CardSet = {
-  id: 'alb', name: 'Alba Cromatica', code: 'ALB',
-  year: 2024, total: 198, color: 'var(--cherry-500)',
+  id: 'alb',
+  name: 'Alba Cromatica',
+  code: 'ALB',
+  year: 2024,
+  total: 198,
+  color: 'var(--cherry-500)',
 }
 
 const card: Card = {
-  id: '1', slug: 'fulmine-di-notte-alb-042', name: 'Fulmine di Notte',
-  set: 'alb', num: '042/198', rarity: 'holo', cond: 'near-mint',
-  lang: 'Italiano', artist: 'M. Ferretti', nuovo: true,
-  vetrina: 2, entrata: '4 marzo', ordine: 120,
+  id: '1',
+  slug: 'fulmine-di-notte-alb-042',
+  name: 'Fulmine di Notte',
+  set: 'alb',
+  num: '042/198',
+  rarity: 'holo',
+  cond: 'near-mint',
+  lang: 'Italiano',
+  artist: 'M. Ferretti',
+  nuovo: true,
+  vetrina: 2,
+  entrata: '4 marzo',
+  ordine: 120,
 }
 
 describe('cardCode', () => {

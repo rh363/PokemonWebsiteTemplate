@@ -105,13 +105,22 @@
   const risultato = $derived.by(() => {
     if (!dati) return null
     const cq: CardQuery = {
-      q, sets: setsSel, rarity: raritySel, cond: condSel, lang: langSel,
-      foil, sort, page, perPage: PER_PAGE,
+      q,
+      sets: setsSel,
+      rarity: raritySel,
+      cond: condSel,
+      lang: langSel,
+      foil,
+      sort,
+      page,
+      perPage: PER_PAGE,
     }
     return queryCards(indexedCards, datiSets, cq)
   })
 
-  const attivi = $derived(raritySel.length + setsSel.length + condSel.length + langSel.length + (foil ? 1 : 0))
+  const attivi = $derived(
+    raritySel.length + setsSel.length + condSel.length + langSel.length + (foil ? 1 : 0),
+  )
 
   const ordinamentoOpzioni = Object.entries(SORT_LABELS).map(([value, label]) => ({ value, label }))
 
@@ -175,19 +184,40 @@
   const chips = $derived.by((): ChipVM[] => {
     const out: ChipVM[] = []
     for (const r of raritySel) {
-      out.push({ key: `r-${r}`, label: RARITY_LABELS[r], onRemove: () => cambiaFiltro(() => (raritySel = raritySel.filter((x) => x !== r))) })
+      out.push({
+        key: `r-${r}`,
+        label: RARITY_LABELS[r],
+        onRemove: () => cambiaFiltro(() => (raritySel = raritySel.filter((x) => x !== r))),
+      })
     }
     for (const s of setsSel) {
       const nome = datiSets.find((x) => x.id === s)?.name ?? s
-      out.push({ key: `s-${s}`, label: nome, onRemove: () => cambiaFiltro(() => (setsSel = setsSel.filter((x) => x !== s))) })
+      out.push({
+        key: `s-${s}`,
+        label: nome,
+        onRemove: () => cambiaFiltro(() => (setsSel = setsSel.filter((x) => x !== s))),
+      })
     }
     for (const c of condSel) {
-      out.push({ key: `c-${c}`, label: CONDITION_LABELS[c], onRemove: () => cambiaFiltro(() => (condSel = condSel.filter((x) => x !== c))) })
+      out.push({
+        key: `c-${c}`,
+        label: CONDITION_LABELS[c],
+        onRemove: () => cambiaFiltro(() => (condSel = condSel.filter((x) => x !== c))),
+      })
     }
     for (const l of langSel) {
-      out.push({ key: `l-${l}`, label: l, onRemove: () => cambiaFiltro(() => (langSel = langSel.filter((x) => x !== l))) })
+      out.push({
+        key: `l-${l}`,
+        label: l,
+        onRemove: () => cambiaFiltro(() => (langSel = langSel.filter((x) => x !== l))),
+      })
     }
-    if (foil) out.push({ key: 'foil', label: 'Solo foil', onRemove: () => cambiaFiltro(() => (foil = false)) })
+    if (foil)
+      out.push({
+        key: 'foil',
+        label: 'Solo foil',
+        onRemove: () => cambiaFiltro(() => (foil = false)),
+      })
     return out
   })
 
@@ -252,8 +282,14 @@
 
   function statoQuery(paginaOverride?: number): CardQuery {
     return {
-      q, sets: setsSel, rarity: raritySel, cond: condSel, lang: langSel,
-      foil, sort, page: paginaOverride ?? page,
+      q,
+      sets: setsSel,
+      rarity: raritySel,
+      cond: condSel,
+      lang: langSel,
+      foil,
+      sort,
+      page: paginaOverride ?? page,
     }
   }
 
@@ -306,8 +342,13 @@
 
   function statoEDefault(): boolean {
     return (
-      q === '' && setsSel.length === 0 && raritySel.length === 0 &&
-      condSel.length === 0 && langSel.length === 0 && !foil && sort === 'novita'
+      q === '' &&
+      setsSel.length === 0 &&
+      raritySel.length === 0 &&
+      condSel.length === 0 &&
+      langSel.length === 0 &&
+      !foil &&
+      sort === 'novita'
     )
   }
 
@@ -371,7 +412,10 @@
     loading = true
     const richiesta = ++versione
     const attesaMinima = new Promise<void>((r) => setTimeout(r, 340))
-    const caricamento = Promise.all([garantisciDati(), q.trim() ? garantisciIndice() : Promise.resolve()])
+    const caricamento = Promise.all([
+      garantisciDati(),
+      q.trim() ? garantisciIndice() : Promise.resolve(),
+    ])
     void Promise.allSettled([attesaMinima, caricamento]).then(() => {
       if (richiesta === versione) loading = false
     })
@@ -432,15 +476,21 @@
           type="button"
           onclick={azzera}
           style="all:unset;cursor:pointer;font:var(--type-label);font-size:var(--fs-caption);color:var(--text-muted);text-decoration:underline"
-        >azzera</button>
+          >azzera</button
+        >
       {/if}
     </div>
-    <Switch checked={foil} label="Solo foil" onchange={() => cambiaFiltro(() => (foil = !foil))} style="margin:var(--sp-2) 0" />
+    <Switch
+      checked={foil}
+      label="Solo foil"
+      onchange={() => cambiaFiltro(() => (foil = !foil))}
+      style="margin:var(--sp-2) 0"
+    />
     <FilterGroup title="Rarità" activeCount={raritySel.length}>
       {#each Object.entries(RARITY_LABELS) as [id, label] (id)}
         <Checkbox
           checked={raritySel.includes(id as Rarity)}
-          label={label}
+          {label}
           count={contaRarita(id as Rarity)}
           onchange={() => cambiaFiltro(() => (raritySel = toggle(raritySel, id as Rarity)))}
         />
@@ -461,7 +511,7 @@
       {#each Object.entries(CONDITION_LABELS) as [id, label] (id)}
         <Checkbox
           checked={condSel.includes(id as Condition)}
-          label={label}
+          {label}
           count={contaCond(id as Condition)}
           onchange={() => cambiaFiltro(() => (condSel = toggle(condSel, id as Condition)))}
         />
@@ -500,7 +550,9 @@
 
     <div style="display:grid;gap:var(--sp-5);min-width:0">
       <div style="display:flex;align-items:center;gap:var(--sp-3);flex-wrap:wrap">
-        <span style="font:var(--type-code);font-size:var(--fs-body-s);color:var(--text-muted)">{risultato?.total ?? 0} carte</span>
+        <span style="font:var(--type-code);font-size:var(--fs-body-s);color:var(--text-muted)"
+          >{risultato?.total ?? 0} carte</span
+        >
         <div class="only-mob">
           <Button size="sm" variant="secondary" onclick={() => (sheetOpen = true)}>
             {#snippet icon()}<Icon name="filter" size={16} />{/snippet}
@@ -515,11 +567,15 @@
             size="sm"
             value={sort}
             options={ordinamentoOpzioni}
-            onchange={(e: Event) => cambiaFiltro(() => (sort = (e.target as HTMLSelectElement).value as SortKey))}
+            onchange={(e: Event) =>
+              cambiaFiltro(() => (sort = (e.target as HTMLSelectElement).value as SortKey))}
           />
           <Tabs
             variant="pill"
-            items={[{ id: 'griglia', label: 'Griglia' }, { id: 'lista', label: 'Lista' }]}
+            items={[
+              { id: 'griglia', label: 'Griglia' },
+              { id: 'lista', label: 'Lista' },
+            ]}
             value={view}
             onchange={(id) => (view = id as Vista)}
           />
@@ -535,22 +591,31 @@
       {#if loading}
         <div class="cards">
           {#each Array.from({ length: 8 }) as _, i (i)}
-            <div style="display:grid;gap:10px;padding:12px;background:var(--surface-card);border:1px solid var(--border-hairline);border-radius:var(--r-card)">
+            <div
+              style="display:grid;gap:10px;padding:12px;background:var(--surface-card);border:1px solid var(--border-hairline);border-radius:var(--r-card)"
+            >
               <Skeleton shape="card" />
               <Skeleton count={2} />
             </div>
           {/each}
         </div>
       {:else if !dati}
-        <EmptyState icon="info" title="Impossibile caricare il catalogo" description="Controlla la connessione e riprova.">
-          {#snippet action()}<Button variant="secondary" onclick={riprova}>Riprova</Button>{/snippet}
+        <EmptyState
+          icon="info"
+          title="Impossibile caricare il catalogo"
+          description="Controlla la connessione e riprova."
+        >
+          {#snippet action()}<Button variant="secondary" onclick={riprova}>Riprova</Button
+            >{/snippet}
         </EmptyState>
       {:else if risultato && risultato.total === 0}
         <EmptyState
           title="Nessuna carta con questi filtri"
           description="Prova a togliere la rarità o ad allargare l'espansione."
         >
-          {#snippet action()}<Button variant="secondary" onclick={azzeraETestoRicerca}>Azzera i filtri</Button>{/snippet}
+          {#snippet action()}<Button variant="secondary" onclick={azzeraETestoRicerca}
+              >Azzera i filtri</Button
+            >{/snippet}
         </EmptyState>
       {:else if view === 'griglia'}
         <div class="cards">
@@ -579,10 +644,17 @@
               href={`/carta/${c.slug}`}
               style={`display:flex;align-items:center;gap:var(--sp-4);padding:var(--sp-3) var(--sp-4);min-height:64px;text-decoration:none;color:inherit;${i ? 'border-top:1px solid var(--border-hairline)' : ''}`}
             >
-              <div style="width:40px;flex:none"><CardArt rarity={c.rarity} src={srcCarta(c)} /></div>
+              <div style="width:40px;flex:none">
+                <CardArt rarity={c.rarity} src={srcCarta(c)} />
+              </div>
               <div style="flex:1;min-width:0;display:grid;gap:2px">
-                <span style="font:var(--type-card-title);color:var(--text-strong);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{c.name}</span>
-                <span style="font:var(--type-code);color:var(--text-faint)">{set ? cardCode(c, set) : c.num} · {c.lang}</span>
+                <span
+                  style="font:var(--type-card-title);color:var(--text-strong);overflow:hidden;text-overflow:ellipsis;white-space:nowrap"
+                  >{c.name}</span
+                >
+                <span style="font:var(--type-code);color:var(--text-faint)"
+                  >{set ? cardCode(c, set) : c.num} · {c.lang}</span
+                >
               </div>
               <div class="hide-mob" style="display:flex;gap:var(--sp-2);align-items:center">
                 <RarityBadge rarity={c.rarity} size="sm" />
@@ -598,8 +670,15 @@
       {/if}
 
       {#if !loading && dati && risultato && risultato.total > 0}
-        <div style="display:flex;justify-content:center;padding-top:var(--sp-6)" onclick={suClicPaginazione}>
-          <Pagination page={risultato.page} pages={risultato.pages} hrefFor={(n: number) => urlPer(n)} />
+        <div
+          style="display:flex;justify-content:center;padding-top:var(--sp-6)"
+          onclick={suClicPaginazione}
+        >
+          <Pagination
+            page={risultato.page}
+            pages={risultato.pages}
+            hrefFor={(n: number) => urlPer(n)}
+          />
         </div>
       {/if}
     </div>
@@ -609,7 +688,9 @@
     {#snippet children()}{@render filtri()}{/snippet}
     {#snippet footer()}
       <Button variant="secondary" onclick={azzera} style="flex:1">Azzera</Button>
-      <Button onclick={() => (sheetOpen = false)} style="flex:1">Vedi {risultato?.total ?? 0} carte</Button>
+      <Button onclick={() => (sheetOpen = false)} style="flex:1"
+        >Vedi {risultato?.total ?? 0} carte</Button
+      >
     {/snippet}
   </Sheet>
 {/if}

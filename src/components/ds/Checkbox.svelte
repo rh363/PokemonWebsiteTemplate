@@ -23,7 +23,7 @@
   class:is-checked={checked}
   class:is-disabled={disabled}
   class:has-description={!!description}
-  style={style}
+  {style}
 >
   <input type="checkbox" class="ds-checkbox__input" {checked} {disabled} {onchange} {...rest} />
   <span class="ds-checkbox__box" aria-hidden="true">

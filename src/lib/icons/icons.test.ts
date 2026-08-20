@@ -2,9 +2,24 @@ import { describe, expect, it } from 'vitest'
 import { ICONS, ICON_NAMES } from './index'
 
 const ATTESE = [
-  'arrow-left', 'arrow-right', 'check', 'chevron-down', 'chevron-right',
-  'clock', 'filter', 'heart', 'info', 'instagram', 'layers', 'list',
-  'map-pin', 'message-circle', 'search', 'share-2', 'sparkles', 'x',
+  'arrow-left',
+  'arrow-right',
+  'check',
+  'chevron-down',
+  'chevron-right',
+  'clock',
+  'filter',
+  'heart',
+  'info',
+  'instagram',
+  'layers',
+  'list',
+  'map-pin',
+  'message-circle',
+  'search',
+  'share-2',
+  'sparkles',
+  'x',
 ] as const
 
 describe('inventario icone', () => {

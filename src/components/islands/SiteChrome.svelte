@@ -20,7 +20,15 @@
   import RarityBadge from '../ds/RarityBadge.svelte'
   import ConditionBadge from '../ds/ConditionBadge.svelte'
   import Testo from '../Testo.svelte'
-  import { chiedi, quick, toast as toastStore, chiudiChiedi, chiudiQuick, apriChiedi, avviso } from '~/stores/chrome'
+  import {
+    chiedi,
+    quick,
+    toast as toastStore,
+    chiudiChiedi,
+    chiudiQuick,
+    apriChiedi,
+    avviso,
+  } from '~/stores/chrome'
   // Import diretto da labels/types, non dal barrel '~/lib/catalog': quel
   // barrel ri-esporta anche source.static.astro.ts, che importa astro:content
   // — un modulo server-only che rompe la build se finisce nel bundle client
@@ -132,7 +140,11 @@
       })
       .catch(() => {
         if ($quick !== slug) return
-        avviso('Impossibile caricare la scheda', 'Controlla la connessione e riprova cliccando di nuovo sulla carta.', 'info')
+        avviso(
+          'Impossibile caricare la scheda',
+          'Controlla la connessione e riprova cliccando di nuovo sulla carta.',
+          'info',
+        )
         chiudiQuick()
       })
   })
@@ -156,7 +168,10 @@
 
 {#snippet contenutoChiedi()}
   <div style="display:grid;gap:var(--sp-5)">
-    <Testo>Scrivici e ti diciamo se è ancora in vetrina. Rispondiamo negli orari di apertura, di solito in giornata.</Testo>
+    <Testo
+      >Scrivici e ti diciamo se è ancora in vetrina. Rispondiamo negli orari di apertura, di solito
+      in giornata.</Testo
+    >
     <div
       style="display:grid;gap:var(--sp-2);padding:var(--sp-4);background:var(--surface-sunken);border-radius:var(--r-md);border:1px solid var(--border-hairline)"
     >
@@ -164,7 +179,8 @@
         style="font:var(--type-eyebrow);letter-spacing:var(--ls-eyebrow);text-transform:uppercase;color:var(--text-muted)"
         >Messaggio pronto</span
       >
-      <span style="font:var(--type-code);font-size:var(--fs-body-s);color:var(--text-body);line-height:1.6"
+      <span
+        style="font:var(--type-code);font-size:var(--fs-body-s);color:var(--text-body);line-height:1.6"
         >{messaggio}</span
       >
       <div>
@@ -176,10 +192,20 @@
     </div>
     <div style="display:grid;gap:var(--sp-2)">
       {#each SITE.social as s (s.id)}
-        <Button as="a" href={s.href} fullWidth variant={s.id === SITE.social[0]?.id ? 'primary' : 'secondary'} style="justify-content:flex-start">
+        <Button
+          as="a"
+          href={s.href}
+          fullWidth
+          variant={s.id === SITE.social[0]?.id ? 'primary' : 'secondary'}
+          style="justify-content:flex-start"
+        >
           {#snippet icon()}<Icon name={s.icon} size={16} />{/snippet}
           {s.label} · {s.valore}
-          {#snippet iconRight()}<Icon name="arrow-right" size={16} style="margin-left:auto" />{/snippet}
+          {#snippet iconRight()}<Icon
+              name="arrow-right"
+              size={16}
+              style="margin-left:auto"
+            />{/snippet}
         </Button>
       {/each}
     </div>
@@ -236,7 +262,13 @@
     {#snippet children()}{@render contenutoChiedi()}{/snippet}
   </Sheet>
 {:else}
-  <Dialog open={chiediAperto} eyebrow="Chiedi in negozio" title={chiediTitolo} onclose={chiudiChiedi} width={520}>
+  <Dialog
+    open={chiediAperto}
+    eyebrow="Chiedi in negozio"
+    title={chiediTitolo}
+    onclose={chiudiChiedi}
+    width={520}
+  >
     {#snippet children()}{@render contenutoChiedi()}{/snippet}
   </Dialog>
 {/if}

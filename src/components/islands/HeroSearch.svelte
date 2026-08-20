@@ -71,7 +71,10 @@
       .slice(0, 5)
       .map((c) => ({
         label: c.name,
-        meta: cardCode(c, catalog!.sets.find((s) => s.id === c.set)!),
+        meta: cardCode(
+          c,
+          catalog!.sets.find((s) => s.id === c.set)!,
+        ),
       }))
   }
 

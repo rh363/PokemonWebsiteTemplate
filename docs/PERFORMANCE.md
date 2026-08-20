@@ -24,22 +24,22 @@ piu'.
 
 **Prop di `SiteChrome`, misurate sull'HTML costruito di `/chi-siamo`:**
 
-| | byte (attributo `props` dell'`astro-island`) |
-|---|---|
-| Prima (sei `CardSet` come prop) | 1441 |
-| Dopo (solo il marchio di scoping CSS di Svelte) | 46 |
+|                                                 | byte (attributo `props` dell'`astro-island`) |
+| ----------------------------------------------- | -------------------------------------------- |
+| Prima (sei `CardSet` come prop)                 | 1441                                         |
+| Dopo (solo il marchio di scoping CSS di Svelte) | 46                                           |
 
 ## Prop di idratazione per isola (misurate sull'HTML costruito)
 
-| Pagina | Isola | `client:` | Prop | Byte |
-|---|---|---|---|---|
-| `/chi-siamo`, `/negozio`, `/404`, ogni pagina | SiteChrome | `idle` | nessuna (solo il marker di scoping) | 46 |
-| `/catalogo` | CatalogApp | `load` | nessuna | 2 (`{}`) |
-| `/carta/[slug]` | CardViewer | `load` | `rarity`, `code` (due stringhe) | 131 |
-| `/carta/[slug]` | CardActions | `idle` | `slug`, `name`, `code` (tre stringhe) | 205 |
-| `/` (vetrina) | HeroSearch | `load` | nessuna | 46 |
-| `/` (vetrina) | NuoviArrivi | `visible` | `slot` (attributo di posizionamento, non dati) | 86 |
-| `/espansioni` | SetFilter | `visible` | nessuna | 2 (`{}`) |
+| Pagina                                        | Isola       | `client:` | Prop                                           | Byte     |
+| --------------------------------------------- | ----------- | --------- | ---------------------------------------------- | -------- |
+| `/chi-siamo`, `/negozio`, `/404`, ogni pagina | SiteChrome  | `idle`    | nessuna (solo il marker di scoping)            | 46       |
+| `/catalogo`                                   | CatalogApp  | `load`    | nessuna                                        | 2 (`{}`) |
+| `/carta/[slug]`                               | CardViewer  | `load`    | `rarity`, `code` (due stringhe)                | 131      |
+| `/carta/[slug]`                               | CardActions | `idle`    | `slug`, `name`, `code` (tre stringhe)          | 205      |
+| `/` (vetrina)                                 | HeroSearch  | `load`    | nessuna                                        | 46       |
+| `/` (vetrina)                                 | NuoviArrivi | `visible` | `slot` (attributo di posizionamento, non dati) | 86       |
+| `/espansioni`                                 | SetFilter   | `visible` | nessuna                                        | 2 (`{}`) |
 
 Ogni valore e' uno scalare che la pagina Astro conosce gia' server-side
 (content collection); nessuna isola porta con se' `Card`, `CardSet` o un
@@ -68,15 +68,15 @@ array — quelli si chiedono al seam al momento in cui servono.
 Conteggio dei tag `<script>` presenti nell'HTML servito (esclude
 `application/ld+json`, che non e' JS eseguibile):
 
-| Pagina | `<script>` tag |
-|---|---|
-| `/` | 6 |
-| `/catalogo` | 8 |
-| `/espansioni` | 5 |
-| `/carta/[slug]` | 5 |
-| `/negozio` | 4 |
-| `/chi-siamo` | 4 |
-| `/404` | 4 |
+| Pagina          | `<script>` tag |
+| --------------- | -------------- |
+| `/`             | 6              |
+| `/catalogo`     | 8              |
+| `/espansioni`   | 5              |
+| `/carta/[slug]` | 5              |
+| `/negozio`      | 4              |
+| `/chi-siamo`    | 4              |
+| `/404`          | 4              |
 
 Il minimo di 4 (pagine senza isole proprie) e' sempre: `ClientRouter`
 (`astro:transitions`), lo script inline di `NavBar.astro` (trigger "Chiedi",
@@ -212,7 +212,7 @@ scheda" dentro l'anteprima rapida portava a `/carta/<slug>` con l'anteprima
 nello store. La correzione sta in `NavBar.astro`: `astro:before-swap`
 azzera gli store del guscio, facendo a mano cio' che una navigazione dura
 otterrebbe ricaricando i moduli. Presidiato da `e2e/quick-view.spec.ts`,
-che verifica *dopo* l'idratazione dell'isola e la fetch del catalogo —
+che verifica _dopo_ l'idratazione dell'isola e la fetch del catalogo —
 controllare subito dopo lo swap passerebbe anche col difetto in piedi.
 
 La regola generale, quindi: con le transizioni soft attive, **ogni stato che

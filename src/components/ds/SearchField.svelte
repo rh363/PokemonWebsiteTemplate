@@ -77,7 +77,7 @@
   }
 </script>
 
-<div class="ds-search" data-size={size} style={style}>
+<div class="ds-search" data-size={size} {style}>
   <div class="ds-search__bar" class:is-focus={focused}>
     <span class="ds-search__icon"><Icon name="search" size={size === 'lg' ? 20 : 18} /></span>
     <input
@@ -96,7 +96,12 @@
       {...rest}
     />
     {#if value}
-      <button type="button" class="ds-search__clear" onclick={onclear} aria-label="Cancella ricerca">
+      <button
+        type="button"
+        class="ds-search__clear"
+        onclick={onclear}
+        aria-label="Cancella ricerca"
+      >
         <Icon name="x" size={18} />
       </button>
     {/if}

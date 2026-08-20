@@ -8,14 +8,18 @@ const condition = z.enum(['mint', 'near-mint', 'excellent', 'good', 'played'])
 
 // Intero obbligatorio da cella CSV: una cella vuota o solo spazi non deve
 // coercere silenziosamente a 0 (Number('') === 0), deve fallire il build.
-const interoObbligatorio = z.string().trim().min(1, 'cella vuota').transform((v, ctx) => {
-  const n = Number(v)
-  if (!Number.isInteger(n)) {
-    ctx.addIssue({ code: 'custom', message: 'deve essere un numero intero' })
-    return z.NEVER
-  }
-  return n
-})
+const interoObbligatorio = z
+  .string()
+  .trim()
+  .min(1, 'cella vuota')
+  .transform((v, ctx) => {
+    const n = Number(v)
+    if (!Number.isInteger(n)) {
+      ctx.addIssue({ code: 'custom', message: 'deve essere un numero intero' })
+      return z.NEVER
+    }
+    return n
+  })
 
 // I2 del giro di fix finale: source.static.astro.ts ordina le carte con
 // Number(c.id) — l'invariante "prime carte in cima = arrivi piu' recenti"
@@ -27,10 +31,13 @@ const interoObbligatorio = z.string().trim().min(1, 'cella vuota').transform((v,
 // vetrina/ordine (interoObbligatorio) qui il tipo di output resta stringa
 // (Card.id e' string in ~/lib/catalog/types.ts, e Number(c.id) lo riconverte
 // dove serve): si valida che il contenuto sia un intero, non si trasforma.
-const idNumerico = z.string().trim().min(1, 'cella vuota').refine(
-  (v) => Number.isInteger(Number(v)),
-  { message: 'deve essere un numero intero (l\'ordine dei "nuovi arrivi" dipende da questo)' },
-)
+const idNumerico = z
+  .string()
+  .trim()
+  .min(1, 'cella vuota')
+  .refine((v) => Number.isInteger(Number(v)), {
+    message: 'deve essere un numero intero (l\'ordine dei "nuovi arrivi" dipende da questo)',
+  })
 
 // I1 del giro di fix finale: prima di questo fix una carta con "set" che non
 // corrispondeva a nessuna espansione di sets.json passava lo schema (era
@@ -55,8 +62,12 @@ const setValido = z.string().transform((v, ctx) => {
 const sets = defineCollection({
   loader: file('src/content/sets.json'),
   schema: z.object({
-    id: z.string(), name: z.string(), code: z.string(),
-    year: z.number().int(), total: z.number().int().positive(), color: z.string(),
+    id: z.string(),
+    name: z.string(),
+    code: z.string(),
+    year: z.number().int(),
+    total: z.number().int().positive(),
+    color: z.string(),
   }),
 })
 
@@ -70,13 +81,25 @@ const cards = defineCollection({
   // Da CSV ogni campo arriva come stringa: z.coerce converte, e un valore
   // non convertibile fa fallire il build indicando la riga.
   schema: z.object({
-    id: idNumerico, slug: z.string(), name: z.string(), set: setValido,
-    num: z.string(), rarity, cond: condition, lang: z.string(), artist: z.string(),
-    nuovo: z.union([z.boolean(), z.enum(['true', 'false'])]).transform((v) => v === true || v === 'true'),
+    id: idNumerico,
+    slug: z.string(),
+    name: z.string(),
+    set: setValido,
+    num: z.string(),
+    rarity,
+    cond: condition,
+    lang: z.string(),
+    artist: z.string(),
+    nuovo: z
+      .union([z.boolean(), z.enum(['true', 'false'])])
+      .transform((v) => v === true || v === 'true'),
     vetrina: interoObbligatorio,
     entrata: z.string(),
     ordine: interoObbligatorio,
-    image: z.string().optional().transform((v) => (v === '' ? undefined : v)),
+    image: z
+      .string()
+      .optional()
+      .transform((v) => (v === '' ? undefined : v)),
   }),
 })
 

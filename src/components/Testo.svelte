@@ -22,9 +22,13 @@
 </script>
 
 <p
-  style="font:var(--type-body);font-size:{grande ? 'var(--fs-body-l)' : 'var(--fs-body-m)'};line-height:{grande
+  style="font:var(--type-body);font-size:{grande
+    ? 'var(--fs-body-l)'
+    : 'var(--fs-body-m)'};line-height:{grande
     ? 'var(--lh-body-l)'
     : 'var(--lh-body-m)'};color:{tone === 'invert'
     ? 'var(--text-invert-muted)'
     : 'var(--text-muted)'};max-width:62ch;text-wrap:pretty;{style}"
->{@render children?.()}</p>
+>
+  {@render children?.()}
+</p>

@@ -26,7 +26,7 @@
   }
 </script>
 
-<div class="ds-skeleton" style={style}>
+<div class="ds-skeleton" {style}>
   {#each items as _, i (i)}
     <div class="ds-skeleton__box" style={boxStyle(i)}></div>
   {/each}

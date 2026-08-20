@@ -54,7 +54,13 @@ const voci = NAV.map((v) => (v.id === 'catalogo' ? { ...v, count: catalogCount }
       desktop), non da un'isola Svelte.
     -->
     <div class="ds-nav__mobile">
-      <a class="ds-iconbtn" data-variant="ghost" data-size="md" aria-label="Cerca una carta" href="/catalogo">
+      <a
+        class="ds-iconbtn"
+        data-variant="ghost"
+        data-size="md"
+        aria-label="Cerca una carta"
+        href="/catalogo"
+      >
         <Icon name="search" size={18} />
       </a>
       <details class="ds-nav__menu">
@@ -78,7 +84,13 @@ const voci = NAV.map((v) => (v.id === 'catalogo' ? { ...v, count: catalogCount }
               ))
             }
           </div>
-          <button type="button" class="ds-btn ds-btn--full" data-variant="primary" data-size="md" data-chiedi-trigger>
+          <button
+            type="button"
+            class="ds-btn ds-btn--full"
+            data-variant="primary"
+            data-size="md"
+            data-chiedi-trigger
+          >
             <Icon name="instagram" size={16} />
             Chiedi una carta
           </button>

@@ -53,7 +53,8 @@
     // padding) non chiude, fuori (il vero backdrop) chiude.
     if (e.target !== el) return
     const r = el!.getBoundingClientRect()
-    const dentroIlBox = e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom
+    const dentroIlBox =
+      e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom
     if (!dentroIlBox) onclose?.()
   }}
 >

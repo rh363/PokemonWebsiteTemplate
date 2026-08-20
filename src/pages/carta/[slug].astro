@@ -80,7 +80,8 @@ const srcsetFoto = mostraFoto ? srcsetImmagine(card.image!) : undefined
 
 // "Nella stessa vetrina": stesso pattern src delle altre pagine.
 const fotoAttive = immaginiAttive()
-const srcCarta = (c: { image?: string }) => (fotoAttive && c.image ? urlImmagine(c.image, 150) : undefined)
+const srcCarta = (c: { image?: string }) =>
+  fotoAttive && c.image ? urlImmagine(c.image, 150) : undefined
 ---
 
 <Base title={`${card.name} — ${SITE.nome}`} active="catalogo" {catalogCount}>
@@ -131,8 +132,8 @@ const srcCarta = (c: { image?: string }) => (fotoAttive && c.image ? urlImmagine
           </div>
           <Titolo livello="pagina">{card.name}</Titolo>
           <Testo grande>
-            Esposta in vetrina {card.vetrina}, sotto vetro. È una carta di {set.name} ({set.year}): chiedila in
-            negozio e la guardiamo insieme, fuori dalla bustina.
+            Esposta in vetrina {card.vetrina}, sotto vetro. È una carta di {set.name} ({set.year}):
+            chiedila in negozio e la guardiamo insieme, fuori dalla bustina.
           </Testo>
         </div>
 
@@ -169,7 +170,9 @@ const srcCarta = (c: { image?: string }) => (fotoAttive && c.image ? urlImmagine
 
         <Panel variant="sunken" padding="var(--sp-5)" style="display:grid;gap:var(--sp-2)">
           <Occhiello>Nota di condizione</Occhiello>
-          <Testo style="font-size:var(--fs-body-s);max-width:none">{NOTE_CONDIZIONE[card.cond]}</Testo>
+          <Testo style="font-size:var(--fs-body-s);max-width:none"
+            >{NOTE_CONDIZIONE[card.cond]}</Testo
+          >
         </Panel>
 
         <div style="display:grid;gap:var(--sp-4)">

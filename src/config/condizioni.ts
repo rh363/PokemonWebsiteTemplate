@@ -10,5 +10,6 @@ export const NOTE_CONDIZIONE: Record<Condition, string> = {
   'near-mint': 'Un micro segno sul bordo, visibile solo in controluce. Centratura buona.',
   excellent: 'Angoli leggermente smussati, fronte pulito. Nessuna piega.',
   good: 'Bordi con qualche sbiancatura e un graffio leggero sul retro.',
-  played: "Ha giocato: bordi consumati e una piega d'angolo. Sta in raccoglitore, non in vetrina rigida.",
+  played:
+    "Ha giocato: bordi consumati e una piega d'angolo. Sta in raccoglitore, non in vetrina rigida.",
 }

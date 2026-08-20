@@ -30,10 +30,11 @@
     class:ds-btn--full={fullWidth}
     data-variant={variant}
     data-size={size}
-    href={href}
+    {href}
     {onclick}
     {style}
-    {...rest}>{@render inner()}</a>
+    {...rest}>{@render inner()}</a
+  >
 {:else}
   <button
     class="ds-btn"
@@ -43,5 +44,6 @@
     {disabled}
     onclick={disabled ? undefined : onclick}
     {style}
-    {...rest}>{@render inner()}</button>
+    {...rest}>{@render inner()}</button
+  >
 {/if}

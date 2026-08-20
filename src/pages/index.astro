@@ -33,7 +33,8 @@ const setOf = (id: string) => sets.find((s) => s.id === id)!
 // falso, quindi srcCarta torna sempre undefined — CardTile ricade su
 // CardArt senza src, identico a prima che questo file sapesse di R2.
 const fotoAttive = immaginiAttive()
-const srcCarta = (c: { image?: string }) => (fotoAttive && c.image ? urlImmagine(c.image, 300) : undefined)
+const srcCarta = (c: { image?: string }) =>
+  fotoAttive && c.image ? urlImmagine(c.image, 300) : undefined
 
 // vetrina.jsx: window.CARDS.slice(0,4) e window.CARDS.filter(...).slice(0,10).
 // getAllCards() torna nell'ordine "di arrivo" del CSV (id in sequenza, vedi
@@ -53,7 +54,8 @@ const heroCards = cards.slice(0, 4)
 // unione segue l'ordine sorgente di `cards`: dato che filter() preserva
 // l'ordine relativo, il sottoinsieme visibile per un tab appare nell'ordine
 // giusto per quel tab senza bisogno di riordinare nel DOM.
-const holoOf = (c: (typeof cards)[number]) => c.rarity === 'holo' || c.rarity === 'ultra' || c.rarity === 'secret'
+const holoOf = (c: (typeof cards)[number]) =>
+  c.rarity === 'holo' || c.rarity === 'ultra' || c.rarity === 'secret'
 const vintageOf = (c: (typeof cards)[number]) => setOf(c.set).year < 2010
 
 const topTutte = cards.slice(0, 10)
@@ -73,40 +75,60 @@ const CERCATI_OGGI = ['Holo', 'Fornace Antica', 'Giapponese', 'Mint']
 
 // vetrina.jsx righe 70-74.
 const PASSI: [string, string, string][] = [
-  ['01', 'Cerca nel catalogo', "Filtra per espansione, rarità, condizione. Ogni scheda dice com'è messa la carta."],
-  ['02', 'Scrivici su Instagram o WhatsApp', 'Copia il codice della carta e mandacelo: ti diciamo se è ancora in vetrina.'],
-  ['03', 'Passa a vederla', 'Te la tiriamo fuori dalla bustina e la guardiamo insieme, sul tavolo grande.'],
+  [
+    '01',
+    'Cerca nel catalogo',
+    "Filtra per espansione, rarità, condizione. Ogni scheda dice com'è messa la carta.",
+  ],
+  [
+    '02',
+    'Scrivici su Instagram o WhatsApp',
+    'Copia il codice della carta e mandacelo: ti diciamo se è ancora in vetrina.',
+  ],
+  [
+    '03',
+    'Passa a vederla',
+    'Te la tiriamo fuori dalla bustina e la guardiamo insieme, sul tavolo grande.',
+  ],
 ]
 ---
 
 <Base title={SITE.seo.titolo} active="vetrina" catalogCount={cards.length}>
   <div>
-    <section style="position:relative;overflow:hidden;border-bottom:1px solid var(--border-hairline)">
-      <div style="position:absolute;inset:0;background:var(--pattern-dots) 0 0/var(--pattern-dots-size);opacity:.7" />
+    <section
+      style="position:relative;overflow:hidden;border-bottom:1px solid var(--border-hairline)"
+    >
+      <div
+        style="position:absolute;inset:0;background:var(--pattern-dots) 0 0/var(--pattern-dots-size);opacity:.7"
+      >
+      </div>
       {
         /* Finding 2: il padding verticale dimezzato sotto 1080px (vetrina.jsx
            riga 8) e' nella regola .hero di src/styles/layout.css, non qui —
            puro CSS, nessuna isola necessaria solo per un padding. */
       }
-      <div
-        class="wrap g2 hero"
-        style="position:relative;gap:var(--sp-12)"
-      >
+      <div class="wrap g2 hero" style="position:relative;gap:var(--sp-12)">
         <div style="display:grid;gap:var(--sp-6)">
           <Occhiello>Vetrina e catalogo · {SITE.citta}</Occhiello>
           <Titolo livello="hero">{cards.length} carte,<br />schedate a mano.</Titolo>
           <Testo grande>
-            Questo è il catalogo del negozio: cerca una carta, guarda com'è conservata, poi passa a vederla dal
-            vero. Non vendiamo online.
+            Questo è il catalogo del negozio: cerca una carta, guarda com'è conservata, poi passa a
+            vederla dal vero. Non vendiamo online.
           </Testo>
           <HeroSearch client:load />
           <div style="display:flex;gap:var(--sp-2);flex-wrap:wrap;align-items:center">
-            <span style="font:var(--type-label);font-size:var(--fs-caption);color:var(--text-faint);margin-right:4px">
+            <span
+              style="font:var(--type-label);font-size:var(--fs-caption);color:var(--text-faint);margin-right:4px"
+            >
               Cercati oggi
             </span>
             {
               CERCATI_OGGI.map((t) => (
-                <a class="ds-chip ds-chip--interactive" style="text-decoration:none" href={`/catalogo?q=${encodeURIComponent(t)}`}>
+                <a
+                  class="ds-chip ds-chip--interactive"
+                  style="text-decoration:none"
+                  href={`/catalogo?q=${encodeURIComponent(t)}`}
+                >
                   {t}
                 </a>
               ))
@@ -117,7 +139,11 @@ const PASSI: [string, string, string][] = [
           {
             heroCards.map((c, i) => (
               <div style={`transform:rotate(${i % 2 ? 1.5 : -1.5}deg)`}>
-                <a href={`/carta/${c.slug}`} data-carta={c.slug} style="text-decoration:none;color:inherit">
+                <a
+                  href={`/carta/${c.slug}`}
+                  data-carta={c.slug}
+                  style="text-decoration:none;color:inherit"
+                >
                   <CardTile
                     name={c.name}
                     code={cardCode(c, setOf(c.set))}
@@ -142,7 +168,11 @@ const PASSI: [string, string, string][] = [
     </section>
 
     <section class="wrap sez">
-      <TestaSezione occhiello="Nuovi arrivi" titolo="Appena entrate in vetrina" testo="Aggiornato ogni martedì, dopo l'apertura delle buste.">
+      <TestaSezione
+        occhiello="Nuovi arrivi"
+        titolo="Appena entrate in vetrina"
+        testo="Aggiornato ogni martedì, dopo l'apertura delle buste."
+      >
         <NuoviArrivi slot="azione" client:visible />
       </TestaSezione>
       <div id="arrivi-list" data-tab="tutte" class="cards">
@@ -159,7 +189,14 @@ const PASSI: [string, string, string][] = [
                 class="cards__item"
                 style="text-decoration:none;color:inherit"
               >
-                <CardTile name={c.name} code={cardCode(c, set)} set={set.name} rarity={c.rarity} src={srcCarta(c)} style="cursor:pointer">
+                <CardTile
+                  name={c.name}
+                  code={cardCode(c, set)}
+                  set={set.name}
+                  rarity={c.rarity}
+                  src={srcCarta(c)}
+                  style="cursor:pointer"
+                >
                   {c.nuovo && (
                     <Badge slot="badge" tone="foil">
                       Nuovo
@@ -181,7 +218,12 @@ const PASSI: [string, string, string][] = [
 
     <section style="background:var(--surface-invert);color:var(--text-invert)">
       <div class="wrap sez" style="display:grid;gap:var(--sp-10)">
-        <TestaSezione tone="invert" occhiello="Espansioni" titolo="Sei espansioni in negozio" style="margin-bottom:0">
+        <TestaSezione
+          tone="invert"
+          occhiello="Espansioni"
+          titolo="Sei espansioni in negozio"
+          style="margin-bottom:0"
+        >
           <Button slot="azione" variant="invert" as="a" href="/espansioni">
             Vedi tutte
             <Icon slot="iconRight" name="arrow-right" size={16} />
@@ -190,9 +232,15 @@ const PASSI: [string, string, string][] = [
         <div class="g3">
           {
             sets.map((s) => (
-              <a href={`/catalogo?set=${s.id}`} class="fascia-tile" style={`--set-color:${s.color}`}>
+              <a
+                href={`/catalogo?set=${s.id}`}
+                class="fascia-tile"
+                style={`--set-color:${s.color}`}
+              >
                 <div style="display:flex;align-items:center;justify-content:space-between">
-                  <span style={`width:34px;height:34px;border-radius:var(--r-sm);background:${s.color}`} />
+                  <span
+                    style={`width:34px;height:34px;border-radius:var(--r-sm);background:${s.color}`}
+                  />
                   <span style="font:var(--type-code);color:var(--ink-400)">
                     {s.code} · {s.year}
                   </span>
@@ -220,8 +268,14 @@ const PASSI: [string, string, string][] = [
       <div class="g3" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr))">
         {
           PASSI.map(([n, t, d]) => (
-            <Panel hoverLift padding="var(--sp-6)" style="display:grid;gap:var(--sp-3);align-content:start">
-              <span style="font:var(--fw-medium) var(--fs-title-m)/1 var(--font-mono);color:var(--cherry-500)">{n}</span>
+            <Panel
+              hoverLift
+              padding="var(--sp-6)"
+              style="display:grid;gap:var(--sp-3);align-content:start"
+            >
+              <span style="font:var(--fw-medium) var(--fs-title-m)/1 var(--font-mono);color:var(--cherry-500)">
+                {n}
+              </span>
               <span style="font:var(--type-card-title);color:var(--text-strong)">{t}</span>
               <Testo style="font-size:var(--fs-body-s)">{d}</Testo>
             </Panel>
@@ -234,8 +288,8 @@ const PASSI: [string, string, string][] = [
       <div style="display:grid;gap:var(--sp-5)">
         <Titolo>Il tavolo grande è sempre libero</Titolo>
         <Testo grande>
-          Siamo in {SITE.via}, a {SITE.citta}. Le carte del catalogo sono tutte in vetrina: chiedi e te le facciamo
-          vedere dal vivo, senza fretta.
+          Siamo in {SITE.via}, a {SITE.citta}. Le carte del catalogo sono tutte in vetrina: chiedi e
+          te le facciamo vedere dal vivo, senza fretta.
         </Testo>
         <div style="display:flex;gap:var(--sp-3);flex-wrap:wrap">
           <Button as="a" href="/negozio">
@@ -253,11 +307,15 @@ const PASSI: [string, string, string][] = [
           SITE.orari.map(([g, h]) => (
             <div style="display:flex;justify-content:space-between;gap:var(--sp-4);padding-bottom:var(--sp-3);border-bottom:1px solid var(--border-hairline)">
               <span style="font:var(--type-label);color:var(--text-strong)">{g}</span>
-              <span style="font:var(--type-code);font-size:var(--fs-body-s);color:var(--text-body)">{h}</span>
+              <span style="font:var(--type-code);font-size:var(--fs-body-s);color:var(--text-body)">
+                {h}
+              </span>
             </div>
           ))
         }
-        <span style="font:var(--type-label);font-size:var(--fs-caption);font-weight:var(--fw-regular);color:var(--text-muted)">
+        <span
+          style="font:var(--type-label);font-size:var(--fs-caption);font-weight:var(--fw-regular);color:var(--text-muted)"
+        >
           Il martedì apriamo le buste nuove alle 17:00. Si può guardare.
         </span>
       </Panel>

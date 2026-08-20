@@ -18,14 +18,16 @@
   } = $props()
 </script>
 
-<label class="ds-select" data-size={size} style={style}>
+<label class="ds-select" data-size={size} {style}>
   {#if label}
     <span class="ds-select__label">{label}</span>
   {/if}
   <span class="ds-select__wrap">
     <select class="ds-select__control" {value} {disabled} {onchange} {...rest}>
       {#each options as o (typeof o === 'string' ? o : o.value)}
-        <option value={typeof o === 'string' ? o : o.value}>{typeof o === 'string' ? o : o.label}</option>
+        <option value={typeof o === 'string' ? o : o.value}
+          >{typeof o === 'string' ? o : o.label}</option
+        >
       {/each}
     </select>
     <span class="ds-select__chev" aria-hidden="true"><Icon name="chevron-down" size={16} /></span>

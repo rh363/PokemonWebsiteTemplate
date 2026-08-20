@@ -9,20 +9,12 @@
     played: { label: 'Played', short: 'PL', level: 1, color: 'var(--cond-played)' },
   } as const
 
-  let {
-    condition = 'near-mint' as Condition,
-    compact = false,
-    style = '',
-  } = $props()
+  let { condition = 'near-mint' as Condition, compact = false, style = '' } = $props()
 
   const c = $derived(COND[condition] ?? COND['near-mint'])
 </script>
 
-<span
-  class="ds-condbadge"
-  title="Condizione: {c.label}"
-  style={style}
->
+<span class="ds-condbadge" title="Condizione: {c.label}" {style}>
   <span aria-hidden="true" class="ds-condbadge__bars">
     {#each [1, 2, 3, 4, 5] as i (i)}
       <span

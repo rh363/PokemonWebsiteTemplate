@@ -28,7 +28,7 @@ export function csvLoader(percorso: string, chiave: string, colonneUniche: strin
       } catch (e) {
         throw new Error(
           `${percorso} non è leggibile: ${(e as Error).message}\n` +
-          `Controlla che ogni riga abbia lo stesso numero di colonne dell'intestazione.`,
+            `Controlla che ogni riga abbia lo stesso numero di colonne dell'intestazione.`,
           { cause: e },
         )
       }
@@ -36,7 +36,7 @@ export function csvLoader(percorso: string, chiave: string, colonneUniche: strin
       if (righe.length === 0) {
         throw new Error(
           `${percorso} non contiene nessuna riga di dati.\n` +
-          `Se il file è vuoto o ha solo l'intestazione, il sito non avrebbe nulla da mostrare.`,
+            `Se il file è vuoto o ha solo l'intestazione, il sito non avrebbe nulla da mostrare.`,
         )
       }
 
@@ -50,7 +50,7 @@ export function csvLoader(percorso: string, chiave: string, colonneUniche: strin
         if (gia !== undefined) {
           throw new Error(
             `${percorso}, riga ${info.lines}: "${chiave}" duplicato — "${id}" compare già alla riga ${gia}.\n` +
-            `Ogni carta deve avere uno slug diverso.`,
+              `Ogni carta deve avere uno slug diverso.`,
           )
         }
         visti.set(id, info.lines)
@@ -62,7 +62,7 @@ export function csvLoader(percorso: string, chiave: string, colonneUniche: strin
           if (giaVisto !== undefined) {
             throw new Error(
               `${percorso}, riga ${info.lines}: colonna "${colonna}" duplicata — "${valore}" compare già alla riga ${giaVisto}.\n` +
-              `Due carte non possono avere lo stesso valore in questa colonna.`,
+                `Due carte non possono avere lo stesso valore in questa colonna.`,
             )
           }
           if (valore) visti2.set(valore, info.lines)

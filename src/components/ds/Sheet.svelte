@@ -45,7 +45,7 @@
 <dialog
   bind:this={el}
   class="ds-sheet sheet-in"
-  style={style}
+  {style}
   aria-labelledby={title ? titleId : undefined}
   oncancel={(e) => {
     e.preventDefault()

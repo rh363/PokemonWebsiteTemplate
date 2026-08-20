@@ -17,7 +17,7 @@
   } = $props()
 </script>
 
-<details class="ds-fg" open={defaultOpen} style={style} {...rest}>
+<details class="ds-fg" open={defaultOpen} {style} {...rest}>
   <summary class="ds-fg__summary">
     <span class="ds-fg__title">{title}</span>
     {#if activeCount && activeCount > 0}

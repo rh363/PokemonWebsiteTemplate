@@ -51,11 +51,7 @@ export function paginate<T>(items: T[], page: number, perPage: number): Page<T> 
   return { items: items.slice(from, from + perPage), total: items.length, page: pagina, pages }
 }
 
-export function queryCards(
-  cards: IndexedCard[],
-  sets: CardSet[],
-  q: CardQuery,
-): Page<IndexedCard> {
+export function queryCards(cards: IndexedCard[], sets: CardSet[], q: CardQuery): Page<IndexedCard> {
   const filtrate = filterCards(cards, q)
   const ordinate = sortCards(filtrate, q.sort ?? 'novita', sets)
   return paginate(ordinate, q.page ?? 1, q.perPage ?? PER_PAGE)

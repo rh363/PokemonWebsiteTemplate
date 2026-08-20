@@ -1,21 +1,47 @@
-:root{
+:root {
   /* Foil olografico — solo su rarità alte, hover e momenti di festa */
-  --foil:linear-gradient(112deg,#00D3E0 0%,#7EEBF2 18%,#C4B5FD 38%,#FFD400 58%,#FF8994 78%,#00D3E0 100%); /* @kind color */
-  --foil-soft:linear-gradient(112deg,rgba(0,211,224,.35),rgba(196,181,253,.35),rgba(255,212,0,.3),rgba(255,137,148,.35)); /* @kind color */
-  --foil-sheen:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.75) 48%,transparent 62%); /* @kind color */
+  --foil: linear-gradient(
+    112deg,
+    #00d3e0 0%,
+    #7eebf2 18%,
+    #c4b5fd 38%,
+    #ffd400 58%,
+    #ff8994 78%,
+    #00d3e0 100%
+  ); /* @kind color */
+  --foil-soft: linear-gradient(
+    112deg,
+    rgba(0, 211, 224, 0.35),
+    rgba(196, 181, 253, 0.35),
+    rgba(255, 212, 0, 0.3),
+    rgba(255, 137, 148, 0.35)
+  ); /* @kind color */
+  --foil-sheen: linear-gradient(
+    105deg,
+    transparent 35%,
+    rgba(255, 255, 255, 0.75) 48%,
+    transparent 62%
+  ); /* @kind color */
   /* Gradienti brand */
-  --grad-brand:linear-gradient(140deg,var(--cherry-500),var(--cherry-700)); /* @kind color */
-  --grad-night:linear-gradient(160deg,var(--ink-900),var(--ink-950)); /* @kind color */
+  --grad-brand: linear-gradient(140deg, var(--cherry-500), var(--cherry-700)); /* @kind color */
+  --grad-night: linear-gradient(160deg, var(--ink-900), var(--ink-950)); /* @kind color */
   /* Pattern di sfondo: retino a punti e griglia da album */
-  --pattern-dots:radial-gradient(var(--ink-200) 1.2px,transparent 1.2px); /* @kind other */
-  --pattern-dots-size:16px 16px; /* @kind other */
-  --pattern-grid:linear-gradient(var(--border-hairline) 1px,transparent 1px),linear-gradient(90deg,var(--border-hairline) 1px,transparent 1px); /* @kind other */
-  --pattern-grid-size:32px 32px; /* @kind other */
+  --pattern-dots: radial-gradient(var(--ink-200) 1.2px, transparent 1.2px); /* @kind other */
+  --pattern-dots-size: 16px 16px; /* @kind other */
+  --pattern-grid:
+    linear-gradient(var(--border-hairline) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border-hairline) 1px, transparent 1px); /* @kind other */
+  --pattern-grid-size: 32px 32px; /* @kind other */
   /* Gradiente di protezione su immagine (leggibilità testo) */
-  --scrim-bottom:linear-gradient(to top,rgba(14,11,18,.82) 0%,rgba(14,11,18,.45) 40%,transparent 100%); /* @kind color */
+  --scrim-bottom: linear-gradient(
+    to top,
+    rgba(14, 11, 18, 0.82) 0%,
+    rgba(14, 11, 18, 0.45) 40%,
+    transparent 100%
+  ); /* @kind color */
   /* Vetro: solo header sticky e overlay */
-  --glass-blur:blur(14px) saturate(1.4); /* @kind other */
-  --glass-bg:rgba(251,249,246,.72); /* @kind other */
-  --glass-bg-invert:rgba(14,11,18,.6); /* @kind other */
-  --scrim-modal:rgba(14,11,18,.55); /* @kind color */
+  --glass-blur: blur(14px) saturate(1.4); /* @kind other */
+  --glass-bg: rgba(251, 249, 246, 0.72); /* @kind other */
+  --glass-bg-invert: rgba(14, 11, 18, 0.6); /* @kind other */
+  --scrim-modal: rgba(14, 11, 18, 0.55); /* @kind color */
 }

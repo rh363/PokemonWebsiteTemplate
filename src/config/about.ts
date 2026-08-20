@@ -46,12 +46,14 @@ export const PASSI: Passo[] = [
   {
     numero: '02',
     titolo: 'La guardiamo in due',
-    testo: "Fronte, retro, bordi e centratura. Se non siamo d'accordo sulla condizione, scende di un gradino.",
+    testo:
+      "Fronte, retro, bordi e centratura. Se non siamo d'accordo sulla condizione, scende di un gradino.",
   },
   {
     numero: '03',
     titolo: 'La fotografiamo',
-    testo: 'Luce fredda, fondo carta, proporzione 63×88. La stessa per tutte, così il confronto è onesto.',
+    testo:
+      'Luce fredda, fondo carta, proporzione 63×88. La stessa per tutte, così il confronto è onesto.',
   },
   {
     numero: '04',
@@ -83,10 +85,10 @@ export interface TappaStoria {
  *  qui nominato per coerenza con le altre costanti della pagina. */
 export const STORIA: TappaStoria[] = [
   { anno: '2019', testo: 'Apriamo con due vetrine e i doppioni di casa.' },
-  { anno: '2021', testo: "Arriva il tavolo grande. Da lì partono i tornei del giovedì." },
+  { anno: '2021', testo: 'Arriva il tavolo grande. Da lì partono i tornei del giovedì.' },
   { anno: '2023', testo: 'Cominciamo a schedare tutto: codice, condizione, foto.' },
   {
     anno: '2026',
-    testo: "Il catalogo va online. Il negozio resta l'unico posto dove si compra.",
+    testo: 'Il catalogo va online.',
   },
 ]

@@ -14,7 +14,7 @@
   serve sia :hover sia :focus-within, altrimenti il Tooltip non si apre da
   tastiera (regola CSS in ds.css).
 -->
-<span class="ds-tooltip" style={style}>
+<span class="ds-tooltip" {style}>
   {@render children?.()}
   <span role="tooltip" class="ds-tooltip__bubble" data-side={side}>{label}</span>
 </span>

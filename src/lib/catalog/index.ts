@@ -2,6 +2,11 @@ export * from './types'
 export * from './labels'
 export { cardCode, buildHaystack, matches, normalizeQuery } from './search'
 export { filterCards, sortCards, paginate, queryCards, type IndexedCard } from './query'
-export { buildCatalogPayload, buildSearchPayload, type CatalogPayload, type SearchPayload } from './source.static'
+export {
+  buildCatalogPayload,
+  buildSearchPayload,
+  type CatalogPayload,
+  type SearchPayload,
+} from './source.static'
 export { staticSource, getAllCards, getAllSets, getIndexedCards } from './source.static.astro'
 export * from './url'

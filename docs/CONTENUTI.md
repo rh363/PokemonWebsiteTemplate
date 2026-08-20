@@ -21,7 +21,7 @@ clicca l'icona a forma di matita ("Edit this file") in alto a destra,
 modifica il testo, poi scorri in fondo alla pagina — lì c'è un riquadro
 "Commit changes" già pronto: scrivi una riga che dica cosa hai cambiato e
 clicca "Commit changes" (con "Commit directly to the `main` branch"
-selezionato). Quel click *è* il commit e push di cui sopra: il deploy parte
+selezionato). Quel click _è_ il commit e push di cui sopra: il deploy parte
 da solo, non serve altro.
 
 ## Cambiare nome e indirizzo del negozio
@@ -110,22 +110,22 @@ spostarne una, sposta il suo blocco nel file.
 
 Apri `src/content/cards.csv` e aggiungi una riga. Le colonne, in ordine:
 
-| Colonna | Cosa contiene | Esempio |
-|---|---|---|
-| `id` | Un numero progressivo, unico | `101` |
-| `slug` | L'indirizzo della pagina della carta, unico | `fulmine-di-notte-alb-042` |
-| `name` | Il nome della carta | `Fulmine di Notte` |
-| `set` | L'`id` dell'espansione (colonna `id` di `sets.json`) | `alb` |
-| `num` | Numero nell'espansione, come stampato sulla carta | `042/198` |
-| `rarity` | Una di: `common`, `uncommon`, `rare`, `holo`, `ultra`, `secret` | `holo` |
-| `cond` | Una di: `mint`, `near-mint`, `excellent`, `good`, `played` | `excellent` |
-| `lang` | Lingua della carta (di norma `Italiano`, `Inglese` o `Giapponese`) | `Italiano` |
-| `artist` | Nome dell'illustratore | `R. Colella` |
-| `nuovo` | `true` se va segnalata come new entry, altrimenti `false` | `true` |
-| `vetrina` | Un numero: quante copie sono esposte in vetrina | `4` |
-| `entrata` | Data di entrata in catalogo, come testo libero | `15 luglio` |
-| `ordine` | Un numero: più basso = mostrata prima fra le novità | `635` |
-| `image` | Nome del file su R2, oppure vuota (placeholder) — vedi sotto | *(vuota)* |
+| Colonna   | Cosa contiene                                                      | Esempio                    |
+| --------- | ------------------------------------------------------------------ | -------------------------- |
+| `id`      | Un numero progressivo, unico                                       | `101`                      |
+| `slug`    | L'indirizzo della pagina della carta, unico                        | `fulmine-di-notte-alb-042` |
+| `name`    | Il nome della carta                                                | `Fulmine di Notte`         |
+| `set`     | L'`id` dell'espansione (colonna `id` di `sets.json`)               | `alb`                      |
+| `num`     | Numero nell'espansione, come stampato sulla carta                  | `042/198`                  |
+| `rarity`  | Una di: `common`, `uncommon`, `rare`, `holo`, `ultra`, `secret`    | `holo`                     |
+| `cond`    | Una di: `mint`, `near-mint`, `excellent`, `good`, `played`         | `excellent`                |
+| `lang`    | Lingua della carta (di norma `Italiano`, `Inglese` o `Giapponese`) | `Italiano`                 |
+| `artist`  | Nome dell'illustratore                                             | `R. Colella`               |
+| `nuovo`   | `true` se va segnalata come new entry, altrimenti `false`          | `true`                     |
+| `vetrina` | Un numero: quante copie sono esposte in vetrina                    | `4`                        |
+| `entrata` | Data di entrata in catalogo, come testo libero                     | `15 luglio`                |
+| `ordine`  | Un numero: più basso = mostrata prima fra le novità                | `635`                      |
+| `image`   | Nome del file su R2, oppure vuota (placeholder) — vedi sotto       | _(vuota)_                  |
 
 Punti che contano:
 

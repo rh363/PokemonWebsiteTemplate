@@ -28,7 +28,11 @@
       <Icon name="arrow-left" size={16} />
     </a>
   {:else}
-    <span class="ds-pagination__arrow is-disabled" aria-disabled="true" aria-label="Pagina precedente">
+    <span
+      class="ds-pagination__arrow is-disabled"
+      aria-disabled="true"
+      aria-label="Pagina precedente"
+    >
       <Icon name="arrow-left" size={16} />
     </span>
   {/if}
@@ -40,8 +44,8 @@
       class="ds-pagination__page"
       class:is-current={n === page}
       href={hrefFor(n)}
-      aria-current={n === page ? 'page' : undefined}
-    >{n}</a>
+      aria-current={n === page ? 'page' : undefined}>{n}</a
+    >
   {/each}
 
   {#if to < pages}<span class="ds-pagination__ellipsis">…</span>{/if}
@@ -52,7 +56,11 @@
       <Icon name="arrow-right" size={16} />
     </a>
   {:else}
-    <span class="ds-pagination__arrow is-disabled" aria-disabled="true" aria-label="Pagina successiva">
+    <span
+      class="ds-pagination__arrow is-disabled"
+      aria-disabled="true"
+      aria-label="Pagina successiva"
+    >
       <Icon name="arrow-right" size={16} />
     </span>
   {/if}

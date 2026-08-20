@@ -19,7 +19,7 @@
   } = $props()
 </script>
 
-<label class="ds-input" data-size={size} style={style}>
+<label class="ds-input" data-size={size} {style}>
   {#if label}
     <span class="ds-input__label">{label}</span>
   {/if}

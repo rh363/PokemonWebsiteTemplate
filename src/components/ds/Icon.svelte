@@ -26,5 +26,5 @@
   role={label ? 'img' : 'presentation'}
   aria-label={label}
   aria-hidden={label ? undefined : 'true'}
-  style="display:inline-block;flex:none;{style}"
->{@html ICONS[name]}</svg>
+  style="display:inline-block;flex:none;{style}">{@html ICONS[name]}</svg
+>

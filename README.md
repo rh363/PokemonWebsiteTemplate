@@ -53,7 +53,7 @@ cosa succede (il build si ferma, dicendo dove) se un campo è sbagliato.
   dal prototipo (Button, CardTile, Dialog, FilterGroup, …). Nessuno idrata
   JavaScript da solo: sono markup + CSS, con gli stati hover/focus/press
   gestiti in `src/styles/ds.css`, non in JS.
-- `src/components/islands/` — le isole che *davvero* servono JavaScript
+- `src/components/islands/` — le isole che _davvero_ servono JavaScript
   (tilt 3D della carta, catalogo filtrabile, dialog "Chiedi una carta", …).
   Ognuna prende i dati dal seam `/api/catalog.json` (via `~/stores/catalog`),
   mai da prop di idratazione — così il payload di ogni pagina resta

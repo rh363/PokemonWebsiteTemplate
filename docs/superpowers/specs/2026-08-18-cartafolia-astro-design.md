@@ -29,13 +29,13 @@ esplicitate in questa spec (vedi §3).
 
 ## 2. Stack
 
-| Ambito | Scelta | Motivo |
-|---|---|---|
-| Framework | Astro 7.2 (`output: 'static'`) | MPA statica: SEO locale, LCP, lazy per rotta |
-| Isole | Svelte 5 (runes), `@astrojs/svelte` 9 | ~3 KB di runtime; è il linguaggio di chi manterrà il progetto |
-| Stile | Token CSS del design system + stili inline | È il sistema del design originale. Nessun Tailwind |
-| Deploy | Cloudflare Workers static assets | Progetto Worker già esistente; asset statici gratuiti e illimitati |
-| Runtime | Node 22, pnpm 11 | Già installati |
+| Ambito    | Scelta                                     | Motivo                                                             |
+| --------- | ------------------------------------------ | ------------------------------------------------------------------ |
+| Framework | Astro 7.2 (`output: 'static'`)             | MPA statica: SEO locale, LCP, lazy per rotta                       |
+| Isole     | Svelte 5 (runes), `@astrojs/svelte` 9      | ~3 KB di runtime; è il linguaggio di chi manterrà il progetto      |
+| Stile     | Token CSS del design system + stili inline | È il sistema del design originale. Nessun Tailwind                 |
+| Deploy    | Cloudflare Workers static assets           | Progetto Worker già esistente; asset statici gratuiti e illimitati |
+| Runtime   | Node 22, pnpm 11                           | Già installati                                                     |
 
 ### Perché Svelte e non React
 
@@ -61,15 +61,15 @@ Il pilastro 1 chiede identità «in tutto». Questi sono gli unici scostamenti, 
 
 ### 3.1 Routing ad hash → URL reali
 
-| Prototipo | Sito |
-|---|---|
-| `#/vetrina` | `/` |
-| `#/catalogo` | `/catalogo` |
-| `#/carta/12` | `/carta/[slug]` |
-| `#/espansioni` | `/espansioni` |
-| `#/negozio` | `/negozio` |
-| `#/about` | `/chi-siamo` |
-| — | `/404` |
+| Prototipo      | Sito            |
+| -------------- | --------------- |
+| `#/vetrina`    | `/`             |
+| `#/catalogo`   | `/catalogo`     |
+| `#/carta/12`   | `/carta/[slug]` |
+| `#/espansioni` | `/espansioni`   |
+| `#/negozio`    | `/negozio`      |
+| `#/about`      | `/chi-siamo`    |
+| —              | `/404`          |
 
 Obbligatorio per SEO locale (il negozio vive di ricerche geografiche) e per il lazy
 loading per rotta. Le Astro View Transitions mantengono la fluidità della SPA.
@@ -144,16 +144,38 @@ PokemonWebsiteTemplate/
 ```ts
 // src/lib/catalog/types.ts
 export interface Card {
-  id: string; slug: string; name: string; set: string; num: string;
-  rarity: Rarity; cond: Condition; lang: string; artist: string;
-  nuovo: boolean; vetrina: number; entrata: string; ordine: number;
-  image?: string;
+  id: string
+  slug: string
+  name: string
+  set: string
+  num: string
+  rarity: Rarity
+  cond: Condition
+  lang: string
+  artist: string
+  nuovo: boolean
+  vetrina: number
+  entrata: string
+  ordine: number
+  image?: string
 }
 export interface CardQuery {
-  q?: string; sets?: string[]; rarity?: Rarity[]; cond?: Condition[];
-  lang?: string[]; foil?: boolean; sort?: SortKey; page?: number; perPage?: number;
+  q?: string
+  sets?: string[]
+  rarity?: Rarity[]
+  cond?: Condition[]
+  lang?: string[]
+  foil?: boolean
+  sort?: SortKey
+  page?: number
+  perPage?: number
 }
-export interface Page<T> { items: T[]; total: number; page: number; pages: number }
+export interface Page<T> {
+  items: T[]
+  total: number
+  page: number
+  pages: number
+}
 
 export interface CatalogSource {
   listSets(): Promise<Set[]>
@@ -194,10 +216,10 @@ dove fa fallire il build.
 
 La regola ha due metà:
 
-| Chi importa | Da dove |
-|---|---|
-| Pagine `.astro`, endpoint, codice di build | `~/lib/catalog` — la facade |
-| Componenti Svelte montati con `client:` | `~/lib/catalog/labels`, `/types`, `/query`, `/search` — i moduli puri |
+| Chi importa                                | Da dove                                                               |
+| ------------------------------------------ | --------------------------------------------------------------------- |
+| Pagine `.astro`, endpoint, codice di build | `~/lib/catalog` — la facade                                           |
+| Componenti Svelte montati con `client:`    | `~/lib/catalog/labels`, `/types`, `/query`, `/search` — i moduli puri |
 
 Non è un'eccezione alla regola «le pagine importano solo dalla facade»: è la sua
 precisazione. La facade è il confine del **server**. Le isole vivono dall'altra parte di
@@ -227,14 +249,14 @@ comodamente, ma il tempo di build cresce linearmente. Quando si passerà a Supab
 
 ### 6.2 Mappa delle isole
 
-| Pagina | HTML statico | Isole Svelte |
-|---|---|---|
-| `/chi-siamo` | tutto | **nessuna — 0 KB JS** |
-| `/negozio` | tutto | trigger dialog «Chiedi una carta» |
-| `/espansioni` | schede espansione | Tabs, quick-view |
-| `/` | hero, sezioni, footer | ricerca hero, quick-view, Tabs nuovi arrivi |
-| `/carta/[slug]` | scheda, specs, correlate | tilt 3D + riflesso foil, condividi |
-| `/catalogo` | header + prime 24 carte | `CatalogApp` |
+| Pagina          | HTML statico             | Isole Svelte                                |
+| --------------- | ------------------------ | ------------------------------------------- |
+| `/chi-siamo`    | tutto                    | **nessuna — 0 KB JS**                       |
+| `/negozio`      | tutto                    | trigger dialog «Chiedi una carta»           |
+| `/espansioni`   | schede espansione        | Tabs, quick-view                            |
+| `/`             | hero, sezioni, footer    | ricerca hero, quick-view, Tabs nuovi arrivi |
+| `/carta/[slug]` | scheda, specs, correlate | tilt 3D + riflesso foil, condividi          |
+| `/catalogo`     | header + prime 24 carte  | `CatalogApp`                                |
 
 NavBar desktop e Footer sono **HTML statico**. Una sola isola `SiteChrome` nel layout
 gestisce menu mobile, dialog «Chiedi una carta» e toast.
@@ -287,11 +309,11 @@ La scelta 2 è quella allineata al resto del progetto e va preferita salvo motiv
 
 ### 7.1 Tre difetti del prototipo da correggere
 
-| Difetto nel prototipo | Correzione |
-|---|---|
-| `@import` da Google Fonts in `tokens/fonts.css` — render-blocking | Self-hosted via `@fontsource-variable` (Bricolage Grotesque, Plus Jakarta Sans, JetBrains Mono), preload dei due pesi critici, `font-display: swap` |
-| `Icon` carica ogni glifo da `unpkg.com/lucide-static` via CSS mask — una richiesta di rete per icona, a runtime | SVG Lucide **inline locali**, solo i ~18 effettivamente usati |
-| React, ReactDOM e Babel standalone da CDN in build `development` | Eliminati |
+| Difetto nel prototipo                                                                                           | Correzione                                                                                                                                          |
+| --------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@import` da Google Fonts in `tokens/fonts.css` — render-blocking                                               | Self-hosted via `@fontsource-variable` (Bricolage Grotesque, Plus Jakarta Sans, JetBrains Mono), preload dei due pesi critici, `font-display: swap` |
+| `Icon` carica ogni glifo da `unpkg.com/lucide-static` via CSS mask — una richiesta di rete per icona, a runtime | SVG Lucide **inline locali**, solo i ~18 effettivamente usati                                                                                       |
+| React, ReactDOM e Babel standalone da CDN in build `development`                                                | Eliminati                                                                                                                                           |
 
 Nota sulla fedeltà delle icone: nel prototipo il glifo è una CSS mask riempita con
 `currentColor`. Le icone Lucide sono stroke-only, quindi la mask dipinge esattamente i
@@ -304,14 +326,14 @@ resterebbe nella storia del repository per sempre e la scaricherebbe ogni clone;
 ripulirla dopo significa riscrivere la storia. È una decisione che costa poco adesso
 e cara più tardi, quindi si prende subito.
 
-| Pezzo | Scelta |
-|---|---|
-| Archiviazione | Bucket **Cloudflare R2**, dietro un **dominio personalizzato** |
-| Ottimizzazione | **Cloudflare Image Transformations**, `https://<zona>/cdn-cgi/image/<opzioni>/<url sorgente>` |
-| Formato servito | `format=auto` → AVIF o WebP secondo il browser |
-| Dimensioni | `srcset` a 150 / 300 / 450 px, `sizes` per la griglia |
-| Caricamento | `loading="lazy"`, `eager` + `fetchpriority=high` solo sui candidati LCP |
-| Riferimento nei dati | La colonna `image` di `cards.csv` contiene **solo la chiave R2** |
+| Pezzo                | Scelta                                                                                        |
+| -------------------- | --------------------------------------------------------------------------------------------- |
+| Archiviazione        | Bucket **Cloudflare R2**, dietro un **dominio personalizzato**                                |
+| Ottimizzazione       | **Cloudflare Image Transformations**, `https://<zona>/cdn-cgi/image/<opzioni>/<url sorgente>` |
+| Formato servito      | `format=auto` → AVIF o WebP secondo il browser                                                |
+| Dimensioni           | `srcset` a 150 / 300 / 450 px, `sizes` per la griglia                                         |
+| Caricamento          | `loading="lazy"`, `eager` + `fetchpriority=high` solo sui candidati LCP                       |
+| Riferimento nei dati | La colonna `image` di `cards.csv` contiene **solo la chiave R2**                              |
 
 **Sul CLS**, che è il rischio proprio delle immagini remote: il contenitore
 `.ds-cardart` impone già `aspect-ratio: var(--card-aspect)` cioè 63/88, e `width`/`height`
@@ -327,6 +349,7 @@ cache senza ricontare, quindi il consumo segue le foto nuove e non le visite. Pe
 catalogo da qualche migliaio di carte resta gratuito.
 
 **Vincoli verificati sulla documentazione Cloudflare**, entrambi bloccanti:
+
 - le trasformazioni vanno **abilitate sulla zona** dalla dashboard, altrimenti
   `/cdn-cgi/image/…` restituisce l'originale **senza segnalare errori** — il sito sembra
   a posto e serve foto non ridimensionate;

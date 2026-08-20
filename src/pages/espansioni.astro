@@ -30,7 +30,8 @@ import { immaginiAttive, urlImmagine } from '~/lib/immagini'
 
 // Task 23: vedi lo stesso pattern in index.astro/catalogo.astro.
 const fotoAttive = immaginiAttive()
-const srcCarta = (c: { image?: string }) => (fotoAttive && c.image ? urlImmagine(c.image, 150) : undefined)
+const srcCarta = (c: { image?: string }) =>
+  fotoAttive && c.image ? urlImmagine(c.image, 150) : undefined
 
 // L'ordine di visualizzazione (quello di sets.json) e' gia' garantito da
 // getAllSets(): vedi il commento in src/lib/catalog/source.static.astro.ts.
@@ -53,8 +54,8 @@ const setsVM = sets.map((s) => {
       <Occhiello>{sets.length} espansioni</Occhiello>
       <Titolo livello="pagina">Espansioni</Titolo>
       <Testo grande>
-        Teniamo in vetrina una parte di ogni espansione. Qui vedi quante carte abbiamo schedato, e da lì entri nel
-        catalogo già filtrato.
+        Teniamo in vetrina una parte di ogni espansione. Qui vedi quante carte abbiamo schedato, e
+        da lì entri nel catalogo già filtrato.
       </Testo>
       <SetFilter client:visible />
     </div>
@@ -66,10 +67,13 @@ const setsVM = sets.map((s) => {
             hoverLift
             padding="var(--panel-set-row-padding)"
             data-recente={s.year >= 2023}
-            data-panel="set-row">
+            data-panel="set-row"
+          >
             <div style="display:grid;gap:var(--sp-3);min-width:0">
               <div style="display:flex;align-items:center;gap:var(--sp-3);flex-wrap:wrap">
-                <span style={`width:38px;height:38px;border-radius:var(--r-sm);background:${s.color};flex:none`} />
+                <span
+                  style={`width:38px;height:38px;border-radius:var(--r-sm);background:${s.color};flex:none`}
+                />
                 <Titolo livello="piccolo" as="h2">
                   {s.name}
                 </Titolo>
@@ -91,7 +95,10 @@ const setsVM = sets.map((s) => {
                 </div>
               </div>
 
-              <div class="set-miniature" style="display:flex;gap:var(--sp-2);flex-wrap:wrap;margin-top:var(--sp-1)">
+              <div
+                class="set-miniature"
+                style="display:flex;gap:var(--sp-2);flex-wrap:wrap;margin-top:var(--sp-1)"
+              >
                 {s.miniature.map((c) => (
                   <button
                     type="button"

@@ -7,8 +7,8 @@
   "compatibility_date": "2026-08-18",
   "assets": {
     "directory": "./dist",
-    "not_found_handling": "404-page"
-  }
+    "not_found_handling": "404-page",
+  },
   // Nessun campo "main": questo e' un Worker solo-asset statici (l'output
   // di `astro build`, output: 'static'). Le richieste servite dalla parte
   // "assets" di un Worker sono gratuite e non consumano la quota di

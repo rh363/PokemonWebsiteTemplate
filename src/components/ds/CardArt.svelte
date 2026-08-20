@@ -18,19 +18,11 @@
   } = $props()
 
   // Fedele a bundle:24 — un code non-stringa e falsy (0, NaN) rende stringa vuota.
-  const caption = $derived(
-    typeof code === 'string' ? code.trim() : code ? String(code) : '',
-  )
-  const isFoil = $derived(
-    foil || rarity === 'holo' || rarity === 'ultra' || rarity === 'secret',
-  )
+  const caption = $derived(typeof code === 'string' ? code.trim() : code ? String(code) : '')
+  const isFoil = $derived(foil || rarity === 'holo' || rarity === 'ultra' || rarity === 'secret')
 </script>
 
-<div
-  class="ds-cardart"
-  class:is-foil={isFoil}
-  style="border-radius:{radius};{style}"
->
+<div class="ds-cardart" class:is-foil={isFoil} style="border-radius:{radius};{style}">
   {#if src}
     <img {src} {alt} class="ds-cardart__img" {loading} {fetchpriority} decoding="async" />
   {:else}

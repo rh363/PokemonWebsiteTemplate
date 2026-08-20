@@ -1,28 +1,28 @@
-:root{
-  --sp-0:0px;
-  --sp-1:4px;
-  --sp-2:8px;
-  --sp-3:12px;
-  --sp-4:16px;
-  --sp-5:20px;
-  --sp-6:24px;
-  --sp-8:32px;
-  --sp-10:40px;
-  --sp-12:48px;
-  --sp-16:64px;
-  --sp-20:80px;
-  --sp-24:96px;
-  --sp-32:128px;
+:root {
+  --sp-0: 0px;
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-8: 32px;
+  --sp-10: 40px;
+  --sp-12: 48px;
+  --sp-16: 64px;
+  --sp-20: 80px;
+  --sp-24: 96px;
+  --sp-32: 128px;
   /* Ritmo di pagina */
-  --gutter:24px;
-  --gutter-lg:40px;
-  --page-max:1280px;
-  --page-narrow:720px;
-  --section-y:96px;
-  --section-y-tight:56px;
+  --gutter: 24px;
+  --gutter-lg: 40px;
+  --page-max: 1280px;
+  --page-narrow: 720px;
+  --section-y: 96px;
+  --section-y-tight: 56px;
   /* Griglie catalogo */
-  --grid-card-min:190px;
-  --grid-gap:20px;
+  --grid-card-min: 190px;
+  --grid-gap: 20px;
   /* Proporzione carta da collezione (63×88mm) */
-  --card-aspect:63/88; /* @kind other */
+  --card-aspect: 63/88; /* @kind other */
 }

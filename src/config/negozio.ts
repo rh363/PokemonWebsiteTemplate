@@ -11,8 +11,20 @@ export interface VoceInNegozio {
 
 /** design-reference/negozio.jsx, sezione "In negozio". */
 export const IN_NEGOZIO: VoceInNegozio[] = [
-  { titolo: 'Il tavolo grande', testo: 'Sei posti, sempre liberi. Si gioca, si scambia, si guardano le carte con calma.' },
-  { titolo: 'Le due vetrine', testo: 'Le carte del catalogo stanno qui, sotto vetro, in ordine di espansione.' },
-  { titolo: 'Bustine nuove', testo: 'Arrivano il martedì. Le apriamo alle 17:00 e finiscono in catalogo la sera stessa.' },
-  { titolo: 'Valutazioni', testo: "Porti la tua collezione, la guardiamo insieme e ti diciamo com'è messa. Gratis." },
+  {
+    titolo: 'Il tavolo grande',
+    testo: 'Sei posti, sempre liberi. Si gioca, si scambia, si guardano le carte con calma.',
+  },
+  {
+    titolo: 'Le due vetrine',
+    testo: 'Le carte del catalogo stanno qui, sotto vetro, in ordine di espansione.',
+  },
+  {
+    titolo: 'Bustine nuove',
+    testo: 'Arrivano il martedì. Le apriamo alle 17:00 e finiscono in catalogo la sera stessa.',
+  },
+  {
+    titolo: 'Valutazioni',
+    testo: "Porti la tua collezione, la guardiamo insieme e ti diciamo com'è messa. Gratis.",
+  },
 ]

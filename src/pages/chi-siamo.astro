@@ -32,7 +32,9 @@ const cards = await getAllCards()
 
 <Base title={`Chi siamo — ${SITE.nome}`} active="about" catalogCount={cards.length}>
   <div>
-    <section style="position:relative;overflow:hidden;border-bottom:1px solid var(--border-hairline)">
+    <section
+      style="position:relative;overflow:hidden;border-bottom:1px solid var(--border-hairline)"
+    >
       <div
         style="position:absolute;inset:0;background:var(--pattern-dots) 0 0/var(--pattern-dots-size);opacity:.7"
       >
@@ -44,13 +46,14 @@ const cards = await getAllCards()
         <Occhiello>Chi siamo</Occhiello>
         <Titolo livello="pagina">Un negozio piccolo, un catalogo lungo.</Titolo>
         <Testo grande>
-          Cartafolia ha aperto a {SITE.citta} nel 2019, in un fondo che prima era una merceria. Abbiamo cominciato
-          con due vetrine e una scatola di doppioni; oggi in catalogo ci sono {cards.length} carte, tutte schedate a
-          mano.
+          Cartafolia ha aperto a {SITE.citta} nel 2019, in un fondo che prima era una merceria. Abbiamo
+          cominciato con due vetrine e una scatola di doppioni; oggi in catalogo ci sono {
+            cards.length
+          } carte, tutte schedate a mano.
         </Testo>
         <Testo grande>
-          Non vendiamo online e non abbiamo intenzione di farlo. Il sito serve a farti sapere cosa c'è prima di
-          venire, così quando arrivi sappiamo già cosa tirare fuori.
+          Non vendiamo online e non abbiamo intenzione di farlo. Il sito serve a farti sapere cosa
+          c'è prima di venire, così quando arrivi sappiamo già cosa tirare fuori.
         </Testo>
       </div>
     </section>
@@ -73,7 +76,11 @@ const cards = await getAllCards()
 
     <section style="background:var(--surface-invert)">
       <div class="wrap sez">
-        <TestaSezione tone="invert" occhiello="Chi ci lavora" titolo="Siamo in tre dietro al banco" />
+        <TestaSezione
+          tone="invert"
+          occhiello="Chi ci lavora"
+          titolo="Siamo in tre dietro al banco"
+        />
         <div class="g3" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr))">
           {
             PERSONE.map((persona) => (
@@ -103,11 +110,17 @@ const cards = await getAllCards()
       <div class="g3" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr))">
         {
           PASSI.map((passo) => (
-            <Panel hoverLift padding="var(--sp-6)" style="display:grid;gap:var(--sp-3);align-content:start">
+            <Panel
+              hoverLift
+              padding="var(--sp-6)"
+              style="display:grid;gap:var(--sp-3);align-content:start"
+            >
               <span style="font:var(--fw-medium) var(--fs-title-m)/1 var(--font-mono);color:var(--cherry-500)">
                 {passo.numero}
               </span>
-              <span style="font:var(--type-card-title);color:var(--text-strong)">{passo.titolo}</span>
+              <span style="font:var(--type-card-title);color:var(--text-strong)">
+                {passo.titolo}
+              </span>
               <Testo style="font-size:var(--fs-body-s)">{passo.testo}</Testo>
             </Panel>
           ))

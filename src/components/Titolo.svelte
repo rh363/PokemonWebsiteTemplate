@@ -43,5 +43,5 @@
   this={tag}
   style="font:{F[livello]};letter-spacing:{L[livello]};color:{tone === 'invert'
     ? 'var(--text-invert)'
-    : 'var(--text-strong)'};text-wrap:pretty;{style}"
->{@render children?.()}</svelte:element>
+    : 'var(--text-strong)'};text-wrap:pretty;{style}">{@render children?.()}</svelte:element
+>

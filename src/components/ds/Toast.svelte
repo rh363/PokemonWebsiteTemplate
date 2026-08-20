@@ -25,11 +25,7 @@
   const t = $derived(TONES[tone] ?? TONES.neutral)
 </script>
 
-<div
-  role="status"
-  class="ds-toast"
-  style="--toast-bg:{t.bg};--toast-fg:{t.fg};{style}"
->
+<div role="status" class="ds-toast" style="--toast-bg:{t.bg};--toast-fg:{t.fg};{style}">
   <Icon name={t.icon} size={18} style="margin-top:2px;opacity:.9" />
   <div class="ds-toast__text">
     <span class="ds-toast__title">{title}</span>

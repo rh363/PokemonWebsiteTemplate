@@ -9,22 +9,39 @@ const SETS: CardSet[] = [
 ]
 
 const base = {
-  lang: 'Italiano', artist: 'ignoto', nuovo: false,
-  vetrina: 1, entrata: '1 marzo', image: undefined,
+  lang: 'Italiano',
+  artist: 'ignoto',
+  nuovo: false,
+  vetrina: 1,
+  entrata: '1 marzo',
+  image: undefined,
 } as const
 
 const mk = (o: Partial<IndexedCard> & { id: string; name: string; set: string }): IndexedCard => {
   const set = SETS.find((s) => s.id === o.set)!
   const card = {
-    slug: `${o.id}-slug`, num: '001/198', rarity: 'common', cond: 'mint',
-    ordine: 0, ...base, ...o,
+    slug: `${o.id}-slug`,
+    num: '001/198',
+    rarity: 'common',
+    cond: 'mint',
+    ordine: 0,
+    ...base,
+    ...o,
   } as IndexedCard
   return { ...card, haystack: buildHaystack(card, set) }
 }
 
 const CARDS: IndexedCard[] = [
   mk({ id: '1', name: 'Alfa', set: 'alb', rarity: 'holo', cond: 'mint', nuovo: true, ordine: 30 }),
-  mk({ id: '2', name: 'Beta', set: 'for', rarity: 'common', cond: 'played', lang: 'Inglese', ordine: 10 }),
+  mk({
+    id: '2',
+    name: 'Beta',
+    set: 'for',
+    rarity: 'common',
+    cond: 'played',
+    lang: 'Inglese',
+    ordine: 10,
+  }),
   mk({ id: '3', name: 'Gamma', set: 'alb', rarity: 'ultra', cond: 'good', ordine: 20 }),
   mk({ id: '4', name: 'Delta', set: 'for', rarity: 'rare', cond: 'mint', nuovo: true, ordine: 5 }),
 ]
@@ -75,11 +92,21 @@ describe('sortCards', () => {
   })
 
   it('az: alfabetico per nome', () => {
-    expect(sortCards(CARDS, 'az', SETS).map((c) => c.name)).toEqual(['Alfa', 'Beta', 'Delta', 'Gamma'])
+    expect(sortCards(CARDS, 'az', SETS).map((c) => c.name)).toEqual([
+      'Alfa',
+      'Beta',
+      'Delta',
+      'Gamma',
+    ])
   })
 
   it('espansione: per nome espansione, pareggi per numero carta', () => {
-    expect(sortCards(CARDS, 'espansione', SETS).map((c) => c.set)).toEqual(['alb', 'alb', 'for', 'for'])
+    expect(sortCards(CARDS, 'espansione', SETS).map((c) => c.set)).toEqual([
+      'alb',
+      'alb',
+      'for',
+      'for',
+    ])
   })
 
   it('non muta l array in ingresso', () => {

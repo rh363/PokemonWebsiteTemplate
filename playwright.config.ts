@@ -13,7 +13,10 @@ export default defineConfig({
   },
   use: { baseURL: 'http://localhost:4321' },
   projects: [
-    { name: 'desktop', use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 } } },
+    {
+      name: 'desktop',
+      use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 } },
+    },
     // iPhone 13 usa WebKit di default: qui resta su Chromium (l'unico
     // browser installato in questo ambiente), tenendo viewport/UA/touch
     // del device — il layout responsivo e' quello che serve testare, non

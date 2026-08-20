@@ -7,10 +7,7 @@
   // aria-current="page" sull'ultima voce: nessuna lacuna di accessibilita'
   // qui, a differenza di Dialog. L'unico cambio e' che onNavigate/
   // preventDefault sparisce: le voci non-ultime sono <a href> reali.
-  let {
-    items = [] as Voce[],
-    style = '',
-  } = $props()
+  let { items = [] as Voce[], style = '' } = $props()
 </script>
 
 <nav aria-label="Percorso" class="ds-breadcrumb" {style}>

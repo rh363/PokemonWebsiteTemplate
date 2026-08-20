@@ -29,6 +29,7 @@ Questi vincoli valgono per **ogni** task. Non vengono ripetuti nei singoli task.
   > ottenendo «0 errors». Senza `svelte-check`, la garanzia «TypeScript strict» non
   > copre nessuno dei 26 componenti del design system, cioe' la maggior parte del codice
   > scritto in questo progetto.
+
 - **Commit frequenti**, uno per task completato, messaggio in italiano, corpo che spiega il perché.
 - **Nessun segreto nel repository.** `CLOUDFLARE_API_TOKEN` e `CLOUDFLARE_ACCOUNT_ID` vivono solo nei GitHub Secrets.
 - **Alias di import:** `~/` → `src/`. Configurato in `tsconfig.json`.
@@ -37,41 +38,42 @@ Questi vincoli valgono per **ogni** task. Non vengono ripetuti nei singoli task.
 
 Il prototipo tiene gli stati di interazione in `React.useState`. Il porting li sposta in CSS **con gli stessi identici valori**. Regola generale, valida per tutti i componenti:
 
-| Prototipo | Porting |
-|---|---|
+| Prototipo                                       | Porting                                                           |
+| ----------------------------------------------- | ----------------------------------------------------------------- |
 | `onMouseEnter`/`onMouseLeave` + `hover ? A : B` | `@media (hover:hover){ .x:hover{ …A } }`, con `B` come stato base |
-| `onMouseDown`/`onMouseUp` + `press ? A : B` | `.x:active{ …A }` |
-| `disabled ? A : B` | `.x:disabled{ …A }` / `.x[aria-disabled="true"]{ …A }` |
+| `onMouseDown`/`onMouseUp` + `press ? A : B`     | `.x:active{ …A }`                                                 |
+| `disabled ? A : B`                              | `.x:disabled{ …A }` / `.x[aria-disabled="true"]{ …A }`            |
 
 Il wrapper `@media (hover:hover)` serve a evitare l'hover appiccicoso sui dispositivi touch. È una correzione di comportamento su mobile, invisibile su desktop, ed è l'unica differenza consapevole rispetto al prototipo in questa conversione.
 
 **Non convertire in CSS** ciò che dipende dalla posizione del puntatore: il tilt 3D di `CardTile` e `CardArt` (`rotateX`/`rotateY` calcolati dalle coordinate del mouse) resta JavaScript.
 
 ---
+
 ## Struttura dei file
 
 Ogni file ha una responsabilità sola. La divisione è per responsabilità, non per layer tecnico: i componenti del catalogo stanno insieme, non sparsi fra «components» e «utils».
 
-| File | Responsabilità |
-|---|---|
-| `src/styles/tokens/*.css` | I 9 file di token, copiati verbatim dal design system. **Non si modificano mai.** |
-| `src/styles/ds.css` | Le classi dei componenti del design system: layout base e stati hover/press convertiti da JS a CSS |
-| `src/styles/layout.css` | Le utility di pagina del prototipo (`.wrap`, `.sez`, `.g2`, `.g3`, `.cards`, `.cat`, `.det`, `.foot`) e le media query |
-| `src/config/site.ts` | Branding: nome negozio, indirizzo, orari, social, SEO. **L'unico file che il cliente tocca per il branding** |
-| `src/content.config.ts` | Schemi Zod delle collection `cards` e `sets` |
-| `src/lib/catalog/types.ts` | `Card`, `Set`, `CardQuery`, `Page<T>`, `CatalogSource`. Nessuna logica |
-| `src/lib/catalog/query.ts` | Filtri, ordinamento, paginazione. Funzioni pure, nessun I/O |
-| `src/lib/catalog/search.ts` | Costruzione haystack e scan. Funzioni pure |
-| `src/lib/catalog/source.static.ts` | Implementa `CatalogSource` leggendo le content collections. Usato **solo a build time** |
-| `src/lib/catalog/index.ts` | Facade: è ciò che le pagine `.astro` importano |
-| `src/lib/demo/prng.ts` | PRNG seeded del prototipo, portato identico. Genera i dati demo |
-| `src/lib/icons/index.ts` | Path SVG Lucide inline, solo le icone usate |
-| `src/integrations/catalog-index.ts` | Integration Astro: emette `/api/catalog.json` e `/api/search-index.json` a build time |
-| `src/stores/chrome.ts` | Store condiviso fra isole: dialog «Chiedi», sheet mobile, toast |
-| `src/components/ds/*.svelte` | I 26 componenti del design system |
-| `src/components/islands/*.svelte` | Componenti con stato: `CatalogApp`, `SiteChrome`, `CardViewer`, `QuickView`, `HeroSearch`, `SetTabs` |
-| `src/layouts/Base.astro` | Shell: `<head>`, NavBar statica, Footer, `SiteChrome` |
-| `src/pages/*.astro` | Una pagina per rotta |
+| File                                | Responsabilità                                                                                                         |
+| ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `src/styles/tokens/*.css`           | I 9 file di token, copiati verbatim dal design system. **Non si modificano mai.**                                      |
+| `src/styles/ds.css`                 | Le classi dei componenti del design system: layout base e stati hover/press convertiti da JS a CSS                     |
+| `src/styles/layout.css`             | Le utility di pagina del prototipo (`.wrap`, `.sez`, `.g2`, `.g3`, `.cards`, `.cat`, `.det`, `.foot`) e le media query |
+| `src/config/site.ts`                | Branding: nome negozio, indirizzo, orari, social, SEO. **L'unico file che il cliente tocca per il branding**           |
+| `src/content.config.ts`             | Schemi Zod delle collection `cards` e `sets`                                                                           |
+| `src/lib/catalog/types.ts`          | `Card`, `Set`, `CardQuery`, `Page<T>`, `CatalogSource`. Nessuna logica                                                 |
+| `src/lib/catalog/query.ts`          | Filtri, ordinamento, paginazione. Funzioni pure, nessun I/O                                                            |
+| `src/lib/catalog/search.ts`         | Costruzione haystack e scan. Funzioni pure                                                                             |
+| `src/lib/catalog/source.static.ts`  | Implementa `CatalogSource` leggendo le content collections. Usato **solo a build time**                                |
+| `src/lib/catalog/index.ts`          | Facade: è ciò che le pagine `.astro` importano                                                                         |
+| `src/lib/demo/prng.ts`              | PRNG seeded del prototipo, portato identico. Genera i dati demo                                                        |
+| `src/lib/icons/index.ts`            | Path SVG Lucide inline, solo le icone usate                                                                            |
+| `src/integrations/catalog-index.ts` | Integration Astro: emette `/api/catalog.json` e `/api/search-index.json` a build time                                  |
+| `src/stores/chrome.ts`              | Store condiviso fra isole: dialog «Chiedi», sheet mobile, toast                                                        |
+| `src/components/ds/*.svelte`        | I 26 componenti del design system                                                                                      |
+| `src/components/islands/*.svelte`   | Componenti con stato: `CatalogApp`, `SiteChrome`, `CardViewer`, `QuickView`, `HeroSearch`, `SetTabs`                   |
+| `src/layouts/Base.astro`            | Shell: `<head>`, NavBar statica, Footer, `SiteChrome`                                                                  |
+| `src/pages/*.astro`                 | Una pagina per rotta                                                                                                   |
 
 ---
 
@@ -80,11 +82,13 @@ Ogni file ha una responsabilità sola. La divisione è per responsabilità, non 
 ### Task 1: Scaffold del progetto e riferimento di design
 
 **Files:**
+
 - Create: `package.json`, `astro.config.mjs`, `tsconfig.json`, `.gitignore`, `.prettierrc`, `.prettierignore`, `oxlintrc.json`
 - Create: `design-reference/` (popolata dal progetto Claude Design)
 - Create: `src/pages/index.astro` (segnaposto minimo, sostituito al Task 18)
 
 **Interfaces:**
+
 - Consumes: niente, è il primo task
 - Produces: `pnpm dev` sulla porta 4321, `pnpm dev:ref` sulla porta 4322, alias `~/` → `src/`
 
@@ -135,7 +139,7 @@ import svelte from '@astrojs/svelte'
 import sitemap from '@astrojs/sitemap'
 
 export default defineConfig({
-  site: 'https://cartafolia.example',   // Task 24: sostituire col dominio reale
+  site: 'https://cartafolia.example', // Task 24: sostituire col dominio reale
   output: 'static',
   integrations: [svelte(), sitemap()],
   build: { inlineStylesheets: 'auto' },
@@ -235,7 +239,9 @@ Aprire `http://localhost:4322/index.html`. Atteso: la home «Cartafolia» si ren
 
 ```astro
 ---
+
 ---
+
 <html lang="it">
   <head><meta charset="utf-8" /><title>Cartafolia</title></head>
   <body><h1>Cartafolia</h1></body>
@@ -245,6 +251,7 @@ Aprire `http://localhost:4322/index.html`. Atteso: la home «Cartafolia» si ren
 ```bash
 pnpm dev
 ```
+
 Atteso: `http://localhost:4321` mostra «Cartafolia». Poi `pnpm check` → 0 errori.
 
 - [ ] **Step 9: Commit**
@@ -265,10 +272,12 @@ e' il meccanismo di verifica della fedelta' al design (pilastro 1)."
 La spec §6.3 dichiara un'assunzione da verificare **prima** di iniziare il porting: che due isole Svelte distinte sulla stessa pagina condividano l'istanza di uno store importato a livello di modulo. Se non regge, cambia il modo in cui le pagine pilotano `SiteChrome`, e scoprirlo dopo aver portato 26 componenti sarebbe costoso.
 
 **Files:**
+
 - Create: `src/stores/chrome.ts`, `src/components/islands/__spike/Emitter.svelte`, `src/components/islands/__spike/Receiver.svelte`
 - Modify: `src/pages/index.astro`
 
 **Interfaces:**
+
 - Produces: conferma (o smentita) del meccanismo di comunicazione usato dal Task 14
 
 - [ ] **Step 1: Scrivere lo store minimo**
@@ -312,6 +321,7 @@ In `src/pages/index.astro`, dentro `<body>`:
 import Emitter from '~/components/islands/__spike/Emitter.svelte'
 import Receiver from '~/components/islands/__spike/Receiver.svelte'
 ---
+
 <Emitter client:load />
 <Receiver client:load />
 ```
@@ -351,7 +361,7 @@ Avviare `pnpm dev` in background, eseguire `node scripts/spike-store.mjs`, poi f
 - **Atteso se l'assunzione regge:** `valore: 3` → store condiviso.
 - **Se resta `valore: 0`:** le isole hanno istanze separate, l'assunzione è smentita.
 
-**Prova B — strutturale, sul build.** Spiega *perché* il risultato è quello che è.
+**Prova B — strutturale, sul build.** Spiega _perché_ il risultato è quello che è.
 
 ```bash
 pnpm build
@@ -401,13 +411,16 @@ meccanismo con cui le pagine pilotano SiteChrome nel Task 14."
 ```
 
 ---
+
 ### Task 3: Token CSS e webfont self-hosted
 
 **Files:**
+
 - Create: `src/styles/tokens/{base,colors,effects,elevation,fonts,motion,radius,spacing,typography}.css`
 - Create: `src/styles/global.css`, `src/styles/layout.css`
 
 **Interfaces:**
+
 - Consumes: `design-reference/_ds/cartafolia-design-system-*/tokens/*.css` (Task 1)
 - Produces: tutte le custom property del design system disponibili globalmente; `.wrap`, `.sez`, `.g2`, `.hero`, `.g3`, `.cards`, `.cat`, `.side`, `.det`, `.det-fix`, `.foot`, `.only-mob`, `.hide-mob`, `.rise`, `.fade-in`, `.sheet-in`
 
@@ -439,10 +452,14 @@ Il file originale fa `@import url("https://fonts.googleapis.com/...")`, che bloc
 /* I webfont sono self-hosted via @fontsource-variable (importati in global.css).
    L'originale caricava da Google Fonts con @import: render-blocking.
    Le tre famiglie e i loro fallback restano identici all'originale. */
-:root{
-  --font-display:"Bricolage Grotesque Variable","Bricolage Grotesque","Plus Jakarta Sans",system-ui,sans-serif;
-  --font-body:"Plus Jakarta Sans Variable","Plus Jakarta Sans",system-ui,-apple-system,sans-serif;
-  --font-mono:"JetBrains Mono Variable","JetBrains Mono",ui-monospace,"SF Mono",Menlo,monospace;
+:root {
+  --font-display:
+    'Bricolage Grotesque Variable', 'Bricolage Grotesque', 'Plus Jakarta Sans', system-ui,
+    sans-serif;
+  --font-body:
+    'Plus Jakarta Sans Variable', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-mono:
+    'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
 }
 ```
 
@@ -478,28 +495,164 @@ Copiare il blocco `<style>` di `design-reference/index.html` **esclusa** la prim
 Contenuto atteso (verificarlo contro il sorgente, non fidarsi di questo estratto):
 
 ```css
-.wrap{max-width:var(--page-max);margin:0 auto;padding-left:var(--gutter-lg);padding-right:var(--gutter-lg)}
-.sez{padding-top:var(--section-y);padding-bottom:var(--section-y)}
-.g2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--sp-12);align-items:center}
-.hero{grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr)}
-.g3{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:var(--sp-4)}
-.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(var(--grid-card-min),1fr));gap:var(--grid-gap)}
-.cat{display:grid;grid-template-columns:264px minmax(0,1fr);gap:var(--sp-10);align-items:start}
-.side{position:sticky;top:92px;display:grid;gap:var(--sp-2)}
-.det{display:grid;grid-template-columns:minmax(0,400px) minmax(0,1fr);gap:var(--sp-16);align-items:start}
-.det-fix{position:sticky;top:100px;display:grid;gap:var(--sp-4)}
-.foot{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:var(--sp-10)}
-.only-mob{display:none!important}
-.sheet-in{animation:sheetUp var(--dur-slow,340ms) var(--ease-out)}
-@keyframes sheetUp{from{transform:translateY(101%)}to{transform:translateY(0)}}
-.fade-in{animation:fadeIn 220ms var(--ease-out)}
-@keyframes fadeIn{from{opacity:0}to{opacity:1}}
-.rise{animation:rise 340ms var(--ease-out) both}
-@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
-@media (max-width:1080px){.cat{grid-template-columns:minmax(0,1fr)}.hero{grid-template-columns:minmax(0,1fr)}.g2{grid-template-columns:minmax(0,1fr);gap:var(--sp-8)}.det{grid-template-columns:minmax(0,1fr);gap:var(--sp-8)}.det-fix{position:static;max-width:340px;margin-left:auto;margin-right:auto;justify-items:center}.foot{grid-template-columns:1fr 1fr}}
-@media (max-width:1080px){.hide-mob{display:none!important}.only-mob{display:block!important}.side{display:none}}
-@media (max-width:760px){:root{--fs-display-xl:42px;--fs-display-l:34px;--fs-display-m:27px;--fs-title-l:24px;--section-y:56px;--gutter-lg:20px;--grid-card-min:148px;--grid-gap:14px}.foot{grid-template-columns:minmax(0,1fr)}.g2{gap:var(--sp-6)}}
-@media (prefers-reduced-motion:reduce){.rise,.fade-in,.sheet-in{animation:none}}
+.wrap {
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding-left: var(--gutter-lg);
+  padding-right: var(--gutter-lg);
+}
+.sez {
+  padding-top: var(--section-y);
+  padding-bottom: var(--section-y);
+}
+.g2 {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--sp-12);
+  align-items: center;
+}
+.hero {
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+}
+.g3 {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--sp-4);
+}
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--grid-card-min), 1fr));
+  gap: var(--grid-gap);
+}
+.cat {
+  display: grid;
+  grid-template-columns: 264px minmax(0, 1fr);
+  gap: var(--sp-10);
+  align-items: start;
+}
+.side {
+  position: sticky;
+  top: 92px;
+  display: grid;
+  gap: var(--sp-2);
+}
+.det {
+  display: grid;
+  grid-template-columns: minmax(0, 400px) minmax(0, 1fr);
+  gap: var(--sp-16);
+  align-items: start;
+}
+.det-fix {
+  position: sticky;
+  top: 100px;
+  display: grid;
+  gap: var(--sp-4);
+}
+.foot {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: var(--sp-10);
+}
+.only-mob {
+  display: none !important;
+}
+.sheet-in {
+  animation: sheetUp var(--dur-slow, 340ms) var(--ease-out);
+}
+@keyframes sheetUp {
+  from {
+    transform: translateY(101%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+.fade-in {
+  animation: fadeIn 220ms var(--ease-out);
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.rise {
+  animation: rise 340ms var(--ease-out) both;
+}
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (max-width: 1080px) {
+  .cat {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .hero {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .g2 {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--sp-8);
+  }
+  .det {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--sp-8);
+  }
+  .det-fix {
+    position: static;
+    max-width: 340px;
+    margin-left: auto;
+    margin-right: auto;
+    justify-items: center;
+  }
+  .foot {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+@media (max-width: 1080px) {
+  .hide-mob {
+    display: none !important;
+  }
+  .only-mob {
+    display: block !important;
+  }
+  .side {
+    display: none;
+  }
+}
+@media (max-width: 760px) {
+  :root {
+    --fs-display-xl: 42px;
+    --fs-display-l: 34px;
+    --fs-display-m: 27px;
+    --fs-title-l: 24px;
+    --section-y: 56px;
+    --gutter-lg: 20px;
+    --grid-card-min: 148px;
+    --grid-gap: 14px;
+  }
+  .foot {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .g2 {
+    gap: var(--sp-6);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rise,
+  .fade-in,
+  .sheet-in {
+    animation: none;
+  }
+}
 ```
 
 - [ ] **Step 6: Creare `src/styles/ds.css` vuoto**
@@ -546,11 +699,13 @@ Google Fonts che bloccava il rendering."
 Il prototipo carica ogni glifo da `unpkg.com/lucide-static@0.446.0/icons/<nome>.svg` usando una CSS mask: una richiesta di rete per icona, a runtime, su ogni pagina. Le icone effettivamente usate sono **18**.
 
 **Files:**
+
 - Create: `src/lib/icons/index.ts`
 - Create: `src/components/ds/Icon.svelte`
 - Test: `src/lib/icons/icons.test.ts`
 
 **Interfaces:**
+
 - Produces: `type IconName`, `ICONS: Record<IconName, string>`, componente `Icon` con props `{ name: IconName; size?: number; label?: string; style?: string }`
 
 - [ ] **Step 1: Scrivere il test che fissa l'inventario**
@@ -562,9 +717,24 @@ import { describe, expect, it } from 'vitest'
 import { ICONS, ICON_NAMES } from './index'
 
 const ATTESE = [
-  'arrow-left', 'arrow-right', 'check', 'chevron-down', 'chevron-right',
-  'clock', 'filter', 'heart', 'info', 'instagram', 'layers', 'list',
-  'map-pin', 'message-circle', 'search', 'share-2', 'sparkles', 'x',
+  'arrow-left',
+  'arrow-right',
+  'check',
+  'chevron-down',
+  'chevron-right',
+  'clock',
+  'filter',
+  'heart',
+  'info',
+  'instagram',
+  'layers',
+  'list',
+  'map-pin',
+  'message-circle',
+  'search',
+  'share-2',
+  'sparkles',
+  'x',
 ] as const
 
 describe('inventario icone', () => {
@@ -653,8 +823,8 @@ Porting di `design-reference/_ds/_ds_bundle.js:499-533`. L'originale dipinge una
   role={label ? 'img' : 'presentation'}
   aria-label={label}
   aria-hidden={label ? undefined : 'true'}
-  style="display:inline-block;flex:none;{style}"
->{@html ICONS[name]}</svg>
+  style="display:inline-block;flex:none;{style}">{@html ICONS[name]}</svg
+>
 ```
 
 `viewBox`, `stroke-width` e i `stroke-linecap`/`linejoin` sono i default di Lucide: vanno riprodotti esattamente o i glifi cambiano spessore.
@@ -675,6 +845,7 @@ la stessa versione, quindi i glifi sono identici."
 ```
 
 ---
+
 # FASE 1 — Strato dati
 
 Questa fase è **interamente logica pura**: nessun DOM, nessun componente. È il posto giusto per il TDD, perché ogni funzione ha input e output espliciti e la semantica è già decisa dal prototipo — i test si scrivono leggendo `design-reference/catalogo.jsx`.
@@ -682,6 +853,7 @@ Questa fase è **interamente logica pura**: nessun DOM, nessun componente. È il
 ### Task 5: Tipi, configurazione del sito e dati demo
 
 **Files:**
+
 - Create: `src/lib/catalog/types.ts`, `src/lib/catalog/labels.ts`, `src/lib/demo/prng.ts`, `src/config/site.ts`
 - Create: `scripts/seed-demo.ts`
 - Create: `src/content/sets.json`, `src/content/cards.csv` (generati)
@@ -689,6 +861,7 @@ Questa fase è **interamente logica pura**: nessun DOM, nessun componente. È il
 - Test: `src/lib/demo/prng.test.ts`
 
 **Interfaces:**
+
 - Produces:
   - `type Rarity = 'common'|'uncommon'|'rare'|'holo'|'ultra'|'secret'`
   - `type Condition = 'mint'|'near-mint'|'excellent'|'good'|'played'`
@@ -768,17 +941,29 @@ Valori copiati da `design-reference/dati.jsx`. `PER_PAGINA` viene da `design-ref
 import type { Condition, Rarity, SortKey } from './types'
 
 export const RARITY_LABELS: Record<Rarity, string> = {
-  common: 'Comune', uncommon: 'Non comune', rare: 'Rara',
-  holo: 'Holo', ultra: 'Ultra rara', secret: 'Segreta',
+  common: 'Comune',
+  uncommon: 'Non comune',
+  rare: 'Rara',
+  holo: 'Holo',
+  ultra: 'Ultra rara',
+  secret: 'Segreta',
 }
 
 export const CONDITION_LABELS: Record<Condition, string> = {
-  mint: 'Mint', 'near-mint': 'Near Mint', excellent: 'Excellent',
-  good: 'Good', played: 'Played',
+  mint: 'Mint',
+  'near-mint': 'Near Mint',
+  excellent: 'Excellent',
+  good: 'Good',
+  played: 'Played',
 }
 
 export const RARITY_RANK: Record<Rarity, number> = {
-  common: 0, uncommon: 1, rare: 2, holo: 3, ultra: 4, secret: 5,
+  common: 0,
+  uncommon: 1,
+  rare: 2,
+  holo: 3,
+  ultra: 4,
+  secret: 5,
 }
 
 export const LANGUAGES = ['Italiano', 'Inglese', 'Giapponese'] as const
@@ -787,7 +972,10 @@ export const FOIL_RARITIES: Rarity[] = ['holo', 'ultra', 'secret']
 /** Etichette dell'ordinamento, come le mostra il prototipo.
  *  Nota: 'az' usa una lineetta EN (U+2013), non un trattino. */
 export const SORT_LABELS: Record<SortKey, string> = {
-  novita: 'Novità', rarita: 'Rarità', az: 'A–Z', espansione: 'Espansione',
+  novita: 'Novità',
+  rarita: 'Rarità',
+  az: 'A–Z',
+  espansione: 'Espansione',
 }
 
 export const PER_PAGE = 24
@@ -809,11 +997,12 @@ import { createRng } from './prng'
 describe('PRNG del prototipo', () => {
   it('riproduce la sequenza di Lehmer con seme 7', () => {
     const rng = createRng(7)
-    expect(rng()).toBeCloseTo((7 * 16807 % 2147483647) / 2147483647, 12)
+    expect(rng()).toBeCloseTo(((7 * 16807) % 2147483647) / 2147483647, 12)
   })
 
   it('e deterministico: due istanze con lo stesso seme coincidono', () => {
-    const a = createRng(7), b = createRng(7)
+    const a = createRng(7),
+      b = createRng(7)
     expect(Array.from({ length: 50 }, a)).toEqual(Array.from({ length: 50 }, b))
   })
 
@@ -850,7 +1039,7 @@ export function createRng(seed = 7) {
 
 export const createPick =
   (rng: () => number) =>
-  <T,>(arr: readonly T[]): T =>
+  <T>(arr: readonly T[]): T =>
     arr[Math.floor(rng() * arr.length)]!
 ```
 
@@ -878,9 +1067,21 @@ export const SITE = {
     ['Lunedì', 'chiuso'],
   ] as const,
   social: [
-    { id: 'instagram', icon: 'instagram', label: 'Instagram', valore: '@cartafolia.ceccano', href: '#' },
+    {
+      id: 'instagram',
+      icon: 'instagram',
+      label: 'Instagram',
+      valore: '@cartafolia.ceccano',
+      href: '#',
+    },
     { id: 'tiktok', icon: 'sparkles', label: 'TikTok', valore: '@cartafolia', href: '#' },
-    { id: 'whatsapp', icon: 'message-circle', label: 'WhatsApp', valore: '+39 000 000 0000', href: '#' },
+    {
+      id: 'whatsapp',
+      icon: 'message-circle',
+      label: 'WhatsApp',
+      valore: '+39 000 000 0000',
+      href: '#',
+    },
   ],
   seo: {
     titolo: 'Cartafolia — vetrina e catalogo, Ceccano',
@@ -904,26 +1105,153 @@ import { createPick, createRng } from '../src/lib/demo/prng'
 import type { Card, CardSet, Condition, Rarity } from '../src/lib/catalog/types'
 
 const SETS: CardSet[] = [
-  { id: 'alb', name: 'Alba Cromatica', code: 'ALB', year: 2024, total: 198, color: 'var(--cherry-500)' },
-  { id: 'eco', name: 'Eco del Vulcano', code: 'ECO', year: 2024, total: 165, color: 'var(--lemon-500)' },
-  { id: 'mar', name: 'Marea Silente', code: 'MAR', year: 2023, total: 172, color: 'var(--cyan-500)' },
-  { id: 'rad', name: 'Radici Profonde', code: 'RAD', year: 2023, total: 154, color: 'var(--lime-500)' },
-  { id: 'cie', name: 'Cieli Spezzati', code: 'CIE', year: 2022, total: 189, color: 'var(--grape-500)' },
-  { id: 'for', name: 'Fornace Antica', code: 'FOR', year: 1999, total: 102, color: 'var(--ink-500)' },
+  {
+    id: 'alb',
+    name: 'Alba Cromatica',
+    code: 'ALB',
+    year: 2024,
+    total: 198,
+    color: 'var(--cherry-500)',
+  },
+  {
+    id: 'eco',
+    name: 'Eco del Vulcano',
+    code: 'ECO',
+    year: 2024,
+    total: 165,
+    color: 'var(--lemon-500)',
+  },
+  {
+    id: 'mar',
+    name: 'Marea Silente',
+    code: 'MAR',
+    year: 2023,
+    total: 172,
+    color: 'var(--cyan-500)',
+  },
+  {
+    id: 'rad',
+    name: 'Radici Profonde',
+    code: 'RAD',
+    year: 2023,
+    total: 154,
+    color: 'var(--lime-500)',
+  },
+  {
+    id: 'cie',
+    name: 'Cieli Spezzati',
+    code: 'CIE',
+    year: 2022,
+    total: 189,
+    color: 'var(--grape-500)',
+  },
+  {
+    id: 'for',
+    name: 'Fornace Antica',
+    code: 'FOR',
+    year: 1999,
+    total: 102,
+    color: 'var(--ink-500)',
+  },
 ]
 
-const NOMI = ['Fulmine','Guardiano','Ala','Serpe','Riccio','Scudo','Volpe','Coleottero','Lupo','Rana','Falco','Tartaruga','Cervo','Salamandra','Gufo','Tasso','Corvo','Lince','Granchio','Pipistrello','Ariete','Talpa','Cavalletta','Anguilla','Istrice']
-const QUAL = ['di Notte',"di Bosco",'di Cenere','di Marea','di Quarzo','di Bruma',"d'Ottone",'di Vetro','di Pioggia','di Sale','di Ferro',"d'Ambra",'di Nebbia','di Brace','di Sabbia',"d'Argento",'di Pietra','Cremisi','Solare','di Lampo']
-const RAR: Rarity[] = ['common','common','common','common','uncommon','uncommon','uncommon','rare','rare','holo','holo','ultra','secret']
-const COND: Condition[] = ['mint','near-mint','near-mint','excellent','excellent','good','good','played']
-const LANG = ['Italiano','Italiano','Italiano','Italiano','Inglese','Inglese','Giapponese']
-const ART = ['M. Ferretti','S. Adani','L. Bonetti','G. Prandi','R. Colella','ignoto']
-const MESI = ['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','settembre','ottobre','novembre']
+const NOMI = [
+  'Fulmine',
+  'Guardiano',
+  'Ala',
+  'Serpe',
+  'Riccio',
+  'Scudo',
+  'Volpe',
+  'Coleottero',
+  'Lupo',
+  'Rana',
+  'Falco',
+  'Tartaruga',
+  'Cervo',
+  'Salamandra',
+  'Gufo',
+  'Tasso',
+  'Corvo',
+  'Lince',
+  'Granchio',
+  'Pipistrello',
+  'Ariete',
+  'Talpa',
+  'Cavalletta',
+  'Anguilla',
+  'Istrice',
+]
+const QUAL = [
+  'di Notte',
+  'di Bosco',
+  'di Cenere',
+  'di Marea',
+  'di Quarzo',
+  'di Bruma',
+  "d'Ottone",
+  'di Vetro',
+  'di Pioggia',
+  'di Sale',
+  'di Ferro',
+  "d'Ambra",
+  'di Nebbia',
+  'di Brace',
+  'di Sabbia',
+  "d'Argento",
+  'di Pietra',
+  'Cremisi',
+  'Solare',
+  'di Lampo',
+]
+const RAR: Rarity[] = [
+  'common',
+  'common',
+  'common',
+  'common',
+  'uncommon',
+  'uncommon',
+  'uncommon',
+  'rare',
+  'rare',
+  'holo',
+  'holo',
+  'ultra',
+  'secret',
+]
+const COND: Condition[] = [
+  'mint',
+  'near-mint',
+  'near-mint',
+  'excellent',
+  'excellent',
+  'good',
+  'good',
+  'played',
+]
+const LANG = ['Italiano', 'Italiano', 'Italiano', 'Italiano', 'Inglese', 'Inglese', 'Giapponese']
+const ART = ['M. Ferretti', 'S. Adani', 'L. Bonetti', 'G. Prandi', 'R. Colella', 'ignoto']
+const MESI = [
+  'gennaio',
+  'febbraio',
+  'marzo',
+  'aprile',
+  'maggio',
+  'giugno',
+  'luglio',
+  'settembre',
+  'ottobre',
+  'novembre',
+]
 
 const slugify = (s: string) =>
-  s.normalize('NFD').replace(/[̀-ͯ]/g, '')
-   .toLowerCase().replace(/['’]/g, '-').replace(/[^a-z0-9]+/g, '-')
-   .replace(/^-+|-+$/g, '')
+  s
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .toLowerCase()
+    .replace(/['’]/g, '-')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
 
 const rnd = createRng(7)
 const pick = createPick(rnd)
@@ -941,8 +1269,13 @@ while (cards.length < 100) {
   cards.push({
     id: String(i),
     slug: `${slugify(name)}-${s.code.toLowerCase()}-${String(n).padStart(3, '0')}`,
-    name, set: s.id, num,
-    rarity: pick(RAR), cond: pick(COND), lang: pick(LANG), artist: pick(ART),
+    name,
+    set: s.id,
+    num,
+    rarity: pick(RAR),
+    cond: pick(COND),
+    lang: pick(LANG),
+    artist: pick(ART),
     nuovo: i <= 9,
     vetrina: 1 + Math.floor(rnd() * 4),
     entrata: `${1 + Math.floor(rnd() * 27)} ${pick(MESI)}`,
@@ -954,8 +1287,20 @@ const slugs = new Set(cards.map((c) => c.slug))
 if (slugs.size !== cards.length) throw new Error('slug duplicati fra le carte demo')
 
 const COLONNE = [
-  'id','slug','name','set','num','rarity','cond','lang','artist',
-  'nuovo','vetrina','entrata','ordine','image',
+  'id',
+  'slug',
+  'name',
+  'set',
+  'num',
+  'rarity',
+  'cond',
+  'lang',
+  'artist',
+  'nuovo',
+  'vetrina',
+  'entrata',
+  'ordine',
+  'image',
 ] as const
 
 /** Virgolette solo dove servono: virgola, virgoletta o a capo nel valore. */
@@ -968,8 +1313,9 @@ mkdirSync('src/content', { recursive: true })
 writeFileSync('src/content/sets.json', JSON.stringify(SETS, null, 2) + '\n')
 writeFileSync(
   'src/content/cards.csv',
-  [COLONNE.join(','), ...cards.map((c) => COLONNE.map((k) => cella((c as any)[k])).join(','))]
-    .join('\n') + '\n',
+  [COLONNE.join(','), ...cards.map((c) => COLONNE.map((k) => cella((c as any)[k])).join(','))].join(
+    '\n',
+  ) + '\n',
 )
 console.log(`generate ${cards.length} carte e ${SETS.length} espansioni`)
 ```
@@ -1002,8 +1348,12 @@ const condition = z.enum(['mint', 'near-mint', 'excellent', 'good', 'played'])
 const sets = defineCollection({
   loader: file('src/content/sets.json'),
   schema: z.object({
-    id: z.string(), name: z.string(), code: z.string(),
-    year: z.number().int(), total: z.number().int().positive(), color: z.string(),
+    id: z.string(),
+    name: z.string(),
+    code: z.string(),
+    year: z.number().int(),
+    total: z.number().int().positive(),
+    color: z.string(),
   }),
 })
 
@@ -1014,13 +1364,25 @@ const cards = defineCollection({
   // Da CSV ogni campo arriva come stringa: z.coerce converte, e un valore
   // non convertibile fa fallire il build indicando la riga.
   schema: z.object({
-    id: z.string(), slug: z.string(), name: z.string(), set: z.string(),
-    num: z.string(), rarity, cond: condition, lang: z.string(), artist: z.string(),
-    nuovo: z.union([z.boolean(), z.enum(['true', 'false'])]).transform((v) => v === true || v === 'true'),
+    id: z.string(),
+    slug: z.string(),
+    name: z.string(),
+    set: z.string(),
+    num: z.string(),
+    rarity,
+    cond: condition,
+    lang: z.string(),
+    artist: z.string(),
+    nuovo: z
+      .union([z.boolean(), z.enum(['true', 'false'])])
+      .transform((v) => v === true || v === 'true'),
     vetrina: z.coerce.number().int(),
     entrata: z.string(),
     ordine: z.coerce.number().int(),
-    image: z.string().optional().transform((v) => (v === '' ? undefined : v)),
+    image: z
+      .string()
+      .optional()
+      .transform((v) => (v === '' ? undefined : v)),
   }),
 })
 
@@ -1034,6 +1396,7 @@ Se l'API dei loader di Astro 7 differisce da questa firma, consultare `https://d
 ```bash
 pnpm check
 ```
+
 Atteso: 0 errori. Poi rompere di proposito una riga — in `src/content/cards.csv` sostituire un `holo` con `leggendaria` — e rilanciare `pnpm check`. Atteso: errore che nomina il campo `rarity` e permette di risalire alla riga. **Ripristinare il valore** dopo la verifica.
 
 Ripetere con una riga a cui manca una colonna, che e' l'errore piu' probabile quando i dati arrivano da un foglio di calcolo: anche quella deve fermare il build.
@@ -1052,22 +1415,29 @@ contenuto editabile invece che codice, e Zod li valida al build."
 ```
 
 ---
+
 ### Task 6: Ricerca — haystack precalcolato
 
 Semantica copiata da `design-reference/catalogo.jsx`, funzione `cerca`:
 
 ```js
-const cerca=c=>!q||[c.name,codeOf(c),setOf(c.set).name,labelRarita(c.rarity),
-  labelCond(c.cond),c.lang,c.artist].join(" ").toLowerCase().includes(q);
+const cerca = (c) =>
+  !q ||
+  [c.name, codeOf(c), setOf(c.set).name, labelRarita(c.rarity), labelCond(c.cond), c.lang, c.artist]
+    .join(' ')
+    .toLowerCase()
+    .includes(q)
 ```
 
 dove `q = query.trim().toLowerCase()`. La ricerca è **substring, non per parole**: `"olo"` trova `"Holo"`. Va riprodotta così com'è.
 
 **Files:**
+
 - Create: `src/lib/catalog/search.ts`
 - Test: `src/lib/catalog/search.test.ts`
 
 **Interfaces:**
+
 - Consumes: `Card`, `CardSet` da `./types`; `RARITY_LABELS`, `CONDITION_LABELS`, **`cardCode`** da `./labels` (definito al Task 5, non ridefinirlo qui)
 - Produces:
   - `buildHaystack(card: Card, set: CardSet): string`
@@ -1085,15 +1455,28 @@ import { buildHaystack, matches, normalizeQuery } from './search'
 import type { Card, CardSet } from './types'
 
 const set: CardSet = {
-  id: 'alb', name: 'Alba Cromatica', code: 'ALB',
-  year: 2024, total: 198, color: 'var(--cherry-500)',
+  id: 'alb',
+  name: 'Alba Cromatica',
+  code: 'ALB',
+  year: 2024,
+  total: 198,
+  color: 'var(--cherry-500)',
 }
 
 const card: Card = {
-  id: '1', slug: 'fulmine-di-notte-alb-042', name: 'Fulmine di Notte',
-  set: 'alb', num: '042/198', rarity: 'holo', cond: 'near-mint',
-  lang: 'Italiano', artist: 'M. Ferretti', nuovo: true,
-  vetrina: 2, entrata: '4 marzo', ordine: 120,
+  id: '1',
+  slug: 'fulmine-di-notte-alb-042',
+  name: 'Fulmine di Notte',
+  set: 'alb',
+  num: '042/198',
+  rarity: 'holo',
+  cond: 'near-mint',
+  lang: 'Italiano',
+  artist: 'M. Ferretti',
+  nuovo: true,
+  vetrina: 2,
+  entrata: '4 marzo',
+  ordine: 120,
 }
 
 describe('cardCode', () => {
@@ -1210,10 +1593,12 @@ ricerca a runtime e' un includes()."
 Semantica copiata da `design-reference/catalogo.jsx`. I filtri sono in AND fra categorie e in OR dentro una categoria; una categoria vuota non filtra.
 
 **Files:**
+
 - Create: `src/lib/catalog/query.ts`
 - Test: `src/lib/catalog/query.test.ts`
 
 **Interfaces:**
+
 - Consumes: `Card`, `CardSet`, `CardQuery`, `Page`, `SortKey` da `./types`; `matches`, `buildHaystack` da `./search`; `RARITY_RANK`, `FOIL_RARITIES`, `PER_PAGE` da `./labels`
 - Produces:
   - `type IndexedCard = Card & { haystack: string }`
@@ -1238,22 +1623,39 @@ const SETS: CardSet[] = [
 ]
 
 const base = {
-  lang: 'Italiano', artist: 'ignoto', nuovo: false,
-  vetrina: 1, entrata: '1 marzo', image: undefined,
+  lang: 'Italiano',
+  artist: 'ignoto',
+  nuovo: false,
+  vetrina: 1,
+  entrata: '1 marzo',
+  image: undefined,
 } as const
 
 const mk = (o: Partial<IndexedCard> & { id: string; name: string; set: string }): IndexedCard => {
   const set = SETS.find((s) => s.id === o.set)!
   const card = {
-    slug: `${o.id}-slug`, num: '001/198', rarity: 'common', cond: 'mint',
-    ordine: 0, ...base, ...o,
+    slug: `${o.id}-slug`,
+    num: '001/198',
+    rarity: 'common',
+    cond: 'mint',
+    ordine: 0,
+    ...base,
+    ...o,
   } as IndexedCard
   return { ...card, haystack: buildHaystack(card, set) }
 }
 
 const CARDS: IndexedCard[] = [
   mk({ id: '1', name: 'Alfa', set: 'alb', rarity: 'holo', cond: 'mint', nuovo: true, ordine: 30 }),
-  mk({ id: '2', name: 'Beta', set: 'for', rarity: 'common', cond: 'played', lang: 'Inglese', ordine: 10 }),
+  mk({
+    id: '2',
+    name: 'Beta',
+    set: 'for',
+    rarity: 'common',
+    cond: 'played',
+    lang: 'Inglese',
+    ordine: 10,
+  }),
   mk({ id: '3', name: 'Gamma', set: 'alb', rarity: 'ultra', cond: 'good', ordine: 20 }),
   mk({ id: '4', name: 'Delta', set: 'for', rarity: 'rare', cond: 'mint', nuovo: true, ordine: 5 }),
 ]
@@ -1304,11 +1706,21 @@ describe('sortCards', () => {
   })
 
   it('az: alfabetico per nome', () => {
-    expect(sortCards(CARDS, 'az', SETS).map((c) => c.name)).toEqual(['Alfa', 'Beta', 'Delta', 'Gamma'])
+    expect(sortCards(CARDS, 'az', SETS).map((c) => c.name)).toEqual([
+      'Alfa',
+      'Beta',
+      'Delta',
+      'Gamma',
+    ])
   })
 
   it('espansione: per nome espansione, pareggi per numero carta', () => {
-    expect(sortCards(CARDS, 'espansione', SETS).map((c) => c.set)).toEqual(['alb', 'alb', 'for', 'for'])
+    expect(sortCards(CARDS, 'espansione', SETS).map((c) => c.set)).toEqual([
+      'alb',
+      'alb',
+      'for',
+      'for',
+    ])
   })
 
   it('non muta l array in ingresso', () => {
@@ -1404,11 +1816,7 @@ export function paginate<T>(items: T[], page: number, perPage: number): Page<T> 
   return { items: items.slice(from, from + perPage), total: items.length, page, pages }
 }
 
-export function queryCards(
-  cards: IndexedCard[],
-  sets: CardSet[],
-  q: CardQuery,
-): Page<IndexedCard> {
+export function queryCards(cards: IndexedCard[], sets: CardSet[], q: CardQuery): Page<IndexedCard> {
   const filtrate = filterCards(cards, q)
   const ordinate = sortCards(filtrate, q.sort ?? 'novita', sets)
   return paginate(ordinate, q.page ?? 1, q.perPage ?? PER_PAGE)
@@ -1432,17 +1840,20 @@ E' il cuore del catalogo e sta tutto sotto test."
 ```
 
 ---
+
 ### Task 8: Sorgente statica, facade e indice emesso a build time
 
 Qui si materializza il seam della spec §5.2: l'isola del catalogo **non importerà mai** `source.static.ts`, ma farà `fetch('/api/catalog.json')`. Questo task produce quel file.
 
 **Files:**
+
 - Create: `src/lib/catalog/source.static.ts`, `src/lib/catalog/index.ts`
 - Create: `src/integrations/catalog-index.ts`
 - Modify: `astro.config.mjs`
 - Test: `src/lib/catalog/source.static.test.ts`
 
 **Interfaces:**
+
 - Consumes: `queryCards`, `IndexedCard` (Task 7); `buildHaystack` (Task 6); collection `cards` e `sets` (Task 5)
 - Produces:
   - `staticSource: CatalogSource`
@@ -1484,9 +1895,19 @@ const SETS: CardSet[] = [
 ]
 const CARDS: Card[] = [
   {
-    id: '1', slug: 's1', name: 'Alfa', set: 'alb', num: '042/198',
-    rarity: 'holo', cond: 'near-mint', lang: 'Italiano', artist: 'M. Ferretti',
-    nuovo: true, vetrina: 2, entrata: '4 marzo', ordine: 120,
+    id: '1',
+    slug: 's1',
+    name: 'Alfa',
+    set: 'alb',
+    num: '042/198',
+    rarity: 'holo',
+    cond: 'near-mint',
+    lang: 'Italiano',
+    artist: 'M. Ferretti',
+    nuovo: true,
+    vetrina: 2,
+    entrata: '4 marzo',
+    ordine: 120,
   },
 ]
 
@@ -1527,12 +1948,21 @@ import { buildHaystack } from './search'
 import { queryCards, type IndexedCard } from './query'
 import type { Card, CardQuery, CardSet, CatalogSource, Page } from './types'
 
-export interface CatalogPayload { version: 1; sets: CardSet[]; cards: Card[] }
-export interface SearchPayload { version: 1; haystacks: string[] }
+export interface CatalogPayload {
+  version: 1
+  sets: CardSet[]
+  cards: Card[]
+}
+export interface SearchPayload {
+  version: 1
+  haystacks: string[]
+}
 
 /** Pure: testabili senza Astro. */
 export const buildCatalogPayload = (cards: Card[], sets: CardSet[]): CatalogPayload => ({
-  version: 1, sets, cards,
+  version: 1,
+  sets,
+  cards,
 })
 
 export const buildSearchPayload = (cards: Card[], sets: CardSet[]): SearchPayload => ({
@@ -1594,9 +2024,14 @@ export * from './labels'
 export { buildHaystack, matches, normalizeQuery } from './search'
 export { filterCards, sortCards, paginate, queryCards, type IndexedCard } from './query'
 export {
-  staticSource, getAllCards, getAllSets, getIndexedCards,
-  buildCatalogPayload, buildSearchPayload,
-  type CatalogPayload, type SearchPayload,
+  staticSource,
+  getAllCards,
+  getAllSets,
+  getIndexedCards,
+  buildCatalogPayload,
+  buildSearchPayload,
+  type CatalogPayload,
+  type SearchPayload,
 } from './source.static'
 ```
 
@@ -1626,7 +2061,10 @@ export function catalogIndex(): AstroIntegration {
         const out = join(fileURLToPath(dir), 'api')
         mkdirSync(out, { recursive: true })
         writeFileSync(join(out, 'catalog.json'), JSON.stringify(buildCatalogPayload(cards, sets)))
-        writeFileSync(join(out, 'search-index.json'), JSON.stringify(buildSearchPayload(cards, sets)))
+        writeFileSync(
+          join(out, 'search-index.json'),
+          JSON.stringify(buildSearchPayload(cards, sets)),
+        )
         logger.info(`emessi api/catalog.json (${cards.length} carte) e api/search-index.json`)
       },
     },
@@ -1661,6 +2099,7 @@ node -e "const c=require('./dist/api/catalog.json');const s=require('./dist/api/
 console.log('carte:',c.cards.length,'espansioni:',c.sets.length,'haystack:',s.haystacks.length);
 if(c.cards.length!==s.haystacks.length) throw new Error('payload non paralleli')"
 ```
+
 Atteso: `carte: 100 espansioni: 6 haystack: 100`.
 
 - [ ] **Step 9: Commit**
@@ -1676,6 +2115,7 @@ componenti cambino."
 ```
 
 ---
+
 # FASE 2 — Design system in Svelte
 
 ## Protocollo di porting (vale per i Task 9-14)
@@ -1704,8 +2144,13 @@ fontSize: it.mono ? "var(--fs-body-s)"  : "var(--fs-body-s)",   // lo STESSO val
 In React `fontSize` viene dopo `font` nello stesso oggetto, quindi vince sempre: il testo è 14px in entrambi i casi. Diviso in CSS diventava
 
 ```css
-.ds-speclist__dd       { font:var(--type-body); font-size:var(--fs-body-s) }
-.ds-speclist__dd--mono { font:var(--type-code) }   /* ← reimposta font-size a --fs-caption, 12px */
+.ds-speclist__dd {
+  font: var(--type-body);
+  font-size: var(--fs-body-s);
+}
+.ds-speclist__dd--mono {
+  font: var(--type-code);
+} /* ← reimposta font-size a --fs-caption, 12px */
 ```
 
 e ogni riga mono rendeva a 12px invece di 14.
@@ -1761,19 +2206,11 @@ Sorgente: `design-reference/_ds/_ds_bundle.js:11-90`. È il modello per Badge, R
   } = $props()
 
   // Fedele a bundle:24 — un code non-stringa e falsy (0, NaN) rende stringa vuota.
-  const caption = $derived(
-    typeof code === 'string' ? code.trim() : code ? String(code) : '',
-  )
-  const isFoil = $derived(
-    foil || rarity === 'holo' || rarity === 'ultra' || rarity === 'secret',
-  )
+  const caption = $derived(typeof code === 'string' ? code.trim() : code ? String(code) : '')
+  const isFoil = $derived(foil || rarity === 'holo' || rarity === 'ultra' || rarity === 'secret')
 </script>
 
-<div
-  class="ds-cardart"
-  class:is-foil={isFoil}
-  style="border-radius:{radius};{style}"
->
+<div class="ds-cardart" class:is-foil={isFoil} style="border-radius:{radius};{style}">
   {#if src}
     <img {src} {alt} class="ds-cardart__img" />
   {:else}
@@ -1793,22 +2230,63 @@ in `src/styles/ds.css`:
 
 ```css
 /* CardArt — bundle:11-90 */
-.ds-cardart{position:relative;aspect-ratio:var(--card-aspect);width:100%;overflow:hidden;
-  background:linear-gradient(160deg,var(--ink-100),var(--paper-100));
-  box-shadow:var(--sh-inset-hairline)}
-.ds-cardart.is-foil{background:var(--foil)}
-.ds-cardart__img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
-.ds-cardart__ph{position:absolute;inset:0;display:grid;place-items:center;container-type:inline-size;
-  background:var(--pattern-dots) 0 0/var(--pattern-dots-size)}
-.ds-cardart.is-foil .ds-cardart__ph{
-  background:radial-gradient(120% 90% at 30% 15%,rgba(255,255,255,.65),transparent 60%)}
-.ds-cardart__code{font:var(--type-code);letter-spacing:var(--ls-eyebrow);text-transform:uppercase;
-  color:var(--text-faint);text-align:center;padding:0 8px;max-width:100%;overflow:hidden;
-  text-overflow:ellipsis;white-space:nowrap;font-size:clamp(7px,14cqw,12px);container-type:inline-size}
-.ds-cardart.is-foil .ds-cardart__code{color:rgba(14,11,18,.5)}
-.ds-cardart__sheen{position:absolute;inset:0;background:var(--foil-sheen);mix-blend-mode:screen;
-  pointer-events:none;
-  transition:opacity var(--dur-base) var(--ease-out),transform var(--dur-slow) var(--ease-out)}
+.ds-cardart {
+  position: relative;
+  aspect-ratio: var(--card-aspect);
+  width: 100%;
+  overflow: hidden;
+  background: linear-gradient(160deg, var(--ink-100), var(--paper-100));
+  box-shadow: var(--sh-inset-hairline);
+}
+.ds-cardart.is-foil {
+  background: var(--foil);
+}
+.ds-cardart__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.ds-cardart__ph {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  container-type: inline-size;
+  background: var(--pattern-dots) 0 0 / var(--pattern-dots-size);
+}
+.ds-cardart.is-foil .ds-cardart__ph {
+  background: radial-gradient(120% 90% at 30% 15%, rgba(255, 255, 255, 0.65), transparent 60%);
+}
+.ds-cardart__code {
+  font: var(--type-code);
+  letter-spacing: var(--ls-eyebrow);
+  text-transform: uppercase;
+  color: var(--text-faint);
+  text-align: center;
+  padding: 0 8px;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: clamp(7px, 14cqw, 12px);
+  container-type: inline-size;
+}
+.ds-cardart.is-foil .ds-cardart__code {
+  color: rgba(14, 11, 18, 0.5);
+}
+.ds-cardart__sheen {
+  position: absolute;
+  inset: 0;
+  background: var(--foil-sheen);
+  mix-blend-mode: screen;
+  pointer-events: none;
+  transition:
+    opacity var(--dur-base) var(--ease-out),
+    transform var(--dur-slow) var(--ease-out);
+}
 ```
 
 `opacity` e `transform` dello sheen restano inline perché derivano dalla prop `sheen`, che è un dato. Tutto il resto è CSS.
@@ -1854,10 +2332,11 @@ Nel prototipo `hover` e `press` sono due `useState`. Qui diventano `:hover` e `:
     class:ds-btn--full={fullWidth}
     data-variant={variant}
     data-size={size}
-    href={href}
+    {href}
     {onclick}
     {style}
-    {...rest}>{@render inner()}</a>
+    {...rest}>{@render inner()}</a
+  >
 {:else}
   <button
     class="ds-btn"
@@ -1867,7 +2346,8 @@ Nel prototipo `hover` e `press` sono due `useState`. Qui diventano `:hover` e `:
     {disabled}
     onclick={disabled ? undefined : onclick}
     {style}
-    {...rest}>{@render inner()}</button>
+    {...rest}>{@render inner()}</button
+  >
 {/if}
 ```
 
@@ -1875,43 +2355,109 @@ in `src/styles/ds.css`:
 
 ```css
 /* Button — bundle:378-498. hover/press erano useState, qui sono :hover/:active. */
-.ds-btn{display:inline-flex;align-items:center;justify-content:center;
-  font:var(--type-label);font-weight:var(--fw-bold);letter-spacing:-.01em;
-  text-decoration:none;white-space:nowrap;border-radius:var(--r-control);cursor:pointer;
-  transition:var(--t-control);
-  background:var(--btn-bg);color:var(--btn-fg);border:var(--btn-bd);box-shadow:var(--btn-sh)}
+.ds-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font: var(--type-label);
+  font-weight: var(--fw-bold);
+  letter-spacing: -0.01em;
+  text-decoration: none;
+  white-space: nowrap;
+  border-radius: var(--r-control);
+  cursor: pointer;
+  transition: var(--t-control);
+  background: var(--btn-bg);
+  color: var(--btn-fg);
+  border: var(--btn-bd);
+  box-shadow: var(--btn-sh);
+}
 
-.ds-btn[data-size="sm"]{padding:8px 16px;font-size:var(--fs-body-s);gap:6px;min-height:36px}
-.ds-btn[data-size="md"]{padding:12px 22px;font-size:var(--fs-body-m);gap:8px;min-height:46px}
-.ds-btn[data-size="lg"]{padding:16px 30px;font-size:var(--fs-body-l);gap:10px;min-height:56px}
+.ds-btn[data-size='sm'] {
+  padding: 8px 16px;
+  font-size: var(--fs-body-s);
+  gap: 6px;
+  min-height: 36px;
+}
+.ds-btn[data-size='md'] {
+  padding: 12px 22px;
+  font-size: var(--fs-body-m);
+  gap: 8px;
+  min-height: 46px;
+}
+.ds-btn[data-size='lg'] {
+  padding: 16px 30px;
+  font-size: var(--fs-body-l);
+  gap: 10px;
+  min-height: 56px;
+}
 
 /* Fallback: il sorgente fa VARIANTS[variant] || VARIANTS.primary, quindi una
    variante sconosciuta deve rendere come primary, non senza stile. */
-.ds-btn{--btn-bg:var(--surface-brand);--btn-fg:var(--text-invert);
-  --btn-bd:var(--bw-strong) solid var(--ink-950);--btn-sh:var(--sh-sticker-sm);
-  --btn-bg-hover:var(--surface-brand-hover)}
-.ds-btn[data-variant="primary"]{--btn-bg:var(--surface-brand);--btn-fg:var(--text-invert);
-  --btn-bd:var(--bw-strong) solid var(--ink-950);--btn-sh:var(--sh-sticker-sm);
-  --btn-bg-hover:var(--surface-brand-hover)}
-.ds-btn[data-variant="secondary"]{--btn-bg:var(--surface-card);--btn-fg:var(--text-strong);
-  --btn-bd:var(--bw-strong) solid var(--ink-950);--btn-sh:var(--sh-sticker-sm);
-  --btn-bg-hover:var(--paper-100)}
-.ds-btn[data-variant="ghost"]{--btn-bg:transparent;--btn-fg:var(--text-strong);
-  --btn-bd:var(--bw-strong) solid transparent;--btn-sh:none;--btn-bg-hover:var(--ink-50)}
-.ds-btn[data-variant="foil"]{--btn-bg:var(--foil);--btn-fg:var(--ink-950);
-  --btn-bd:var(--bw-strong) solid var(--ink-950);--btn-sh:var(--sh-sticker-sm);
-  --btn-bg-hover:var(--foil)}
-.ds-btn[data-variant="invert"]{--btn-bg:var(--surface-invert);--btn-fg:var(--text-invert);
-  --btn-bd:var(--bw-strong) solid var(--ink-950);--btn-sh:none;--btn-bg-hover:var(--ink-800)}
-
-@media (hover:hover){
-  .ds-btn:not(:disabled):hover{background:var(--btn-bg-hover);
-    box-shadow:var(--sh-sticker);transform:translateY(-2px)}
+.ds-btn {
+  --btn-bg: var(--surface-brand);
+  --btn-fg: var(--text-invert);
+  --btn-bd: var(--bw-strong) solid var(--ink-950);
+  --btn-sh: var(--sh-sticker-sm);
+  --btn-bg-hover: var(--surface-brand-hover);
 }
-.ds-btn:not(:disabled):active{box-shadow:none;transform:translate(2px,2px)}
-.ds-btn:disabled,.ds-btn[aria-disabled="true"]{opacity:.4;cursor:not-allowed;
-  box-shadow:none;transform:none}
-.ds-btn--full{width:100%}
+.ds-btn[data-variant='primary'] {
+  --btn-bg: var(--surface-brand);
+  --btn-fg: var(--text-invert);
+  --btn-bd: var(--bw-strong) solid var(--ink-950);
+  --btn-sh: var(--sh-sticker-sm);
+  --btn-bg-hover: var(--surface-brand-hover);
+}
+.ds-btn[data-variant='secondary'] {
+  --btn-bg: var(--surface-card);
+  --btn-fg: var(--text-strong);
+  --btn-bd: var(--bw-strong) solid var(--ink-950);
+  --btn-sh: var(--sh-sticker-sm);
+  --btn-bg-hover: var(--paper-100);
+}
+.ds-btn[data-variant='ghost'] {
+  --btn-bg: transparent;
+  --btn-fg: var(--text-strong);
+  --btn-bd: var(--bw-strong) solid transparent;
+  --btn-sh: none;
+  --btn-bg-hover: var(--ink-50);
+}
+.ds-btn[data-variant='foil'] {
+  --btn-bg: var(--foil);
+  --btn-fg: var(--ink-950);
+  --btn-bd: var(--bw-strong) solid var(--ink-950);
+  --btn-sh: var(--sh-sticker-sm);
+  --btn-bg-hover: var(--foil);
+}
+.ds-btn[data-variant='invert'] {
+  --btn-bg: var(--surface-invert);
+  --btn-fg: var(--text-invert);
+  --btn-bd: var(--bw-strong) solid var(--ink-950);
+  --btn-sh: none;
+  --btn-bg-hover: var(--ink-800);
+}
+
+@media (hover: hover) {
+  .ds-btn:not(:disabled):hover {
+    background: var(--btn-bg-hover);
+    box-shadow: var(--sh-sticker);
+    transform: translateY(-2px);
+  }
+}
+.ds-btn:not(:disabled):active {
+  box-shadow: none;
+  transform: translate(2px, 2px);
+}
+.ds-btn:disabled,
+.ds-btn[aria-disabled='true'] {
+  opacity: 0.4;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+.ds-btn--full {
+  width: 100%;
+}
 ```
 
 Confronto con la sorgente, riga per riga: `padding`, `fontSize`, `gap`, `minHeight` dai `SIZES`; `background`, `color`, `border`, `shadow`, `hoverBg` dai `VARIANTS`; `boxShadow: hover ? "var(--sh-sticker)"`, `transform: press ? "translate(2px,2px)" : hover ? "translateY(-2px)"`, `opacity: disabled ? .4 : 1`. Tutti presenti, tutti con gli stessi valori.
@@ -1921,6 +2467,7 @@ Confronto con la sorgente, riga per riga: `padding`, `fontSize`, `gap`, `minHeig
 ### Task 9: Primitivi senza stato
 
 **Files:**
+
 - Create: `src/components/ds/{CardArt,Badge,RarityBadge,ConditionBadge,SpecList,Skeleton,EmptyState}.svelte`
 - Modify: `src/styles/ds.css`
 - Create: `src/pages/ds-gallery.astro` (galleria di verifica, rimossa al Task 27)
@@ -1928,18 +2475,19 @@ Confronto con la sorgente, riga per riga: `padding`, `fontSize`, `gap`, `minHeig
 **Nota sul nome del file:** non usare un nome che inizi per `_`. Astro esclude dal routing ogni segmento di percorso che comincia con un underscore, quindi `__ds.astro` restituirebbe 404 sia in dev sia nel build.
 
 **Interfaces:**
+
 - Consumes: `Icon` (Task 4), token (Task 3), tipi `Rarity`/`Condition` (Task 5)
 - Produces: i sette componenti, tutti **senza direttiva `client:`**: sono HTML statico
 
-| Componente | Sorgente | Nota di porting |
-|---|---|---|
-| `CardArt` | `bundle:11-90` | Vedi Esempio A qui sopra |
-| `ConditionBadge` | `bundle:91-167` | La mappa `COND` con `label`/`short`/`level`/`color` va copiata così com'è. I 5 trattini della scala hanno altezza `4 + i * 1.6` px: è una formula, resta in JS |
-| `RarityBadge` | `bundle:168-250` | La mappa `RARITY` porta `dots` da 1 a 6. `size="sm"` cambia diametro (5 contro 6) e padding |
-| `SpecList` | `bundle:251-299` | Struttura `<dl>/<div>/<dt>/<dd>`, da rispettare: è semantica, non decorazione. `it.mono` cambia il font del `<dd>` |
-| `Badge` | `bundle:300-377` | Leggere la mappa `TONES` alla riga 303 e copiarne tutte le voci, compresa `foil` |
-| `Skeleton` | `bundle:1192-1229` | L'animazione di pulsazione va in `ds.css` come `@keyframes`, non in JS |
-| `EmptyState` | `bundle:1131-1191` | `action` diventa una prop snippet |
+| Componente       | Sorgente           | Nota di porting                                                                                                                                                |
+| ---------------- | ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `CardArt`        | `bundle:11-90`     | Vedi Esempio A qui sopra                                                                                                                                       |
+| `ConditionBadge` | `bundle:91-167`    | La mappa `COND` con `label`/`short`/`level`/`color` va copiata così com'è. I 5 trattini della scala hanno altezza `4 + i * 1.6` px: è una formula, resta in JS |
+| `RarityBadge`    | `bundle:168-250`   | La mappa `RARITY` porta `dots` da 1 a 6. `size="sm"` cambia diametro (5 contro 6) e padding                                                                    |
+| `SpecList`       | `bundle:251-299`   | Struttura `<dl>/<div>/<dt>/<dd>`, da rispettare: è semantica, non decorazione. `it.mono` cambia il font del `<dd>`                                             |
+| `Badge`          | `bundle:300-377`   | Leggere la mappa `TONES` alla riga 303 e copiarne tutte le voci, compresa `foil`                                                                               |
+| `Skeleton`       | `bundle:1192-1229` | L'animazione di pulsazione va in `ds.css` come `@keyframes`, non in JS                                                                                         |
+| `EmptyState`     | `bundle:1131-1191` | `action` diventa una prop snippet                                                                                                                              |
 
 - [ ] **Step 1: Portare `CardArt`**
 
@@ -1963,34 +2511,37 @@ import Badge from '~/components/ds/Badge.svelte'
 import SpecList from '~/components/ds/SpecList.svelte'
 import Skeleton from '~/components/ds/Skeleton.svelte'
 
-const RARITA = ['common','uncommon','rare','holo','ultra','secret'] as const
-const COND = ['mint','near-mint','excellent','good','played'] as const
+const RARITA = ['common', 'uncommon', 'rare', 'holo', 'ultra', 'secret'] as const
+const COND = ['mint', 'near-mint', 'excellent', 'good', 'played'] as const
 ---
-<html lang="it"><head><meta charset="utf-8" /><title>DS</title></head>
-<body>
-  <div class="wrap sez" style="display:grid;gap:var(--sp-8)">
-    <h2>CardArt — una per rarita</h2>
-    <div class="cards">
-      {RARITA.map((r) => <CardArt rarity={r} code={`ALB 042/198`} />)}
+
+<html lang="it">
+  <head><meta charset="utf-8" /><title>DS</title></head>
+  <body>
+    <div class="wrap sez" style="display:grid;gap:var(--sp-8)">
+      <h2>CardArt — una per rarita</h2>
+      <div class="cards">
+        {RARITA.map((r) => <CardArt rarity={r} code={`ALB 042/198`} />)}
+      </div>
+      <h2>RarityBadge — md e sm</h2>
+      <div style="display:flex;gap:var(--sp-3);flex-wrap:wrap">
+        {RARITA.map((r) => <RarityBadge rarity={r} />)}
+      </div>
+      <div style="display:flex;gap:var(--sp-3);flex-wrap:wrap">
+        {RARITA.map((r) => <RarityBadge rarity={r} size="sm" />)}
+      </div>
+      <h2>ConditionBadge — pieno e compatto</h2>
+      <div style="display:flex;gap:var(--sp-3);flex-wrap:wrap">
+        {COND.map((c) => <ConditionBadge condition={c} />)}
+      </div>
+      <div style="display:flex;gap:var(--sp-3);flex-wrap:wrap">
+        {COND.map((c) => <ConditionBadge condition={c} compact />)}
+      </div>
+      <h2>Skeleton</h2>
+      <div class="cards"><Skeleton shape="card" /><Skeleton count={3} /></div>
     </div>
-    <h2>RarityBadge — md e sm</h2>
-    <div style="display:flex;gap:var(--sp-3);flex-wrap:wrap">
-      {RARITA.map((r) => <RarityBadge rarity={r} />)}
-    </div>
-    <div style="display:flex;gap:var(--sp-3);flex-wrap:wrap">
-      {RARITA.map((r) => <RarityBadge rarity={r} size="sm" />)}
-    </div>
-    <h2>ConditionBadge — pieno e compatto</h2>
-    <div style="display:flex;gap:var(--sp-3);flex-wrap:wrap">
-      {COND.map((c) => <ConditionBadge condition={c} />)}
-    </div>
-    <div style="display:flex;gap:var(--sp-3);flex-wrap:wrap">
-      {COND.map((c) => <ConditionBadge condition={c} compact />)}
-    </div>
-    <h2>Skeleton</h2>
-    <div class="cards"><Skeleton shape="card" /><Skeleton count={3} /></div>
-  </div>
-</body></html>
+  </body>
+</html>
 ```
 
 `Badge` ed `EmptyState` vanno aggiunti alla galleria allo stesso modo, con tutte le loro varianti.
@@ -2022,23 +2573,26 @@ affiancato col prototipo."
 ```
 
 ---
+
 ### Task 10: Controlli — hover e press in CSS
 
 **Files:**
+
 - Create: `src/components/ds/{Button,IconButton,Chip,Panel,Tooltip}.svelte`
 - Modify: `src/styles/ds.css`, `src/pages/ds-gallery.astro`
 
 **Interfaces:**
+
 - Produces: `Button` (props `variant`, `size`, `fullWidth`, `disabled`, `href`, `onclick`, snippet `icon`/`iconRight`/`children`), `IconButton` (`icon: IconName`, `variant`, `size`, `label`, `onclick`), `Chip` (`onclick`, `onRemove`, snippet `children`), `Panel` (`variant`, `padding`, `hoverLift`, `as`), `Tooltip` (`label`, `side`)
 - Tutti **senza direttiva `client:`**: dopo la conversione degli hover in CSS non hanno più stato
 
-| Componente | Sorgente | Nota di porting |
-|---|---|---|
-| `Button` | `bundle:378-498` | Vedi Esempio B qui sopra |
-| `IconButton` | `bundle:674-754` | Stessa struttura di `Button` ma quadrato. `label` è obbligatoria e diventa `aria-label`: è l'unico testo che un lettore di schermo trova |
-| `Chip` | `bundle:610-673` | Quando c'è `onRemove` compare una `x`. Il bottone di rimozione va **annidato** ma con `onclick` che ferma la propagazione, altrimenti scatta anche l'`onclick` del chip |
-| `Panel` | `bundle:902-965` | Cinque `SKINS`: `card`, `sunken`, `sticker`, `invert`, `foil`. `hoverLift` diventa la classe `.ds-panel--lift`, e **solo quella classe** attiva `:hover`. Attenzione: per `sticker` e `foil` l'ombra in hover è `6px 6px 0 var(--ink-950)`, non `var(--sh-3)` |
-| `Tooltip` | `bundle:966-1029` | `open` era `useState` su mouse **e focus**: in CSS diventa `:hover` **e** `:focus-within`, entrambi necessari per l'accessibilità da tastiera. Le quattro posizioni (`top`/`bottom`/`left`/`right`) diventano `[data-side="..."]` |
+| Componente   | Sorgente          | Nota di porting                                                                                                                                                                                                                                               |
+| ------------ | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Button`     | `bundle:378-498`  | Vedi Esempio B qui sopra                                                                                                                                                                                                                                      |
+| `IconButton` | `bundle:674-754`  | Stessa struttura di `Button` ma quadrato. `label` è obbligatoria e diventa `aria-label`: è l'unico testo che un lettore di schermo trova                                                                                                                      |
+| `Chip`       | `bundle:610-673`  | Quando c'è `onRemove` compare una `x`. Il bottone di rimozione va **annidato** ma con `onclick` che ferma la propagazione, altrimenti scatta anche l'`onclick` del chip                                                                                       |
+| `Panel`      | `bundle:902-965`  | Cinque `SKINS`: `card`, `sunken`, `sticker`, `invert`, `foil`. `hoverLift` diventa la classe `.ds-panel--lift`, e **solo quella classe** attiva `:hover`. Attenzione: per `sticker` e `foil` l'ombra in hover è `6px 6px 0 var(--ink-950)`, non `var(--sh-3)` |
+| `Tooltip`    | `bundle:966-1029` | `open` era `useState` su mouse **e focus**: in CSS diventa `:hover` **e** `:focus-within`, entrambi necessari per l'accessibilità da tastiera. Le quattro posizioni (`top`/`bottom`/`left`/`right`) diventano `[data-side="..."]`                             |
 
 - [ ] **Step 1: Portare `Button`**
 
@@ -2049,34 +2603,78 @@ Copiare esattamente il codice dell'Esempio B (componente + blocco CSS).
 Seguire il protocollo. Per `Panel` la regola di hover è:
 
 ```css
-@media (hover:hover){
-  .ds-panel--lift:hover{transform:var(--lift-hover);box-shadow:var(--sh-3)}
-  .ds-panel--lift[data-variant="sticker"]:hover,
-  .ds-panel--lift[data-variant="foil"]:hover{box-shadow:6px 6px 0 var(--ink-950)}
+@media (hover: hover) {
+  .ds-panel--lift:hover {
+    transform: var(--lift-hover);
+    box-shadow: var(--sh-3);
+  }
+  .ds-panel--lift[data-variant='sticker']:hover,
+  .ds-panel--lift[data-variant='foil']:hover {
+    box-shadow: 6px 6px 0 var(--ink-950);
+  }
 }
 ```
 
 Per `Tooltip`:
 
 ```css
-.ds-tooltip{position:relative;display:inline-flex}
-.ds-tooltip__bubble{position:absolute;z-index:60;pointer-events:none;opacity:0;
-  background:var(--ink-950);color:var(--text-invert);padding:6px 10px;
-  border-radius:var(--r-xs);font:var(--type-label);font-size:var(--fs-caption);
-  white-space:nowrap;box-shadow:var(--sh-2);
-  transition:opacity var(--dur-fast) var(--ease-out),transform var(--dur-fast) var(--ease-snap)}
-.ds-tooltip__bubble[data-side="top"]{bottom:calc(100% + 8px);left:50%;transform:translateX(-50%) translateY(4px)}
-.ds-tooltip__bubble[data-side="bottom"]{top:calc(100% + 8px);left:50%;transform:translateX(-50%) translateY(-4px)}
-.ds-tooltip__bubble[data-side="left"]{right:calc(100% + 8px);top:50%;transform:translateY(-50%)}
-.ds-tooltip__bubble[data-side="right"]{left:calc(100% + 8px);top:50%;transform:translateY(-50%)}
-.ds-tooltip:hover .ds-tooltip__bubble[data-side="top"],
-.ds-tooltip:focus-within .ds-tooltip__bubble[data-side="top"]{opacity:1;transform:translateX(-50%) translateY(0)}
-.ds-tooltip:hover .ds-tooltip__bubble[data-side="bottom"],
-.ds-tooltip:focus-within .ds-tooltip__bubble[data-side="bottom"]{opacity:1;transform:translateX(-50%) translateY(0)}
-.ds-tooltip:hover .ds-tooltip__bubble[data-side="left"],
-.ds-tooltip:focus-within .ds-tooltip__bubble[data-side="left"],
-.ds-tooltip:hover .ds-tooltip__bubble[data-side="right"],
-.ds-tooltip:focus-within .ds-tooltip__bubble[data-side="right"]{opacity:1}
+.ds-tooltip {
+  position: relative;
+  display: inline-flex;
+}
+.ds-tooltip__bubble {
+  position: absolute;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0;
+  background: var(--ink-950);
+  color: var(--text-invert);
+  padding: 6px 10px;
+  border-radius: var(--r-xs);
+  font: var(--type-label);
+  font-size: var(--fs-caption);
+  white-space: nowrap;
+  box-shadow: var(--sh-2);
+  transition:
+    opacity var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-snap);
+}
+.ds-tooltip__bubble[data-side='top'] {
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+}
+.ds-tooltip__bubble[data-side='bottom'] {
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%) translateY(-4px);
+}
+.ds-tooltip__bubble[data-side='left'] {
+  right: calc(100% + 8px);
+  top: 50%;
+  transform: translateY(-50%);
+}
+.ds-tooltip__bubble[data-side='right'] {
+  left: calc(100% + 8px);
+  top: 50%;
+  transform: translateY(-50%);
+}
+.ds-tooltip:hover .ds-tooltip__bubble[data-side='top'],
+.ds-tooltip:focus-within .ds-tooltip__bubble[data-side='top'] {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+.ds-tooltip:hover .ds-tooltip__bubble[data-side='bottom'],
+.ds-tooltip:focus-within .ds-tooltip__bubble[data-side='bottom'] {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+.ds-tooltip:hover .ds-tooltip__bubble[data-side='left'],
+.ds-tooltip:focus-within .ds-tooltip__bubble[data-side='left'],
+.ds-tooltip:hover .ds-tooltip__bubble[data-side='right'],
+.ds-tooltip:focus-within .ds-tooltip__bubble[data-side='right'] {
+  opacity: 1;
+}
 ```
 
 - [ ] **Step 3: Estendere la galleria**
@@ -2086,6 +2684,7 @@ Aggiungere a `src/pages/ds-gallery.astro`: le 5 varianti di `Button` × 3 dimens
 - [ ] **Step 4: Verificare hover, press e tastiera**
 
 Affiancato al prototipo su `:4322`:
+
 - passare il mouse su un `Button` primario: si alza di 2px e l'ombra sticker passa da 3px a 4px;
 - tenere premuto: si sposta di `2px,2px` e l'ombra sparisce;
 - **navigare con Tab**: ogni controllo deve mostrare l'anello di focus `2px solid var(--focus-ring)` da `base.css`, e il `Tooltip` deve aprirsi al focus, non solo all'hover;
@@ -2097,6 +2696,7 @@ Affiancato al prototipo su `:4322`:
 pnpm build
 ls dist/_astro/*.js 2>/dev/null | head
 ```
+
 Atteso: nessun bundle JS generato dalla pagina `__ds`, perché nessun componente ha `client:`.
 
 - [ ] **Step 6: Commit**
@@ -2115,21 +2715,23 @@ controlli funzionano in pagine che non idratano nulla."
 ### Task 11: Campi e filtri
 
 **Files:**
+
 - Create: `src/components/ds/{Input,SearchField,Select,Checkbox,Switch,FilterGroup}.svelte`
 - Modify: `src/styles/ds.css`, `src/pages/ds-gallery.astro`
 
 **Interfaces:**
+
 - Produces: `Input`, `SearchField` (`value`, `oninput`, `onclear`, `suggestions`, `onpick`, `size`), `Select` (`value`, `options`, `onchange`, `size`), `Checkbox` (`checked`, `label`, `description`, `count`, `onchange`), `Switch` (`checked`, `label`, `onchange`), `FilterGroup` (`title`, `activeCount`, `defaultOpen`, snippet `children`)
 - `SearchField`, `Select`, `Checkbox`, `Switch`, `FilterGroup` hanno stato **vero** (valore, apertura): vanno usati dentro un'isola
 
-| Componente | Sorgente | Nota di porting |
-|---|---|---|
-| `Input` | `bundle:1411-1482` | Il `focus` era `useState`: diventa `:focus-within` sul contenitore |
-| `SearchField` | `bundle:1483-1596` | Vedi sotto: è il più delicato |
-| `Select` | `bundle:1597-1670` | Resta un `<select>` nativo: accessibile e senza JS di posizionamento |
-| `Checkbox` | `bundle:1323-1410` | `<input type="checkbox">` reale nascosto + riquadro disegnato, così Tab e Spazio funzionano da soli |
-| `Switch` | `bundle:1671-1736` | `<input type="checkbox" role="switch">` |
-| `FilterGroup` | `bundle:534-609` | L'apertura era `useState`. Usare `<details open={defaultOpen}>` + `<summary>`: apre e chiude **senza JavaScript**, con tastiera funzionante di serie. Il chevron riproduce i valori del sorgente (`bundle:592`): `transform: open ? "rotate(0deg)" : "rotate(-90deg)"` su un glifo `chevron-down`, cioe' **chiuso punta a destra, aperto punta in basso** — la convenzione classica. In CSS: `.ds-fg__chev{transform:rotate(-90deg)}` e `details.ds-fg[open] .ds-fg__chev{transform:rotate(0deg)}`. **Non** `rotate(180deg)`, che darebbe un chevron in basso da chiuso e in alto da aperto: entrambi gli stati sbagliati |
+| Componente    | Sorgente           | Nota di porting                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| ------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Input`       | `bundle:1411-1482` | Il `focus` era `useState`: diventa `:focus-within` sul contenitore                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `SearchField` | `bundle:1483-1596` | Vedi sotto: è il più delicato                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `Select`      | `bundle:1597-1670` | Resta un `<select>` nativo: accessibile e senza JS di posizionamento                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `Checkbox`    | `bundle:1323-1410` | `<input type="checkbox">` reale nascosto + riquadro disegnato, così Tab e Spazio funzionano da soli                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `Switch`      | `bundle:1671-1736` | `<input type="checkbox" role="switch">`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `FilterGroup` | `bundle:534-609`   | L'apertura era `useState`. Usare `<details open={defaultOpen}>` + `<summary>`: apre e chiude **senza JavaScript**, con tastiera funzionante di serie. Il chevron riproduce i valori del sorgente (`bundle:592`): `transform: open ? "rotate(0deg)" : "rotate(-90deg)"` su un glifo `chevron-down`, cioe' **chiuso punta a destra, aperto punta in basso** — la convenzione classica. In CSS: `.ds-fg__chev{transform:rotate(-90deg)}` e `details.ds-fg[open] .ds-fg__chev{transform:rotate(0deg)}`. **Non** `rotate(180deg)`, che darebbe un chevron in basso da chiuso e in alto da aperto: entrambi gli stati sbagliati |
 
 **`SearchField` — due miglioramenti dichiarati.** Il prototipo (`bundle:1483-1596`) chiude il pannello dei suggerimenti con `onBlur: () => setTimeout(() => setFocus(false), 120)` e li seleziona con `onMouseDown`. Sono due limiti reali:
 
@@ -2149,6 +2751,7 @@ Dentro `ds-gallery.astro` serve un'isola contenitore, perché questi componenti 
 - [ ] **Step 3: Verificare la tastiera**
 
 Su `http://localhost:4321/ds-gallery`:
+
 - Tab raggiunge ogni campo; `Checkbox` e `Switch` si attivano con Spazio;
 - `FilterGroup` apre e chiude con Invio sul `<summary>`;
 - in `SearchField`, scrivendo appare la lista: `↓` evidenzia la prima voce, `Invio` la sceglie, `Esc` chiude;
@@ -2170,18 +2773,20 @@ che nel prototipo mancava, e sostituisce il setTimeout su blur con pointerdown."
 ### Task 12: Overlay — Dialog, Sheet, Toast
 
 **Files:**
+
 - Create: `src/components/ds/{Dialog,Sheet,Toast}.svelte`
 - Modify: `src/styles/ds.css`
 
 **Interfaces:**
+
 - Produces: `Dialog` (`open`, `title`, `eyebrow`, `width`, `onclose`, snippet `children`/`footer`), `Sheet` (stessa API, sale dal basso), `Toast` (`tone`, `title`, `description`, `onclose`)
 - Consumatori: `SiteChrome` (Task 15)
 
-| Componente | Sorgente | Nota di porting |
-|---|---|---|
-| `Dialog` | `bundle:1030-1130` | Vedi sotto |
-| `Sheet` | `design-reference/pezzi.jsx`, funzione `Sheet` | Non sta nel bundle: è definita nel prototipo. Blocca lo scroll del body con `document.body.style.overflow = 'hidden'` e lo ripristina in uscita — comportamento da mantenere |
-| `Toast` | `bundle:1230-1322` | La mappa `TONES` alla riga 1233 va copiata intera |
+| Componente | Sorgente                                       | Nota di porting                                                                                                                                                              |
+| ---------- | ---------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Dialog`   | `bundle:1030-1130`                             | Vedi sotto                                                                                                                                                                   |
+| `Sheet`    | `design-reference/pezzi.jsx`, funzione `Sheet` | Non sta nel bundle: è definita nel prototipo. Blocca lo scroll del body con `document.body.style.overflow = 'hidden'` e lo ripristina in uscita — comportamento da mantenere |
+| `Toast`    | `bundle:1230-1322`                             | La mappa `TONES` alla riga 1233 va copiata intera                                                                                                                            |
 
 **`Dialog` — tre lacune di accessibilità da colmare.** Il prototipo gestisce `Escape` ma non ha né focus trap né ripristino del focus, e il `<h2>` del titolo non è collegato al ruolo `dialog`. Sono difetti reali che non incidono sull'aspetto. Il porting:
 
@@ -2199,7 +2804,10 @@ Lo scrim del prototipo (`background: var(--scrim-modal)`, `backdrop-filter: blur
   import IconButton from './IconButton.svelte'
 
   let {
-    open = false, title = '', eyebrow = '', width = 560,
+    open = false,
+    title = '',
+    eyebrow = '',
+    width = 560,
     onclose = undefined as (() => void) | undefined,
     children = undefined as Snippet | undefined,
     footer = undefined as Snippet | undefined,
@@ -2226,8 +2834,13 @@ Lo scrim del prototipo (`background: var(--scrim-modal)`, `backdrop-filter: blur
   class="ds-dialog"
   style="max-width:{width}px"
   aria-labelledby={title ? titleId : undefined}
-  oncancel={(e) => { e.preventDefault(); onclose?.() }}
-  onclick={(e) => { if (e.target === el) onclose?.() }}
+  oncancel={(e) => {
+    e.preventDefault()
+    onclose?.()
+  }}
+  onclick={(e) => {
+    if (e.target === el) onclose?.()
+  }}
 >
   <div class="ds-dialog__head">
     <div class="ds-dialog__titles">
@@ -2269,18 +2882,20 @@ della sorgente; lo scrim passa su ::backdrop."
 ### Task 13: Navigazione
 
 **Files:**
+
 - Create: `src/components/ds/{Tabs,Pagination,Breadcrumb}.svelte`
 - Create: `src/components/NavBar.astro`, `src/components/Footer.astro`, `src/config/nav.ts`
 - Modify: `src/styles/ds.css`, `src/pages/ds-gallery.astro`
 
 **Interfaces:**
+
 - Produces: `Tabs` (`items`, `value`, `onchange`, `variant`), `Pagination` (`page`, `pages`, `onchange`), `Breadcrumb` (`items`), `NavBar.astro` (props `{ active: string; catalogCount?: number }`), `Footer.astro`
 
-| Componente | Sorgente | Nota di porting |
-|---|---|---|
-| `Tabs` | `bundle:1993-2050` | Due varianti, default e `pill`. Marcare con `role="tablist"`/`role="tab"` e `aria-selected` |
+| Componente   | Sorgente           | Nota di porting                                                                                                                      |
+| ------------ | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `Tabs`       | `bundle:1993-2050` | Due varianti, default e `pill`. Marcare con `role="tablist"`/`role="tab"` e `aria-selected`                                          |
 | `Pagination` | `bundle:1908-1992` | Nel catalogo diventa navigazione vera: ogni pagina è un `<a href="?p=N">`, non un bottone, così funziona senza JS ed è indicizzabile |
-| `Breadcrumb` | `bundle:1737-1792` | Voci come `<a href>` reali; l'ultima senza link e con `aria-current="page"`. Avvolgere in `<nav aria-label="Percorso">` |
+| `Breadcrumb` | `bundle:1737-1792` | Voci come `<a href>` reali; l'ultima senza link e con `aria-current="page"`. Avvolgere in `<nav aria-label="Percorso">`              |
 
 **`NavBar` diventa un componente Astro, non Svelte.** Nel prototipo (`bundle:1793-1907`) l'unico stato è `scrolled`, che al superamento di 8px di scroll cambia il fondo in `var(--glass-bg)`, attiva `backdrop-filter` e mostra il bordo inferiore. Non serve un framework per questo: bastano un attributo e uno script di dieci righe. Così la barra di navigazione resta HTML statico su **ogni** pagina del sito.
 
@@ -2294,6 +2909,7 @@ import { NAV } from '~/config/nav'
 const { active, catalogCount } = Astro.props as { active: string; catalogCount?: number }
 const voci = NAV.map((v) => (v.id === 'catalogo' ? { ...v, count: catalogCount } : v))
 ---
+
 <header class="ds-nav" data-scrolled="false">
   <nav class="ds-nav__inner">
     <a class="ds-nav__brand" href="/">
@@ -2301,13 +2917,19 @@ const voci = NAV.map((v) => (v.id === 'catalogo' ? { ...v, count: catalogCount }
       <span>{SITE.brand}</span>
     </a>
     <div class="ds-nav__links">
-      {voci.map((it) => (
-        <a href={it.href} class="ds-nav__link" data-on={it.id === active}
-           aria-current={it.id === active ? 'page' : undefined}>
-          {it.label}
-          {it.count != null && <span class="ds-nav__count">{it.count}</span>}
-        </a>
-      ))}
+      {
+        voci.map((it) => (
+          <a
+            href={it.href}
+            class="ds-nav__link"
+            data-on={it.id === active}
+            aria-current={it.id === active ? 'page' : undefined}
+          >
+            {it.label}
+            {it.count != null && <span class="ds-nav__count">{it.count}</span>}
+          </a>
+        ))
+      }
     </div>
     <div class="ds-nav__right"><slot /></div>
   </nav>
@@ -2366,10 +2988,12 @@ Breadcrumb usano <a href> reali, quindi funzionano senza JS e sono indicizzabili
 Il tilt dipende dalla posizione del puntatore dentro l'elemento: `rotateY = (x/w - .5) * 10`, `rotateX = -(y/h - .5) * 10` (`bundle:775-783`). Non è esprimibile in CSS. Tutto il **resto** di `CardTile` — bordo che si scurisce, ombra che passa da `--sh-1` a `--sh-3`, sollevamento `--lift-hover`, comparsa del bottone «mi piace» — è hover, e va in CSS.
 
 **Files:**
+
 - Create: `src/components/ds/CardTile.svelte`
 - Modify: `src/styles/ds.css`, `src/pages/ds-gallery.astro`
 
 **Interfaces:**
+
 - Consumes: `CardArt` (Task 9), `RarityBadge` (Task 9), `IconButton` (Task 10)
 - Produces: `CardTile` con props `name`, `code`, `set`, `rarity`, `src`, `href`, `tilt`, `onclick`, snippet `badge`
 
@@ -2381,8 +3005,10 @@ Il tilt in Svelte 5:
 
 ```svelte
 <script lang="ts">
-  let { tilt = true, /* … */ } = $props()
-  let rx = $state(0), ry = $state(0), hover = $state(false)
+  let { tilt = true /* … */ } = $props()
+  let rx = $state(0),
+    ry = $state(0),
+    hover = $state(false)
 
   function move(e: MouseEvent) {
     if (!tilt) return
@@ -2390,7 +3016,11 @@ Il tilt in Svelte 5:
     ry = ((e.clientX - r.left) / r.width - 0.5) * 10
     rx = -((e.clientY - r.top) / r.height - 0.5) * 10
   }
-  const reset = () => { rx = 0; ry = 0; hover = false }
+  const reset = () => {
+    rx = 0
+    ry = 0
+    hover = false
+  }
 </script>
 ```
 
@@ -2403,8 +3033,8 @@ I coefficienti sono `10` per `CardTile` e `16` per la scheda carta (`design-refe
 Rispettare inoltre `prefers-reduced-motion`: se l'utente lo richiede, il tilt non si applica.
 
 ```svelte
-const ridotto = typeof matchMedia === 'function'
-  && matchMedia('(prefers-reduced-motion: reduce)').matches
+const ridotto = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion:
+reduce)').matches
 ```
 
 - [ ] **Step 3: Verificare**
@@ -2425,6 +3055,7 @@ e' in CSS, quindi la tessera resta corretta anche senza idratazione."
 ```
 
 ---
+
 # FASE 3 — Shell e pagine
 
 ## I quattro helper di `pezzi.jsx` sono componenti, non stili da ricopiare
@@ -2438,12 +3069,12 @@ si somigliano.
 `design-reference/pezzi.jsx` definisce **quattro componenti condivisi** che le pagine del
 prototipo usano ovunque:
 
-| Componente | Righe | Cosa incapsula |
-|---|---|---|
-| `Occhiello` | 9-11 | l'etichetta maiuscoletta sopra i titoli, con `tone` chiaro/scuro |
-| `Titolo` | 13-21 | quattro livelli (`hero`, `pagina`, `sezione`, `piccolo`), ognuno con font e tracking propri, e il tag HTML che ne consegue |
-| `Testo` | 23-25 | il paragrafo, con `grande`, `tone` e **sempre** un `color` esplicito |
-| `TestaSezione` | 27-36 | occhiello + titolo + testo + azione, con la loro spaziatura |
+| Componente     | Righe | Cosa incapsula                                                                                                             |
+| -------------- | ----- | -------------------------------------------------------------------------------------------------------------------------- |
+| `Occhiello`    | 9-11  | l'etichetta maiuscoletta sopra i titoli, con `tone` chiaro/scuro                                                           |
+| `Titolo`       | 13-21 | quattro livelli (`hero`, `pagina`, `sezione`, `piccolo`), ognuno con font e tracking propri, e il tag HTML che ne consegue |
+| `Testo`        | 23-25 | il paragrafo, con `grande`, `tone` e **sempre** un `color` esplicito                                                       |
+| `TestaSezione` | 27-36 | occhiello + titolo + testo + azione, con la loro spaziatura                                                                |
 
 Vanno portati **una volta sola, come componenti**, non inlineati in ogni pagina. E' anche
 la scelta piu' fedele: nel prototipo sono componenti, non stili sparsi.
@@ -2457,18 +3088,18 @@ andra' allineato quando li si tocca.
 I Task 17-22 usano questi componenti. Se una pagina scrive a mano
 `style="font:var(--type-body);…"` per un paragrafo, sta reintroducendo il difetto.
 
-
-
 L'ordine delle pagine non è casuale: si parte dalla più semplice (`/chi-siamo`, zero interazione) per validare la catena layout → token → componenti su un caso senza variabili, e si finisce con la più complessa (`/catalogo`).
 
 ### Task 15: Layout di base e shell interattiva
 
 **Files:**
+
 - Create: `src/layouts/Base.astro`, `src/components/islands/SiteChrome.svelte`, `src/stores/chrome.ts`
 - Consuma (creato al Task 13): `src/config/nav.ts`
 - Create: `public/assets/logo-mark.svg`, `public/assets/logo.svg`
 
 **Interfaces:**
+
 - Consumes: esito del Task 2 (store condiviso o `CustomEvent`), `NavBar.astro`/`Footer.astro` (Task 13), `Dialog`/`Sheet`/`Toast` (Task 12)
 - Produces:
   - `Base.astro` con props `{ title, description, active, catalogCount? }`
@@ -2490,12 +3121,16 @@ cp design-reference/assets/logo-mark.svg design-reference/assets/logo.svg public
 import { writable } from 'svelte/store'
 import type { Card } from '~/lib/catalog'
 
-export interface Toast { title: string; description: string; tone: 'success' | 'info' }
+export interface Toast {
+  title: string
+  description: string
+  tone: 'success' | 'info'
+}
 
-export const chiedi = writable<Card | true | null>(null)   // true = richiesta generica
-export const quick  = writable<Card | null>(null)
-export const menu   = writable(false)
-export const toast  = writable<Toast | null>(null)
+export const chiedi = writable<Card | true | null>(null) // true = richiesta generica
+export const quick = writable<Card | null>(null)
+export const menu = writable(false)
+export const toast = writable<Toast | null>(null)
 
 let t: ReturnType<typeof setTimeout>
 export function avviso(title: string, description: string, tone: Toast['tone'] = 'success') {
@@ -2528,9 +3163,15 @@ import Footer from '~/components/Footer.astro'
 import SiteChrome from '~/components/islands/SiteChrome.svelte'
 import Button from '~/components/ds/Button.svelte'
 
-interface Props { title: string; description?: string; active: string; catalogCount?: number }
+interface Props {
+  title: string
+  description?: string
+  active: string
+  catalogCount?: number
+}
 const { title, description = SITE.seo.descrizione, active, catalogCount } = Astro.props
 ---
+
 <!doctype html>
 <html lang="it">
   <head>
@@ -2574,9 +3215,11 @@ col first paint."
 ### Task 16: `/chi-siamo` — la pagina a zero JavaScript
 
 **Files:**
+
 - Create: `src/pages/chi-siamo.astro`
 
 **Interfaces:**
+
 - Consumes: `Base.astro`, `Panel`, `ConditionBadge`, `Button`, `Icon`
 - Produces: rotta `/chi-siamo`
 
@@ -2616,9 +3259,11 @@ Non spedisce JavaScript oltre alla shell."
 ### Task 17: `/negozio`
 
 **Files:**
+
 - Create: `src/pages/negozio.astro`, `src/components/Mappa.astro`
 
 **Interfaces:**
+
 - Consumes: `Base.astro`, `Panel`, `Button`, `Icon`, `SITE`
 - Produces: rotta `/negozio`
 
@@ -2652,9 +3297,11 @@ i dati in mano."
 ### Task 18: `/espansioni`
 
 **Files:**
+
 - Create: `src/pages/espansioni.astro`, `src/components/islands/SetFilter.svelte`
 
 **Interfaces:**
+
 - Consumes: `Base.astro`, `Panel`, `Tabs`, `Badge`, `CardArt`, `Button`, `getAllSets`/`getIndexedCards`
 - Produces: rotta `/espansioni`; ogni «Vedi le carte» punta a `/catalogo?set=<id>`
 
@@ -2665,16 +3312,24 @@ Sorgente: `design-reference/espansioni.jsx`. Intestazione con Tabs (Tutte / Rece
 Il filtro dei Tabs opera su 6 elementi: **renderizzarli tutti in HTML** e far nascondere/mostrare all'isola, invece di ricostruire la lista. Così la pagina è completa senza JS e il filtro è istantaneo.
 
 ```astro
-{sets.map((s) => (
-  <div data-set-year={s.year} data-recente={s.year >= 2023}>…</div>
-))}
+{
+  sets.map((s) => (
+    <div data-set-year={s.year} data-recente={s.year >= 2023}>
+      …
+    </div>
+  ))
+}
 ```
 
 `SetFilter.svelte` è un'isola `client:visible` che monta solo i `Tabs` e commuta un attributo sul contenitore; il CSS nasconde ciò che non serve:
 
 ```css
-.sets[data-tab="recenti"] [data-recente="false"]{display:none}
-.sets[data-tab="vintage"] [data-recente="true"]{display:none}
+.sets[data-tab='recenti'] [data-recente='false'] {
+  display: none;
+}
+.sets[data-tab='vintage'] [data-recente='true'] {
+  display: none;
+}
 ```
 
 - [ ] **Step 2: Portare `BarraSchedate`**
@@ -2735,10 +3390,12 @@ Un'isola che riceve `Card[]` come props sta reintroducendo il difetto.
 ### Task 19: `/` — la vetrina
 
 **Files:**
+
 - Create: `src/pages/index.astro`, `src/components/islands/{HeroSearch,NuoviArrivi}.svelte`
 - Modify: `src/pages/index.astro` (sostituisce il segnaposto del Task 1)
 
 **Interfaces:**
+
 - Consumes: tutto il design system, `getIndexedCards`, `getAllSets`
 - Produces: rotta `/`
 
@@ -2777,11 +3434,13 @@ fascia espansioni, i tre passi e la striscia negozio restano HTML statico."
 ### Task 20: `/catalogo` — la pagina piu complessa
 
 **Files:**
+
 - Create: `src/pages/catalogo.astro`, `src/components/islands/CatalogApp.svelte`
 - Create: `src/lib/catalog/url.ts`
 - Test: `src/lib/catalog/url.test.ts`
 
 **Interfaces:**
+
 - Consumes: `queryCards`, `getIndexedCards`, `getAllSets`, tutti i componenti form e catalogo
 - Produces:
   - `parseQuery(params: URLSearchParams): CardQuery`
@@ -2798,17 +3457,33 @@ import { parseQuery, toSearchParams } from './url'
 
 describe('parseQuery', () => {
   it('legge tutte le chiavi supportate', () => {
-    const q = parseQuery(new URLSearchParams(
-      'q=holo&set=alb&set=for&rar=ultra&cond=mint&lang=Italiano&foil=1&sort=rarita&p=3'))
+    const q = parseQuery(
+      new URLSearchParams(
+        'q=holo&set=alb&set=for&rar=ultra&cond=mint&lang=Italiano&foil=1&sort=rarita&p=3',
+      ),
+    )
     expect(q).toEqual({
-      q: 'holo', sets: ['alb', 'for'], rarity: ['ultra'], cond: ['mint'],
-      lang: ['Italiano'], foil: true, sort: 'rarita', page: 3,
+      q: 'holo',
+      sets: ['alb', 'for'],
+      rarity: ['ultra'],
+      cond: ['mint'],
+      lang: ['Italiano'],
+      foil: true,
+      sort: 'rarita',
+      page: 3,
     })
   })
 
   it('su querystring vuota restituisce i default', () => {
     expect(parseQuery(new URLSearchParams())).toEqual({
-      q: '', sets: [], rarity: [], cond: [], lang: [], foil: false, sort: 'novita', page: 1,
+      q: '',
+      sets: [],
+      rarity: [],
+      cond: [],
+      lang: [],
+      foil: false,
+      sort: 'novita',
+      page: 1,
     })
   })
 
@@ -2827,8 +3502,9 @@ describe('toSearchParams', () => {
 
   it('e inverso di parseQuery', () => {
     const s = 'q=holo&set=alb&rar=ultra&foil=1&sort=az&p=2'
-    expect(toSearchParams(parseQuery(new URLSearchParams(s))).toString())
-      .toBe(new URLSearchParams(s).toString())
+    expect(toSearchParams(parseQuery(new URLSearchParams(s))).toString()).toBe(
+      new URLSearchParams(s).toString(),
+    )
   })
 })
 ```
@@ -2919,9 +3595,11 @@ ricerca solo quando serve, e parla con /api/catalog.json, mai col filesystem."
 ### Task 21: `/carta/[slug]`
 
 **Files:**
+
 - Create: `src/pages/carta/[slug].astro`, `src/components/islands/{CardViewer,CardActions}.svelte`
 
 **Interfaces:**
+
 - Consumes: `getAllCards`, `getAllSets`, `CardArt`, `SpecList`, `Breadcrumb`, `RarityBadge`, `ConditionBadge`, `Panel`, `Tooltip`
 - Produces: una pagina statica per carta
 
@@ -2979,6 +3657,7 @@ col tilt 3D e i due bottoni che pilotano la shell."
 ### Task 22: `/404`
 
 **Files:**
+
 - Create: `src/pages/404.astro`
 
 - [ ] **Step 1: Scrivere la pagina**
@@ -2997,6 +3676,7 @@ git commit -m "feat: pagina 404"
 ```
 
 ---
+
 # FASE 4 — Immagini, rifinitura, deploy
 
 ### Task 23: Immagini delle carte su Cloudflare R2
@@ -3006,12 +3686,14 @@ Il prototipo non ha nessuna immagine: `CardArt` senza `src` mostra il placeholde
 **Prerequisiti da procurarsi prima di iniziare** (spec §13): una zona Cloudflare per il dominio del sito, e un sottodominio da dedicare alle immagini (per esempio `img.<dominio>`).
 
 **Files:**
+
 - Create: `src/components/CardImage.astro`, `scripts/upload-immagini.ts`
 - Modify: `src/config/site.ts`
 - Create: `docs/CONTENUTI.md` (primo scrittore; il Task 27 lo completa)
 - **Non** si crea `src/assets/cards/`: nel repository non finiscono binari
 
 **Interfaces:**
+
 - Produces: `CardImage.astro` con props `{ card, set, sizes?, priority? }`; `urlImmagine(key, width)` esportata da `~/lib/immagini.ts`
 - Se la colonna `image` della carta e' vuota, ricade su `CardArt` senza `src`, identico al prototipo
 
@@ -3085,27 +3767,36 @@ import { cardCode } from '~/lib/catalog'
 import { immaginiAttive, srcsetImmagine, urlImmagine } from '~/lib/immagini'
 import type { Card, CardSet } from '~/lib/catalog'
 
-interface Props { card: Card; set: CardSet; sizes?: string; priority?: boolean }
+interface Props {
+  card: Card
+  set: CardSet
+  sizes?: string
+  priority?: boolean
+}
 const { card, set, sizes = '(max-width:760px) 45vw, 190px', priority = false } = Astro.props
 const mostraFoto = Boolean(card.image) && immaginiAttive()
 ---
-{mostraFoto ? (
-  <div class="ds-cardart" style="border-radius:var(--r-cardart)">
-    <img
-      class="ds-cardart__img"
-      src={urlImmagine(card.image!, 300)}
-      srcset={srcsetImmagine(card.image!)}
-      {sizes}
-      alt={card.name}
-      width="63" height="88"
-      loading={priority ? 'eager' : 'lazy'}
-      fetchpriority={priority ? 'high' : undefined}
-      decoding="async"
-    />
-  </div>
-) : (
-  <CardArt rarity={card.rarity} code={cardCode(card, set)} />
-)}
+
+{
+  mostraFoto ? (
+    <div class="ds-cardart" style="border-radius:var(--r-cardart)">
+      <img
+        class="ds-cardart__img"
+        src={urlImmagine(card.image!, 300)}
+        srcset={srcsetImmagine(card.image!)}
+        {sizes}
+        alt={card.name}
+        width="63"
+        height="88"
+        loading={priority ? 'eager' : 'lazy'}
+        fetchpriority={priority ? 'high' : undefined}
+        decoding="async"
+      />
+    </div>
+  ) : (
+    <CardArt rarity={card.rarity} code={cardCode(card, set)} />
+  )
+}
 ```
 
 **Sul CLS**, che e' il rischio vero quando le immagini sono remote e il build non le conosce: `.ds-cardart` impone gia' `aspect-ratio: var(--card-aspect)` cioe' 63/88, e `width`/`height` sul tag ribadiscono la proporzione. Lo spazio e' quindi riservato prima che arrivi un solo byte — **niente salti di layout**, esattamente come con le immagini locali.
@@ -3133,8 +3824,21 @@ if (!cartella) throw new Error('uso: pnpm tsx scripts/upload-immagini.ts <cartel
 
 const file = readdirSync(cartella).filter((f) => /\.(jpe?g|png|webp|avif)$/i.test(f))
 for (const f of file) {
-  execFileSync('pnpm', ['exec', 'wrangler', 'r2', 'object', 'put',
-    `${bucket}/${f}`, '--file', join(cartella, f), '--remote'], { stdio: 'inherit' })
+  execFileSync(
+    'pnpm',
+    [
+      'exec',
+      'wrangler',
+      'r2',
+      'object',
+      'put',
+      `${bucket}/${f}`,
+      '--file',
+      join(cartella, f),
+      '--remote',
+    ],
+    { stdio: 'inherit' },
+  )
   console.log('caricato', f)
 }
 console.log(`${file.length} immagini caricate. Scrivi i nomi nella colonna image di cards.csv.`)
@@ -3194,6 +3898,7 @@ si ricade sul placeholder foil, cosi' lo sviluppo locale funziona senza rete."
 ### Task 24: SEO, cache e transizioni
 
 **Files:**
+
 - Create: `public/_headers`, `public/robots.txt`
 - Modify: `src/layouts/Base.astro`, `astro.config.mjs`
 
@@ -3202,16 +3907,23 @@ si ricade sul placeholder foil, cosi' lo sviluppo locale funziona senza rete."
 Aggiungere Open Graph (`og:title`, `og:description`, `og:type`, `og:url`, `og:locale` = `it_IT`), `twitter:card`, e i dati strutturati del negozio, che per un'attività locale valgono più di ogni altra cosa:
 
 ```astro
-<script type="application/ld+json" set:html={JSON.stringify({
-  '@context': 'https://schema.org',
-  '@type': 'Store',
-  name: SITE.nome,
-  address: { '@type': 'PostalAddress', streetAddress: SITE.via,
-             addressLocality: SITE.citta, postalCode: SITE.cap.split(' ')[0],
-             addressCountry: 'IT' },
-  openingHours: SITE.orari.filter(([, h]) => h !== 'chiuso').map(([g, h]) => `${g} ${h}`),
-  url: Astro.site?.href,
-})} />
+<script
+  type="application/ld+json"
+  set:html={JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'Store',
+    name: SITE.nome,
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: SITE.via,
+      addressLocality: SITE.citta,
+      postalCode: SITE.cap.split(' ')[0],
+      addressCountry: 'IT',
+    },
+    openingHours: SITE.orari.filter(([, h]) => h !== 'chiuso').map(([g, h]) => `${g} ${h}`),
+    url: Astro.site?.href,
+  })}
+/>
 ```
 
 Questo serve il pilastro sulla SEO locale citato nella spec §3.1: è ciò che fa comparire orari e indirizzo nei risultati di ricerca.
@@ -3276,6 +3988,7 @@ altra ottimizzazione."
 ### Task 25: Smoke test end-to-end
 
 **Files:**
+
 - Create: `playwright.config.ts`, `e2e/rotte.spec.ts`, `e2e/catalogo.spec.ts`
 
 - [ ] **Step 1: Configurare Playwright**
@@ -3285,10 +3998,17 @@ import { defineConfig, devices } from '@playwright/test'
 
 export default defineConfig({
   testDir: './e2e',
-  webServer: { command: 'pnpm build && pnpm preview', url: 'http://localhost:4321', reuseExistingServer: !process.env.CI },
+  webServer: {
+    command: 'pnpm build && pnpm preview',
+    url: 'http://localhost:4321',
+    reuseExistingServer: !process.env.CI,
+  },
   use: { baseURL: 'http://localhost:4321' },
   projects: [
-    { name: 'desktop', use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 } } },
+    {
+      name: 'desktop',
+      use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 } },
+    },
     { name: 'mobile', use: { ...devices['iPhone 13'] } },
   ],
 })
@@ -3311,7 +4031,9 @@ for (const r of ROTTE) {
   test(`${r.path} si carica senza errori`, async ({ page }) => {
     const errori: string[] = []
     page.on('pageerror', (e) => errori.push(e.message))
-    page.on('console', (m) => { if (m.type() === 'error') errori.push(m.text()) })
+    page.on('console', (m) => {
+      if (m.type() === 'error') errori.push(m.text())
+    })
 
     await page.goto(r.path)
     await expect(page.locator('h1')).toHaveText(r.h1)
@@ -3327,7 +4049,9 @@ test('la 404 risponde', async ({ page }) => {
 
 test('chi-siamo non spedisce JS oltre alla shell', async ({ page }) => {
   const js: string[] = []
-  page.on('request', (r) => { if (r.resourceType() === 'script') js.push(r.url()) })
+  page.on('request', (r) => {
+    if (r.resourceType() === 'script') js.push(r.url())
+  })
   await page.goto('/chi-siamo')
   await page.waitForLoadState('networkidle')
   expect(js.length, `script caricati: ${js.join(', ')}`).toBeLessThanOrEqual(2)
@@ -3379,6 +4103,7 @@ Aggiungere `data-card` come attributo su ogni tessera in `CardTile`.
 pnpm exec playwright install chromium
 pnpm test:e2e
 ```
+
 Atteso: tutti verdi su entrambi i profili.
 
 - [ ] **Step 5: Commit**
@@ -3397,6 +4122,7 @@ l'isola, fallirebbe subito."
 ### Task 26: Deploy su Cloudflare Workers
 
 **Files:**
+
 - Create: `wrangler.jsonc`, `.github/workflows/deploy.yml`, `.env.example`
 - Modify: `astro.config.mjs`, `public/robots.txt`
 
@@ -3407,12 +4133,12 @@ l'isola, fallirebbe subito."
 ```jsonc
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "NOME-DEL-WORKER",          // ← dall'utente
+  "name": "NOME-DEL-WORKER", // ← dall'utente
   "compatibility_date": "2026-08-18",
   "assets": {
     "directory": "./dist",
-    "not_found_handling": "404-page"
-  }
+    "not_found_handling": "404-page",
+  },
   // Nessun "main": il Worker serve solo asset statici.
   // Le richieste agli asset sono gratuite e non consumano la quota del piano free.
 }
@@ -3492,6 +4218,7 @@ cosi' un errore di tipo non arriva in produzione."
 È il task che chiude il pilastro 1. Non va saltato.
 
 **Files:**
+
 - Delete: `src/pages/ds-gallery.astro`
 - Create: `README.md`, `docs/FEDELTA.md`
 - Modify: `docs/CONTENUTI.md` (creato al Task 23, qui si completa)
@@ -3501,9 +4228,10 @@ cosi' un errore di tipo non arriva in produzione."
 Due finestre: `http://localhost:4321` e `http://localhost:4322/index.html`. Per **ognuna** delle 6 pagine e a **ognuno** dei 3 viewport (390, 1024, 1440), confrontare e annotare in `docs/FEDELTA.md`:
 
 | Pagina | 390 | 1024 | 1440 | Note |
-|---|---|---|---|---|
+| ------ | --- | ---- | ---- | ---- |
 
 Punti su cui si accumulano gli scostamenti, da controllare per primi:
+
 - dimensione e tracking del titolo hero (`--fs-display-xl`, che cambia sotto 760px);
 - numero di colonne di `.cards` ai vari viewport;
 - spaziatura verticale delle sezioni (`--section-y`, 96px che diventano 56px);
@@ -3557,6 +4285,7 @@ La guida per chi aggiorna il sito senza toccare il codice: cambiare nome e indir
 ```bash
 pnpm check && pnpm test && pnpm test:e2e && pnpm build
 ```
+
 Tutti e quattro devono passare.
 
 - [ ] **Step 7: Commit**
@@ -3574,13 +4303,13 @@ design e non somiglianza a occhio."
 
 ## Riepilogo
 
-| Fase | Task | Esito |
-|---|---|---|
-| 0 — Fondamenta | 1-4 | Progetto in piedi, token e icone locali, assunzione sullo store verificata |
-| 1 — Dati | 5-8 | Logica del catalogo sotto test, `/api/catalog.json` emesso a build time |
-| 2 — Design system | 9-14 | 26 componenti in Svelte, hover in CSS, un solo componente idratato |
-| 3 — Pagine | 15-22 | Le 6 rotte più la 404 |
-| 4 — Rifinitura | 23-27 | Immagini, SEO, E2E, deploy, verifica di fedeltà |
+| Fase              | Task  | Esito                                                                      |
+| ----------------- | ----- | -------------------------------------------------------------------------- |
+| 0 — Fondamenta    | 1-4   | Progetto in piedi, token e icone locali, assunzione sullo store verificata |
+| 1 — Dati          | 5-8   | Logica del catalogo sotto test, `/api/catalog.json` emesso a build time    |
+| 2 — Design system | 9-14  | 26 componenti in Svelte, hover in CSS, un solo componente idratato         |
+| 3 — Pagine        | 15-22 | Le 6 rotte più la 404                                                      |
+| 4 — Rifinitura    | 23-27 | Immagini, SEO, E2E, deploy, verifica di fedeltà                            |
 
 ### Cosa resta in sospeso
 
@@ -3611,5 +4340,6 @@ Un **trigger esplicito**, non un cron: il cron farebbe aspettare al cliente ore 
 E' proprio per tenere aperta questa strada a costo zero che il formato nel repo e' CSV: e' cio' che un foglio esporta, quindi la pipeline sarebbe solo l'Action, senza nessuna conversione da mantenere.
 
 Due punti da risolvere quando si costruira', gia' identificati:
+
 - **accesso al foglio** — pubblicato in sola lettura (basta: il catalogo e' pubblico comunque) oppure service account Google;
 - **ritorno degli errori** — se il cliente rompe una colonna il build si ferma giustamente, ma lui vede il sito invariato e non sa perche'. Minimo indispensabile: la mail di fallimento dell'Action arriva allo sviluppatore, che fa da fallback. Mitigazione a monte: convalida dati sulle colonne del foglio, con rarita', condizione e lingua come elenchi chiusi.

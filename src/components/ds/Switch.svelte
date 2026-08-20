@@ -14,7 +14,7 @@
   } = $props()
 </script>
 
-<label class="ds-switch" class:is-disabled={disabled} style={style}>
+<label class="ds-switch" class:is-disabled={disabled} {style}>
   <input
     type="checkbox"
     role="switch"

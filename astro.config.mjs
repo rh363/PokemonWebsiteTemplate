@@ -11,7 +11,8 @@ export default defineConfig({
   // Sovrascrivibile con PUBLIC_SITE_URL (vedi .env.example): il dominio
   // appartiene al deploy, non al progetto. `||` e non `??` perche' una
   // variabile non impostata in CI arriva come stringa vuota.
-  site: process.env.PUBLIC_SITE_URL || 'https://pokemonwebsitetemplate.alex-massaroni2004.workers.dev',
+  site:
+    process.env.PUBLIC_SITE_URL || 'https://pokemonwebsitetemplate.alex-massaroni2004.workers.dev',
   output: 'static',
   integrations: [svelte(), sitemap()],
   build: { inlineStylesheets: 'auto' },

@@ -13,7 +13,7 @@
   } = $props()
 </script>
 
-<div class="ds-emptystate" class:ds-emptystate--compact={compact} style={style}>
+<div class="ds-emptystate" class:ds-emptystate--compact={compact} {style}>
   <span class="ds-emptystate__icon">
     <Icon name={icon} size={24} />
   </span>

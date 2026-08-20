@@ -71,15 +71,15 @@ dal progetto, più la vista lista del catalogo (mai confrontata prima).
 
 ## Risultato per pagina e viewport
 
-| Pagina | 390 | 1024 | 1440 | Note |
-|---|---|---|---|---|
-| Vetrina (`/` ↔ `#/vetrina`) | ✅ identico | ✅ identico | ✅ identico | h1 76→42px, `.cards` 5→2 col, `.foot` 4→1 col, tutti misurati uguali |
-| Catalogo, vista griglia (`/catalogo`) | ✅ identico | ✅ identico | ✅ identico | `.cat` 2→1 col sotto 1080px, `.cards` 4 col a 1440/1024 (`minmax(190px,1fr)`), 2 col a 390 |
-| Catalogo, vista lista (`/catalogo`, tab "Lista") | ✅ identico | — | ✅ identico | riga: padding 12px 16px, min-height 64px, gap 16px, nome 20px/`#0E0B12`, codice 12px/`#8A8296` — su entrambi. **Mai confrontata prima di questo task.** Riga `<a>` nel sito costruito contro `<div onclick>` nel prototipo: differenza voluta (Task 14/19-21, navigazione da tastiera), non un difetto |
-| Espansioni (`/espansioni`) | ✅ identico (dopo fix) | ⚠️→✅ **difetto trovato e corretto** | ✅ identico | vedi sotto |
-| Il negozio (`/negozio`) | ✅ identico | ✅ identico | ✅ identico | `.g2` 2→1 col sotto 1080px, `.g3` 4→3→1 col |
-| Chi siamo (`/chi-siamo`) | ✅ identico | ✅ identico | ✅ identico | tutti i paragrafi `rgb(107,97,120)` = `#6B6178` su entrambi — il fix del Task 16 tiene |
-| Scheda carta (`/carta/fulmine-solare-eco-035` ↔ `#/carta/1`) | ✅ identico | ✅ identico | ✅ identico | `.det` 400px+736px a 1440, 1 col sotto 1080, `.det-fix` statico/max-width 340px a 390 |
+| Pagina                                                       | 390                    | 1024                                 | 1440        | Note                                                                                                                                                                                                                                                                                                   |
+| ------------------------------------------------------------ | ---------------------- | ------------------------------------ | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Vetrina (`/` ↔ `#/vetrina`)                                  | ✅ identico            | ✅ identico                          | ✅ identico | h1 76→42px, `.cards` 5→2 col, `.foot` 4→1 col, tutti misurati uguali                                                                                                                                                                                                                                   |
+| Catalogo, vista griglia (`/catalogo`)                        | ✅ identico            | ✅ identico                          | ✅ identico | `.cat` 2→1 col sotto 1080px, `.cards` 4 col a 1440/1024 (`minmax(190px,1fr)`), 2 col a 390                                                                                                                                                                                                             |
+| Catalogo, vista lista (`/catalogo`, tab "Lista")             | ✅ identico            | —                                    | ✅ identico | riga: padding 12px 16px, min-height 64px, gap 16px, nome 20px/`#0E0B12`, codice 12px/`#8A8296` — su entrambi. **Mai confrontata prima di questo task.** Riga `<a>` nel sito costruito contro `<div onclick>` nel prototipo: differenza voluta (Task 14/19-21, navigazione da tastiera), non un difetto |
+| Espansioni (`/espansioni`)                                   | ✅ identico (dopo fix) | ⚠️→✅ **difetto trovato e corretto** | ✅ identico | vedi sotto                                                                                                                                                                                                                                                                                             |
+| Il negozio (`/negozio`)                                      | ✅ identico            | ✅ identico                          | ✅ identico | `.g2` 2→1 col sotto 1080px, `.g3` 4→3→1 col                                                                                                                                                                                                                                                            |
+| Chi siamo (`/chi-siamo`)                                     | ✅ identico            | ✅ identico                          | ✅ identico | tutti i paragrafi `rgb(107,97,120)` = `#6B6178` su entrambi — il fix del Task 16 tiene                                                                                                                                                                                                                 |
+| Scheda carta (`/carta/fulmine-solare-eco-035` ↔ `#/carta/1`) | ✅ identico            | ✅ identico                          | ✅ identico | `.det` 400px+736px a 1440, 1 col sotto 1080, `.det-fix` statico/max-width 340px a 390                                                                                                                                                                                                                  |
 
 Nota d'ambiente: nessuna instabilità del server del prototipo a 1024px è
 stata osservata durante queste misure (il quirk descritto nel Task 16 non si
@@ -187,22 +187,22 @@ Campione verificato riga per riga contro `_ds_bundle.js` (bundle
 transpilato, non i `.jsx` — la formattazione con spazio dopo `:` e newline è
 quella del bundle, non del sorgente babel):
 
-| `ds.css` | Valore | Bundle (`_ds_bundle.js`) | Componente |
-|---|---|---|---|
-| `.ds-emptystate__icon` | `width:56px;height:56px` | `width: 56, height: 56` | EmptyState |
-| `.ds-switch` | `gap:10px` | `gap: 10` | Switch |
-| `.ds-switch__track` | `width:44px;height:26px;padding:3px` | `width: 44, height: 26, padding: 3` | Switch |
-| `.ds-switch__thumb` | `width:16px;height:16px` | `width: 16, height: 16` | Switch |
-| `.ds-pagination` | `gap:8px` | `gap: 8` | Pagination |
-| `.ds-pagination__page` | `min-width:34px;height:34px` | `minWidth: 34, height: 34` | Pagination |
-| `.ds-pagination__ellipsis` | `padding:0 2px` | `padding: "0 2px"` | Pagination |
-| `.ds-checkbox__box` | `width:20px;height:20px` | `width: 20, height: 20` | Checkbox |
-| `.ds-fg__count` | `min-width:18px;height:18px;padding:0 5px` | `minWidth: 18, height: 18, padding: "0 5px"` | FilterGroup |
-| `.ds-cardtile` | `gap:12px;padding:12px` | `gap: 12, padding: 12` | CardTile (citato dal brief) |
-| `.ds-cardtile__badge` | `top:20px;left:20px` | `top: 20, left: 20` | CardTile |
-| `.ds-cardtile__like` | `top:18px;right:18px` | `top: 18, right: 18` | CardTile |
-| `.ds-cardtile__stage` | `perspective:700px` | `perspective: 700` | CardTile |
-| `.ds-nav__menu-link` | `min-height:56px` | `minHeight:56` (`guscio.jsx:32`) | NavBar (menu mobile) |
+| `ds.css`                   | Valore                                     | Bundle (`_ds_bundle.js`)                     | Componente                  |
+| -------------------------- | ------------------------------------------ | -------------------------------------------- | --------------------------- |
+| `.ds-emptystate__icon`     | `width:56px;height:56px`                   | `width: 56, height: 56`                      | EmptyState                  |
+| `.ds-switch`               | `gap:10px`                                 | `gap: 10`                                    | Switch                      |
+| `.ds-switch__track`        | `width:44px;height:26px;padding:3px`       | `width: 44, height: 26, padding: 3`          | Switch                      |
+| `.ds-switch__thumb`        | `width:16px;height:16px`                   | `width: 16, height: 16`                      | Switch                      |
+| `.ds-pagination`           | `gap:8px`                                  | `gap: 8`                                     | Pagination                  |
+| `.ds-pagination__page`     | `min-width:34px;height:34px`               | `minWidth: 34, height: 34`                   | Pagination                  |
+| `.ds-pagination__ellipsis` | `padding:0 2px`                            | `padding: "0 2px"`                           | Pagination                  |
+| `.ds-checkbox__box`        | `width:20px;height:20px`                   | `width: 20, height: 20`                      | Checkbox                    |
+| `.ds-fg__count`            | `min-width:18px;height:18px;padding:0 5px` | `minWidth: 18, height: 18, padding: "0 5px"` | FilterGroup                 |
+| `.ds-cardtile`             | `gap:12px;padding:12px`                    | `gap: 12, padding: 12`                       | CardTile (citato dal brief) |
+| `.ds-cardtile__badge`      | `top:20px;left:20px`                       | `top: 20, left: 20`                          | CardTile                    |
+| `.ds-cardtile__like`       | `top:18px;right:18px`                      | `top: 18, right: 18`                         | CardTile                    |
+| `.ds-cardtile__stage`      | `perspective:700px`                        | `perspective: 700`                           | CardTile                    |
+| `.ds-nav__menu-link`       | `min-height:56px`                          | `minHeight:56` (`guscio.jsx:32`)             | NavBar (menu mobile)        |
 
 14 valori distinti su 8 componenti diversi, tutti esatti. Il resto dei 120
 riscontri (per lo più `gap`/`padding` a 2–16px e bordi `1px solid

@@ -1,17 +1,29 @@
 import type { Card, CardSet, Condition, Rarity, SortKey } from './types'
 
 export const RARITY_LABELS: Record<Rarity, string> = {
-  common: 'Comune', uncommon: 'Non comune', rare: 'Rara',
-  holo: 'Holo', ultra: 'Ultra rara', secret: 'Segreta',
+  common: 'Comune',
+  uncommon: 'Non comune',
+  rare: 'Rara',
+  holo: 'Holo',
+  ultra: 'Ultra rara',
+  secret: 'Segreta',
 }
 
 export const CONDITION_LABELS: Record<Condition, string> = {
-  mint: 'Mint', 'near-mint': 'Near Mint', excellent: 'Excellent',
-  good: 'Good', played: 'Played',
+  mint: 'Mint',
+  'near-mint': 'Near Mint',
+  excellent: 'Excellent',
+  good: 'Good',
+  played: 'Played',
 }
 
 export const RARITY_RANK: Record<Rarity, number> = {
-  common: 0, uncommon: 1, rare: 2, holo: 3, ultra: 4, secret: 5,
+  common: 0,
+  uncommon: 1,
+  rare: 2,
+  holo: 3,
+  ultra: 4,
+  secret: 5,
 }
 
 export const LANGUAGES = ['Italiano', 'Inglese', 'Giapponese'] as const
@@ -20,7 +32,10 @@ export const FOIL_RARITIES: Rarity[] = ['holo', 'ultra', 'secret']
 /** Etichette dell'ordinamento, come le mostra il prototipo.
  *  Nota: 'az' usa una lineetta EN (U+2013), non un trattino. */
 export const SORT_LABELS: Record<SortKey, string> = {
-  novita: 'Novità', rarita: 'Rarità', az: 'A–Z', espansione: 'Espansione',
+  novita: 'Novità',
+  rarita: 'Rarità',
+  az: 'A–Z',
+  espansione: 'Espansione',
 }
 
 export const PER_PAGE = 24

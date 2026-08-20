@@ -59,7 +59,8 @@ const setOf = (id: string) => sets.find((s) => s.id === id)!
 // Task 23: vedi lo stesso pattern in index.astro — con la configurazione
 // vuota srcCarta torna sempre undefined, output identico a prima.
 const fotoAttive = immaginiAttive()
-const srcCarta = (c: { image?: string }) => (fotoAttive && c.image ? urlImmagine(c.image, 300) : undefined)
+const srcCarta = (c: { image?: string }) =>
+  fotoAttive && c.image ? urlImmagine(c.image, 300) : undefined
 
 // spec §6.1: pagina 1, ordinamento "novita", nessun filtro — lo stato
 // iniziale esatto del prototipo all'apertura di /catalogo.
@@ -98,14 +99,23 @@ const ordinamentoOpzioni = Object.entries(SORT_LABELS).map(([value, label]) => (
              idratazione — ricarica la stessa pagina di default, col termine
              gia' nell'URL per quando CatalogApp prendera' il controllo. -->
         <form method="get" action="/catalogo">
-          <SearchField size="md" name="q" placeholder="Cerca per nome, codice, espansione, condizione…" />
+          <SearchField
+            size="md"
+            name="q"
+            placeholder="Cerca per nome, codice, espansione, condizione…"
+          />
         </form>
       </div>
       <div class="cat">
         <aside class="side">
           <div style="display:grid;gap:var(--sp-2)">
-            <div style="display:flex;align-items:center;justify-content:space-between;min-height:32px">
-              <span style="font:var(--type-label);font-weight:var(--fw-bold);color:var(--text-strong)">Filtri</span>
+            <div
+              style="display:flex;align-items:center;justify-content:space-between;min-height:32px"
+            >
+              <span
+                style="font:var(--type-label);font-weight:var(--fw-bold);color:var(--text-strong)"
+                >Filtri</span
+              >
             </div>
             <Switch checked={false} label="Solo foil" style="margin:var(--sp-2) 0" />
             <FilterGroup title="Rarità">
@@ -118,7 +128,12 @@ const ordinamentoOpzioni = Object.entries(SORT_LABELS).map(([value, label]) => (
             <FilterGroup title="Espansione">
               {
                 sets.map((s) => (
-                  <Checkbox checked={false} label={s.name} description={`${s.code} · ${s.year}`} count={contaSet(s.id)} />
+                  <Checkbox
+                    checked={false}
+                    label={s.name}
+                    description={`${s.code} · ${s.year}`}
+                    count={contaSet(s.id)}
+                  />
                 ))
               }
             </FilterGroup>
@@ -137,7 +152,9 @@ const ordinamentoOpzioni = Object.entries(SORT_LABELS).map(([value, label]) => (
 
         <div style="display:grid;gap:var(--sp-5);min-width:0">
           <div style="display:flex;align-items:center;gap:var(--sp-3);flex-wrap:wrap">
-            <span style="font:var(--type-code);font-size:var(--fs-body-s);color:var(--text-muted)">{iniziale.total} carte</span>
+            <span style="font:var(--type-code);font-size:var(--fs-body-s);color:var(--text-muted)"
+              >{iniziale.total} carte</span
+            >
             <!-- Stessa affordance di CatalogApp (finding 2 del task-20-report):
                  sotto 1080px .side sparisce (layout.css) e questo pulsante
                  e' l'unico modo per aprire i filtri. Deve esistere gia' qui,
@@ -156,14 +173,25 @@ const ordinamentoOpzioni = Object.entries(SORT_LABELS).map(([value, label]) => (
             <div class="hide-mob" style="display:flex;gap:var(--sp-2);flex-wrap:wrap"></div>
             <div style="margin-left:auto;display:flex;align-items:center;gap:var(--sp-3)">
               <Select size="sm" value="novita" options={ordinamentoOpzioni} />
-              <Tabs variant="pill" items={[{ id: 'griglia', label: 'Griglia' }, { id: 'lista', label: 'Lista' }]} value="griglia" />
+              <Tabs
+                variant="pill"
+                items={[
+                  { id: 'griglia', label: 'Griglia' },
+                  { id: 'lista', label: 'Lista' },
+                ]}
+                value="griglia"
+              />
             </div>
           </div>
 
           <div class="cards">
             {
               iniziale.items.map((c) => (
-                <a href={`/carta/${c.slug}`} data-carta={c.slug} style="text-decoration:none;color:inherit">
+                <a
+                  href={`/carta/${c.slug}`}
+                  data-carta={c.slug}
+                  style="text-decoration:none;color:inherit"
+                >
                   <CardTile
                     name={c.name}
                     code={cardCode(c, setOf(c.set))}
@@ -216,4 +244,3 @@ const ordinamentoOpzioni = Object.entries(SORT_LABELS).map(([value, label]) => (
     <CatalogApp client:load />
   </div>
 </Base>
-

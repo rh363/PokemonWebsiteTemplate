@@ -21,13 +21,19 @@ import { NAV } from '~/config/nav'
         <span class="ds-foot__brandname">{SITE.brand}</span>
       </div>
       <p class="ds-foot__desc">
-        Vetrina e catalogo di carte da collezione. {SITE.via}, {SITE.citta}. Non vendiamo online: passa in
-        negozio.
+        Vetrina e catalogo di carte da collezione. {SITE.via}, {SITE.citta}. Non vendiamo online:
+        passa in negozio.
       </p>
     </div>
     <div class="ds-foot__col">
       <span class="ds-foot__label">Sito</span>
-      {NAV.map((it) => <a href={it.href} class="ds-foot__link">{it.label}</a>)}
+      {
+        NAV.map((it) => (
+          <a href={it.href} class="ds-foot__link">
+            {it.label}
+          </a>
+        ))
+      }
     </div>
     <div class="ds-foot__col">
       <span class="ds-foot__label">Orari</span>
