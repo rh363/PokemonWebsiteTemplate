@@ -1,0 +1,8 @@
+/* I webfont sono self-hosted via @fontsource-variable (importati in global.css).
+   L'originale caricava da Google Fonts con @import: render-blocking.
+   Le tre famiglie e i loro fallback restano identici all'originale. */
+:root{
+  --font-display:"Bricolage Grotesque Variable","Bricolage Grotesque","Plus Jakarta Sans",system-ui,sans-serif;
+  --font-body:"Plus Jakarta Sans Variable","Plus Jakarta Sans",system-ui,-apple-system,sans-serif;
+  --font-mono:"JetBrains Mono Variable","JetBrains Mono",ui-monospace,"SF Mono",Menlo,monospace;
+}

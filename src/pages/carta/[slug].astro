@@ -1,0 +1,206 @@
+---
+// Porting di design-reference/carta.jsx, funzione SchedaCarta() — una
+// pagina statica per carta (100 al momento della scrittura, prerenderizzate
+// tutte). getStaticPaths gira una volta sola per l'intera rotta: getAllCards
+// e getAllSets sono chiamate UNA volta, non una per pagina — con centinaia
+// di carte la spesa e' un mapping in memoria, non cento fetch ripetute.
+//
+// Quasi tutto e' testo e specifiche, quindi HTML statico: breadcrumb, badge,
+// titolo, descrizione, i due Panel con SpecList, la nota di condizione e le
+// 5 correlate. Solo due cose hanno bisogno di JavaScript — CardViewer (il
+// tilt segue il puntatore, CSS non puo' leggerne la posizione) e
+// CardActions (i bottoni "Chiedila in negozio" e "Condividi" parlano con lo
+// chrome del sito) — ed entrambe ricevono solo stringhe/slug, mai la Card
+// intera: vedi il commento in cima a ciascuna isola.
+import Base from '~/layouts/Base.astro'
+import Breadcrumb from '~/components/ds/Breadcrumb.svelte'
+import RarityBadge from '~/components/ds/RarityBadge.svelte'
+import ConditionBadge from '~/components/ds/ConditionBadge.svelte'
+import Badge from '~/components/ds/Badge.svelte'
+import Icon from '~/components/ds/Icon.svelte'
+import Button from '~/components/ds/Button.svelte'
+import Panel from '~/components/ds/Panel.svelte'
+import SpecList from '~/components/ds/SpecList.svelte'
+import CardTile from '~/components/ds/CardTile.svelte'
+import Occhiello from '~/components/Occhiello.svelte'
+import Titolo from '~/components/Titolo.svelte'
+import Testo from '~/components/Testo.svelte'
+import CardViewer from '~/components/islands/CardViewer.svelte'
+import CardActions from '~/components/islands/CardActions.svelte'
+import CardImage from '~/components/CardImage.astro'
+import { SITE } from '~/config/site'
+import { NOTE_CONDIZIONE } from '~/config/condizioni'
+import { getAllCards, getAllSets, cardCode, CONDITION_LABELS } from '~/lib/catalog'
+import type { Card, CardSet } from '~/lib/catalog/types'
+import { immaginiAttive, srcsetImmagine, urlImmagine } from '~/lib/immagini'
+
+export async function getStaticPaths() {
+  // Una sola lettura del catalogo per l'intera rotta (100 pagine), non una
+  // per carta: e' il punto esatto in cui il tempo di build diventa
+  // visibile con centinaia di pagine prerenderizzate — vedi task-21-report.md.
+  const [cards, sets] = await Promise.all([getAllCards(), getAllSets()])
+  const setOf = (id: string): CardSet => sets.find((s) => s.id === id) ?? sets[0]!
+
+  return cards.map((card) => {
+    const set = setOf(card.set)
+    // carta.jsx riga 6: window.CARDS.filter(c=>c.id!==carta.id&&(c.set===carta.set||c.rarity===carta.rarity)).slice(0,5)
+    const simili = cards
+      .filter((c) => c.id !== card.id && (c.set === card.set || c.rarity === card.rarity))
+      .slice(0, 5)
+      .map((c) => ({ card: c, code: cardCode(c, setOf(c.set)) }))
+
+    return {
+      params: { slug: card.slug },
+      props: { card, set, simili, catalogCount: cards.length },
+    }
+  })
+}
+
+interface Props {
+  card: Card
+  set: CardSet
+  simili: { card: Card; code: string }[]
+  catalogCount: number
+}
+const { card, set, simili, catalogCount } = Astro.props as Props
+
+const codice = cardCode(card, set)
+
+// Task 23: la carta grande. Con la configurazione immagini vuota
+// mostraFoto e' sempre falso, quindi si rende sempre <CardViewer> come
+// prima — il ramo <CardImage> qui sotto e' morto finche' il proprietario
+// non compila src/config/site.ts#immagini. Il tilt di CardViewer resta
+// riservato al placeholder foil: su una foto vera non avrebbe senso.
+const mostraFoto = Boolean(card.image) && immaginiAttive()
+const cardSizes = '(max-width:1080px) 86vw, 380px'
+
+// "Nella stessa vetrina": stesso pattern src delle altre pagine.
+const fotoAttive = immaginiAttive()
+const srcCarta = (c: { image?: string }) => (fotoAttive && c.image ? urlImmagine(c.image, 150) : undefined)
+---
+
+<Base title={`${card.name} — ${SITE.nome}`} active="catalogo" {catalogCount}>
+  {
+    mostraFoto && (
+      <Fragment slot="head">
+        <link rel="preload" as="image" imagesrcset={srcsetImmagine(card.image!)} sizes={cardSizes} />
+      </Fragment>
+    )
+  }
+  <div class="wrap" style="padding-top:var(--sp-8);padding-bottom:var(--section-y)">
+    <Breadcrumb
+      style="margin-bottom:var(--sp-8)"
+      items={[
+        { label: 'Vetrina', href: '/' },
+        { label: 'Catalogo', href: '/catalogo' },
+        { label: set.name, href: '/espansioni' },
+        { label: card.name },
+      ]}
+    />
+
+    <div class="det">
+      <div class="det-fix">
+        {
+          mostraFoto ? (
+            <CardImage card={card} set={set} sizes={cardSizes} priority />
+          ) : (
+            <CardViewer client:load rarity={card.rarity} code={codice} />
+          )
+        }
+        <div style="display:flex;gap:var(--sp-2);align-items:center;justify-content:center">
+          <Icon name="info" size={14} style="color:var(--text-faint)" />
+          <span class="hint hint--desktop">Muovi il mouse sulla carta per vedere il riflesso</span>
+          <span class="hint hint--mobile">Tieni il dito sulla carta per vedere il riflesso</span>
+        </div>
+      </div>
+
+      <div style="display:grid;gap:var(--sp-6);min-width:0">
+        <div style="display:grid;gap:var(--sp-3)">
+          <div style="display:flex;gap:var(--sp-2);align-items:center;flex-wrap:wrap">
+            <RarityBadge rarity={card.rarity} />
+            <ConditionBadge condition={card.cond} />
+            {card.nuovo && <Badge tone="foil">Nuovo arrivo</Badge>}
+          </div>
+          <Titolo livello="pagina">{card.name}</Titolo>
+          <Testo grande>
+            Esposta in vetrina {card.vetrina}, sotto vetro. È una carta di {set.name} ({set.year}): chiedila in
+            negozio e la guardiamo insieme, fuori dalla bustina.
+          </Testo>
+        </div>
+
+        <div style="display:flex;gap:var(--sp-3);flex-wrap:wrap">
+          <CardActions client:idle slug={card.slug} name={card.name} code={codice} />
+          <Button variant="secondary" as="a" href="/negozio">
+            <Icon slot="icon" name="map-pin" size={16} />
+            Come arrivare
+          </Button>
+        </div>
+
+        <div class="g2" style="gap:var(--sp-5);align-items:stretch">
+          <Panel padding="var(--sp-5)">
+            <SpecList
+              items={[
+                { label: 'Espansione', value: set.name },
+                { label: 'Codice', value: codice, mono: true },
+                { label: 'Numero', value: card.num, mono: true },
+                { label: 'Anno', value: String(set.year), mono: true },
+              ]}
+            />
+          </Panel>
+          <Panel padding="var(--sp-5)">
+            <SpecList
+              items={[
+                { label: 'Illustrazione', value: card.artist },
+                { label: 'Lingua', value: card.lang },
+                { label: 'Condizione', value: CONDITION_LABELS[card.cond] },
+                { label: 'In vetrina da', value: card.entrata, mono: true },
+              ]}
+            />
+          </Panel>
+        </div>
+
+        <Panel variant="sunken" padding="var(--sp-5)" style="display:grid;gap:var(--sp-2)">
+          <Occhiello>Nota di condizione</Occhiello>
+          <Testo style="font-size:var(--fs-body-s);max-width:none">{NOTE_CONDIZIONE[card.cond]}</Testo>
+        </Panel>
+
+        <div style="display:grid;gap:var(--sp-4)">
+          <Titolo livello="piccolo">Nella stessa vetrina</Titolo>
+          <div class="cards" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr))">
+            {
+              simili.map(({ card: c, code: cCode }) => (
+                <a href={`/carta/${c.slug}`} style="text-decoration:none;color:inherit">
+                  <CardTile name={c.name} code={cCode} rarity={c.rarity} src={srcCarta(c)} />
+                </a>
+              ))
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</Base>
+
+<style>
+  /* carta.jsx usa useMedia("(max-width:1080px)") per scegliere il testo del
+     suggerimento — qui e' puro CSS, stesso breakpoint di .det in layout.css
+     (dove det-fix passa da sticky a colonna centrata): niente isola solo
+     per una media query. */
+  .hint {
+    font: var(--type-label);
+    font-size: var(--fs-caption);
+    font-weight: var(--fw-regular);
+    color: var(--text-muted);
+  }
+  .hint--mobile {
+    display: none;
+  }
+  @media (max-width: 1080px) {
+    .hint--desktop {
+      display: none;
+    }
+    .hint--mobile {
+      display: inline;
+    }
+  }
+</style>

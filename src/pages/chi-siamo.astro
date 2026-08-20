@@ -1,0 +1,150 @@
+---
+// Porting di design-reference/about.jsx, funzione About(). E' la pagina piu'
+// semplice del sito e per questo la prima a montare Base.astro: cinque
+// sezioni statiche, zero variabili di interazione. I pezzi di testo/titolo
+// del sorgente (Titolo, Testo, Occhiello, TestaSezione — design-reference/
+// pezzi.jsx) sono i componenti src/components/{Occhiello,Titolo,Testo,
+// TestaSezione}.svelte: sono Svelte (non Astro) cosi' funzionano anche dentro
+// le isole, ma qui — senza alcun client:* — Astro li rende in modo
+// puramente statico, zero JavaScript in piu' rispetto a prima.
+//
+// "Chiedi una carta" non ha bisogno di alcuno script di pagina: l'attributo
+// data-chiedi-trigger lo aggancia allo stesso script inline di NavBar.astro
+// (query globale su document, gia' presente su ogni pagina tramite
+// Base.astro), lo stesso meccanismo del bottone gemello nella navbar.
+import Base from '~/layouts/Base.astro'
+import Panel from '~/components/ds/Panel.svelte'
+import ConditionBadge from '~/components/ds/ConditionBadge.svelte'
+import Button from '~/components/ds/Button.svelte'
+import Icon from '~/components/ds/Icon.svelte'
+import Occhiello from '~/components/Occhiello.svelte'
+import Titolo from '~/components/Titolo.svelte'
+import Testo from '~/components/Testo.svelte'
+import TestaSezione from '~/components/TestaSezione.svelte'
+import { SITE } from '~/config/site'
+import { PERSONE, PASSI, NOTE_COND, STORIA } from '~/config/about'
+import { getAllCards } from '~/lib/catalog'
+
+// window.CARDS.length nel sorgente: qui e' il conteggio reale del catalogo,
+// non un numero scritto a mano.
+const cards = await getAllCards()
+---
+
+<Base title={`Chi siamo — ${SITE.nome}`} active="about" catalogCount={cards.length}>
+  <div>
+    <section style="position:relative;overflow:hidden;border-bottom:1px solid var(--border-hairline)">
+      <div
+        style="position:absolute;inset:0;background:var(--pattern-dots) 0 0/var(--pattern-dots-size);opacity:.7"
+      >
+      </div>
+      <div
+        class="wrap"
+        style="position:relative;padding-top:var(--sp-16);padding-bottom:var(--sp-12);display:grid;gap:var(--sp-5);max-width:var(--page-narrow);margin-left:auto;margin-right:auto"
+      >
+        <Occhiello>Chi siamo</Occhiello>
+        <Titolo livello="pagina">Un negozio piccolo, un catalogo lungo.</Titolo>
+        <Testo grande>
+          Cartafolia ha aperto a {SITE.citta} nel 2019, in un fondo che prima era una merceria. Abbiamo cominciato
+          con due vetrine e una scatola di doppioni; oggi in catalogo ci sono {cards.length} carte, tutte schedate a
+          mano.
+        </Testo>
+        <Testo grande>
+          Non vendiamo online e non abbiamo intenzione di farlo. Il sito serve a farti sapere cosa c'è prima di
+          venire, così quando arrivi sappiamo già cosa tirare fuori.
+        </Testo>
+      </div>
+    </section>
+
+    <section class="wrap sez">
+      <TestaSezione occhiello="Storia" titolo="Sette anni, tre traslochi di vetrina" />
+      <div class="g3" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr))">
+        {
+          STORIA.map((tappa) => (
+            <Panel padding="var(--sp-5)" style="display:grid;gap:var(--sp-2);align-content:start">
+              <span style="font:var(--fw-medium) var(--fs-title-m)/1 var(--font-mono);color:var(--cherry-500)">
+                {tappa.anno}
+              </span>
+              <Testo style="font-size:var(--fs-body-s)">{tappa.testo}</Testo>
+            </Panel>
+          ))
+        }
+      </div>
+    </section>
+
+    <section style="background:var(--surface-invert)">
+      <div class="wrap sez">
+        <TestaSezione tone="invert" occhiello="Chi ci lavora" titolo="Siamo in tre dietro al banco" />
+        <div class="g3" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr))">
+          {
+            PERSONE.map((persona) => (
+              <div style="display:grid;gap:var(--sp-3);padding:var(--sp-6);border-radius:var(--r-card);background:var(--surface-invert-soft);border:1px solid var(--border-invert)">
+                <span style="display:grid;place-items:center;width:52px;height:52px;border-radius:var(--r-pill);background:var(--foil);color:var(--ink-950);font:var(--fw-black) var(--fs-body-m)/1 var(--font-display)">
+                  {persona.iniziali}
+                </span>
+                <span style="font:var(--fw-bold) var(--fs-title-s)/var(--lh-title-s) var(--font-display);color:var(--text-invert)">
+                  {persona.nome}
+                </span>
+                <Testo tone="invert" style="font-size:var(--fs-body-s)">
+                  {persona.ruolo}
+                </Testo>
+              </div>
+            ))
+          }
+        </div>
+      </div>
+    </section>
+
+    <section class="wrap sez">
+      <TestaSezione
+        occhiello="Come schediamo"
+        titolo="Ogni carta passa da quattro mani"
+        testo="Dalla busta alla vetrina ci vogliono venti minuti. Sono sempre gli stessi quattro passaggi."
+      />
+      <div class="g3" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr))">
+        {
+          PASSI.map((passo) => (
+            <Panel hoverLift padding="var(--sp-6)" style="display:grid;gap:var(--sp-3);align-content:start">
+              <span style="font:var(--fw-medium) var(--fs-title-m)/1 var(--font-mono);color:var(--cherry-500)">
+                {passo.numero}
+              </span>
+              <span style="font:var(--type-card-title);color:var(--text-strong)">{passo.titolo}</span>
+              <Testo style="font-size:var(--fs-body-s)">{passo.testo}</Testo>
+            </Panel>
+          ))
+        }
+      </div>
+    </section>
+
+    <section class="wrap sez" style="padding-top:0">
+      <TestaSezione
+        occhiello="Condizione"
+        titolo="Cinque gradi, dichiarati sempre"
+        testo="Usiamo la scala standard in inglese. Se una carta sta fra due gradi, la mettiamo nel più basso."
+      />
+      <Panel padding="0" style="overflow:hidden">
+        {
+          NOTE_COND.map((nota, i) => (
+            <div
+              style={`display:flex;align-items:center;gap:var(--sp-5);padding:var(--sp-4) var(--sp-5);border-top:${i ? '1px solid var(--border-hairline)' : 'none'};flex-wrap:wrap`}
+            >
+              <div style="width:132px;flex:none">
+                <ConditionBadge condition={nota.id} />
+              </div>
+              <Testo style="font-size:var(--fs-body-s);flex:1;min-width:200px">{nota.testo}</Testo>
+            </div>
+          ))
+        }
+      </Panel>
+      <div style="display:flex;gap:var(--sp-3);flex-wrap:wrap;margin-top:var(--sp-8)">
+        <Button as="a" href="/catalogo">
+          <Icon slot="icon" name="layers" size={16} />
+          Sfoglia il catalogo
+        </Button>
+        <Button variant="secondary" data-chiedi-trigger>
+          <Icon slot="icon" name="instagram" size={16} />
+          Chiedi una carta
+        </Button>
+      </div>
+    </section>
+  </div>
+</Base>

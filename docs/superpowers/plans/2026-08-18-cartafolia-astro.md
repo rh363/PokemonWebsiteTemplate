@@ -21,7 +21,14 @@ Questi vincoli valgono per **ogni** task. Non vengono ripetuti nei singoli task.
 - **Nessun valore hardcoded al posto di un token.** Se il prototipo scrive `var(--sp-4)`, il porting scrive `var(--sp-4)`, non `16px`. Fanno eccezione i valori che il prototipo stesso scrive come numeri nudi (per esempio `gap: 12` in `CardTile`, `padding: "8px 16px"` in `Button`): quelli si copiano così come sono. La regola è **fedeltà letterale alla sorgente**, non normalizzazione.
 - **Lingua dell'interfaccia: italiano.** Tutte le stringhe visibili, gli `aria-label` e i messaggi di errore sono in italiano, copiati alla lettera dal prototipo.
 - **Fonte di verità per il porting:** `design-reference/_ds/_ds_bundle.js` e i file `.jsx` in `design-reference/`. Ogni task che porta un componente cita l'intervallo di righe esatto.
-- **TypeScript strict.** `astro check` deve passare senza errori a ogni commit.
+- **TypeScript strict.** `pnpm check` deve passare senza errori a ogni commit — e deve
+  comprendere **sia** `astro check` **sia** `svelte-check`.
+
+  > Scoperto al Task 11: `astro check` **non controlla i tipi dentro i file `.svelte`**.
+  > Verificato iniettando `const errore: number = "una stringa"` in un componente e
+  > ottenendo «0 errors». Senza `svelte-check`, la garanzia «TypeScript strict» non
+  > copre nessuno dei 26 componenti del design system, cioe' la maggior parte del codice
+  > scritto in questo progetto.
 - **Commit frequenti**, uno per task completato, messaggio in italiano, corpo che spiega il perché.
 - **Nessun segreto nel repository.** `CLOUDFLARE_API_TOKEN` e `CLOUDFLARE_ACCOUNT_ID` vivono solo nei GitHub Secrets.
 - **Alias di import:** `~/` → `src/`. Configurato in `tsconfig.json`.
@@ -51,7 +58,7 @@ Ogni file ha una responsabilità sola. La divisione è per responsabilità, non 
 | `src/styles/ds.css` | Le classi dei componenti del design system: layout base e stati hover/press convertiti da JS a CSS |
 | `src/styles/layout.css` | Le utility di pagina del prototipo (`.wrap`, `.sez`, `.g2`, `.g3`, `.cards`, `.cat`, `.det`, `.foot`) e le media query |
 | `src/config/site.ts` | Branding: nome negozio, indirizzo, orari, social, SEO. **L'unico file che il cliente tocca per il branding** |
-| `src/content/config.ts` | Schemi Zod delle collection `cards` e `sets` |
+| `src/content.config.ts` | Schemi Zod delle collection `cards` e `sets` |
 | `src/lib/catalog/types.ts` | `Card`, `Set`, `CardQuery`, `Page<T>`, `CatalogSource`. Nessuna logica |
 | `src/lib/catalog/query.ts` | Filtri, ordinamento, paginazione. Funzioni pure, nessun I/O |
 | `src/lib/catalog/search.ts` | Costruzione haystack e scan. Funzioni pure |
@@ -73,7 +80,7 @@ Ogni file ha una responsabilità sola. La divisione è per responsabilità, non 
 ### Task 1: Scaffold del progetto e riferimento di design
 
 **Files:**
-- Create: `package.json`, `astro.config.mjs`, `tsconfig.json`, `.gitignore`, `.prettierrc`, `oxlintrc.json`
+- Create: `package.json`, `astro.config.mjs`, `tsconfig.json`, `.gitignore`, `.prettierrc`, `.prettierignore`, `oxlintrc.json`
 - Create: `design-reference/` (popolata dal progetto Claude Design)
 - Create: `src/pages/index.astro` (segnaposto minimo, sostituito al Task 18)
 
@@ -311,12 +318,49 @@ import Receiver from '~/components/islands/__spike/Receiver.svelte'
 
 Devono essere **due direttive `client:` distinte**: è questo che le rende isole separate.
 
-- [ ] **Step 4: Verificare**
+- [ ] **Step 4: Verificare — due prove indipendenti**
 
-`pnpm dev`, aprire `http://localhost:4321`, cliccare «incrementa» tre volte.
+La verifica deve essere automatica: «aprire il browser e cliccare» non è eseguibile né ripetibile.
 
-- **Atteso (assunzione confermata):** «valore: 3». Le isole condividono lo store.
-- **Se resta «valore: 0»:** l'assunzione è smentita.
+**Prova A — comportamentale, con Playwright.** È quella che conta.
+
+```bash
+pnpm exec playwright install chromium
+```
+
+`scripts/spike-store.mjs` (file usa e getta, cancellato allo Step 6):
+
+```js
+import { chromium } from 'playwright'
+
+const browser = await chromium.launch()
+const page = await browser.newPage()
+const errori = []
+page.on('pageerror', (e) => errori.push(e.message))
+await page.goto('http://localhost:4321/')
+await page.getByRole('button', { name: 'incrementa' }).click({ clickCount: 3, delay: 50 })
+const testo = await page.getByTestId('spike-value').textContent()
+await browser.close()
+console.log('valore letto:', JSON.stringify(testo))
+console.log('errori di pagina:', errori.length ? errori : 'nessuno')
+console.log(testo?.includes('3') ? 'ESITO: store CONDIVISO' : 'ESITO: store NON condiviso')
+```
+
+Avviare `pnpm dev` in background, eseguire `node scripts/spike-store.mjs`, poi fermare il server.
+
+- **Atteso se l'assunzione regge:** `valore: 3` → store condiviso.
+- **Se resta `valore: 0`:** le isole hanno istanze separate, l'assunzione è smentita.
+
+**Prova B — strutturale, sul build.** Spiega *perché* il risultato è quello che è.
+
+```bash
+pnpm build
+grep -rl 'spikeCounter\|writable' dist/_astro/*.js | head
+```
+
+Se lo store finisce in **un solo chunk** importato da entrambe le isole, l'istanza è condivisa: due `import` dello stesso URL restituiscono lo stesso modulo. Se ogni isola porta la propria copia dello store, non lo è.
+
+Le due prove devono concordare. **Se discordano, riportare BLOCKED**: significa che il meccanismo non è quello che crediamo, e proseguire su un'assunzione sbagliata costerebbe il Task 15 intero.
 
 - [ ] **Step 5: Registrare l'esito nella spec**
 
@@ -343,8 +387,12 @@ export const onChrome = (fn: (e: ChromeEvent) => void) => {
 
 - [ ] **Step 6: Rimuovere lo spike e committare**
 
+Vanno via **tutti** i pezzi dello spike: le due isole, lo store (che al Task 15 verra' ricreato con il contenuto vero), lo script di verifica e le modifiche a `index.astro`. Se `index.astro` restasse a importare componenti cancellati, il build si romperebbe al Task 3.
+
 ```bash
 rm -rf src/components/islands/__spike
+rm -f src/stores/chrome.ts scripts/spike-store.mjs
+git checkout -- src/pages/index.astro   # torna al segnaposto del Task 1
 git add -A
 git commit -m "spike: verificata la condivisione dello store fra isole Svelte
 
@@ -458,7 +506,9 @@ Contenuto atteso (verificarlo contro il sorgente, non fidarsi di questo estratto
 
 ```css
 /* Classi dei componenti del design system.
-   Popolato dai Task 8-13, un blocco per componente. */
+   Popolato dai Task 9-14, un blocco per componente, in aggiunta.
+   Nessun task riscrive questo file: ognuno accoda il proprio blocco
+   preceduto da un commento che cita la sorgente nel bundle. */
 ```
 
 Serve perché `global.css` lo importa già.
@@ -519,7 +569,7 @@ const ATTESE = [
 
 describe('inventario icone', () => {
   it('contiene esattamente le 18 icone usate dal prototipo', () => {
-    expect([...ICON_NAMES].sort()).toEqual([...ATTESE].sort())
+    expect(ICON_NAMES.toSorted()).toEqual([...ATTESE].toSorted())
   })
 
   it('ogni icona ha contenuto SVG non vuoto', () => {
@@ -611,6 +661,8 @@ Porting di `design-reference/_ds/_ds_bundle.js:499-533`. L'originale dipinge una
 
 `{@html}` qui è sicuro: il contenuto viene da un file generato in fase di build da un pacchetto npm, mai da input utente.
 
+**La prop `color` del prototipo non viene portata, deliberatamente.** `design-reference/CONTRATTI-COMPONENTI.md` la elenca e il sorgente la implementa (`background: color || "currentColor"`), ma nessuno la passa mai: i quattro chiamanti nei `.jsx` usano `style={{color:…}}`, e dentro il bundle le occorrenze di `color` stanno anch'esse dentro `style`. È API morta già nell'originale, e `style` ottiene lo stesso risultato.
+
 - [ ] **Step 6: Commit**
 
 ```bash
@@ -633,7 +685,7 @@ Questa fase è **interamente logica pura**: nessun DOM, nessun componente. È il
 - Create: `src/lib/catalog/types.ts`, `src/lib/catalog/labels.ts`, `src/lib/demo/prng.ts`, `src/config/site.ts`
 - Create: `scripts/seed-demo.ts`
 - Create: `src/content/sets.json`, `src/content/cards.csv` (generati)
-- Create: `src/content/config.ts`
+- Create: `src/content.config.ts`
 - Test: `src/lib/demo/prng.test.ts`
 
 **Interfaces:**
@@ -847,7 +899,7 @@ export const SITE = {
 `scripts/seed-demo.ts` riproduce la generazione di `design-reference/dati.jsx` e la **serializza su file**, così i dati demo diventano contenuto editabile invece che codice.
 
 ```ts
-import { mkdirSync, rmSync, writeFileSync } from 'node:fs'
+import { mkdirSync, writeFileSync } from 'node:fs'
 import { createPick, createRng } from '../src/lib/demo/prng'
 import type { Card, CardSet, Condition, Rarity } from '../src/lib/catalog/types'
 
@@ -937,7 +989,7 @@ head -2 src/content/cards.csv
 
 Aggiungere a `package.json`: `"seed": "tsx scripts/seed-demo.ts"`.
 
-- [ ] **Step 10: Scrivere `src/content/config.ts`**
+- [ ] **Step 10: Scrivere `src/content.config.ts`**
 
 ```ts
 import { defineCollection, z } from 'astro:content'
@@ -1016,9 +1068,8 @@ dove `q = query.trim().toLowerCase()`. La ricerca è **substring, non per parole
 - Test: `src/lib/catalog/search.test.ts`
 
 **Interfaces:**
-- Consumes: `Card`, `CardSet` da `./types`; `RARITY_LABELS`, `CONDITION_LABELS` da `./labels`
+- Consumes: `Card`, `CardSet` da `./types`; `RARITY_LABELS`, `CONDITION_LABELS`, **`cardCode`** da `./labels` (definito al Task 5, non ridefinirlo qui)
 - Produces:
-  - `cardCode(card: Card, set: CardSet): string`
   - `buildHaystack(card: Card, set: CardSet): string`
   - `matches(haystack: string, q: string): boolean`
   - `normalizeQuery(q: string | undefined): string`
@@ -1029,7 +1080,8 @@ dove `q = query.trim().toLowerCase()`. La ricerca è **substring, non per parole
 
 ```ts
 import { describe, expect, it } from 'vitest'
-import { buildHaystack, cardCode, matches, normalizeQuery } from './search'
+import { cardCode } from './labels'
+import { buildHaystack, matches, normalizeQuery } from './search'
 import type { Card, CardSet } from './types'
 
 const set: CardSet = {
@@ -1107,11 +1159,8 @@ Atteso: FAIL, `Failed to resolve import "./search"`.
 - [ ] **Step 3: Scrivere `src/lib/catalog/search.ts`**
 
 ```ts
-import { CONDITION_LABELS, RARITY_LABELS } from './labels'
+import { cardCode, CONDITION_LABELS, RARITY_LABELS } from './labels'
 import type { Card, CardSet } from './types'
-
-/** "ALB 042/198" — come codeOf() in design-reference/dati.jsx */
-export const cardCode = (card: Card, set: CardSet) => `${set.code} ${card.num}`
 
 export const normalizeQuery = (q: string | undefined) => (q ?? '').trim().toLowerCase()
 
@@ -1542,7 +1591,7 @@ e spostare `getAllSets`/`getAllCards`/`staticSource` in `source.static.astro.ts`
 ```ts
 export * from './types'
 export * from './labels'
-export { cardCode, buildHaystack, matches, normalizeQuery } from './search'
+export { buildHaystack, matches, normalizeQuery } from './search'
 export { filterCards, sortCards, paginate, queryCards, type IndexedCard } from './query'
 export {
   staticSource, getAllCards, getAllSets, getIndexedCards,
@@ -1639,6 +1688,48 @@ Ogni componente segue gli stessi cinque passi. Non vengono ripetuti in ogni task
 4. **Verificare affiancato** contro `http://localhost:4322/index.html`, sia a riposo sia in hover sia in focus da tastiera.
 5. **Commit** a fine task.
 
+### Il trabocchetto degli shorthand CSS
+
+Emerso al Task 9 con un difetto vero e invisibile ai controlli automatici. **Leggerlo prima di dividere una regola in base + modificatore.**
+
+Quando si separa uno stile React in una classe base e una classe modificatore, il modificatore che usa uno **shorthand** (`font`, `border`, `background`, `margin`, `padding`, `grid`, `flex`) **azzera silenziosamente tutte le longhand che quello shorthand copre** — comprese quelle dichiarate solo nella regola base. A parità di specificità vince la regola dichiarata dopo.
+
+Il caso reale: `SpecList` nel sorgente fa
+
+```js
+font:     it.mono ? "var(--type-code)"  : "var(--type-body)",
+fontSize: it.mono ? "var(--fs-body-s)"  : "var(--fs-body-s)",   // lo STESSO valore nei due rami
+```
+
+In React `fontSize` viene dopo `font` nello stesso oggetto, quindi vince sempre: il testo è 14px in entrambi i casi. Diviso in CSS diventava
+
+```css
+.ds-speclist__dd       { font:var(--type-body); font-size:var(--fs-body-s) }
+.ds-speclist__dd--mono { font:var(--type-code) }   /* ← reimposta font-size a --fs-caption, 12px */
+```
+
+e ogni riga mono rendeva a 12px invece di 14.
+
+**Regola:** un valore che il sorgente mantiene costante fra i rami di un ternario va **ridichiarato esplicitamente in ogni regola modificatore** che usa uno shorthand. In alternativa, e più sicuro: nel modificatore usare le longhand (`font-family`, `font-weight`, `line-height`) invece dello shorthand.
+
+**Come accorgersene:** dopo aver diviso, chiedersi per ogni shorthand del modificatore quali longhand implica, e se la regola base ne dichiarava qualcuna.
+
+### Stati persistenti contro `:hover` — conflitto di specificità
+
+Emerso al Task 10. Un componente con uno stato **persistente** (`active` su `IconButton`, `selected` su `Chip`, la voce corrente di `Tabs` o di `NavBar`) ha una regola che deve **sopravvivere all'hover**, non essere sostituita da esso.
+
+Se la regola dello stato persistente e quella di `:hover` hanno la stessa specificità, vince quella dichiarata dopo — di solito `:hover`, e lo stato attivo sparisce appena ci passi sopra il mouse. Il prototipo non ha questo problema perché in React lo stile è un unico oggetto calcolato, dove l'ordine delle chiavi decide.
+
+**Regola:** la regola dello stato persistente deve avere specificità **maggiore** di quella di hover, e va scritta anche nella sua variante hover. Per esempio:
+
+```css
+@media (hover:hover){ .ds-iconbtn:hover{ … } }
+.ds-iconbtn.is-active,
+.ds-iconbtn.is-active:hover{ … }   /* vince su entrambi gli stati */
+```
+
+Riguarda i Task 11 (`Checkbox`, `Switch`), 13 (`Tabs`, `NavBar`) e 14 (`CardTile` con `liked`).
+
 ### Convenzioni comuni a tutti i componenti
 
 - Props tipizzate con `$props()` e destrutturazione con valori di default identici a quelli React.
@@ -1669,7 +1760,10 @@ Sorgente: `design-reference/_ds/_ds_bundle.js:11-90`. È il modello per Badge, R
     style = '',
   } = $props()
 
-  const caption = $derived(code == null ? '' : String(code).trim())
+  // Fedele a bundle:24 — un code non-stringa e falsy (0, NaN) rende stringa vuota.
+  const caption = $derived(
+    typeof code === 'string' ? code.trim() : code ? String(code) : '',
+  )
   const isFoil = $derived(
     foil || rarity === 'holo' || rarity === 'ultra' || rarity === 'secret',
   )
@@ -1731,9 +1825,13 @@ Nel prototipo `hover` e `press` sono due `useState`. Qui diventano `:hover` e `:
 <script lang="ts">
   import type { Snippet } from 'svelte'
 
+  type Variante = 'primary' | 'secondary' | 'ghost' | 'foil' | 'invert'
+  type Dimensione = 'sm' | 'md' | 'lg'
+
   let {
-    variant = 'primary',
-    size = 'md',
+    variant = 'primary' as Variante,
+    size = 'md' as Dimensione,
+    as = 'button' as 'button' | 'a',
     fullWidth = false,
     disabled = false,
     href = undefined as string | undefined,
@@ -1750,13 +1848,13 @@ Nel prototipo `hover` e `press` sono due `useState`. Qui diventano `:hover` e `:
   {@render icon?.()}{@render children?.()}{@render iconRight?.()}
 {/snippet}
 
-{#if href}
+{#if as === 'a'}
   <a
     class="ds-btn"
     class:ds-btn--full={fullWidth}
     data-variant={variant}
     data-size={size}
-    {href}
+    href={href}
     {onclick}
     {style}
     {...rest}>{@render inner()}</a>
@@ -1787,6 +1885,11 @@ in `src/styles/ds.css`:
 .ds-btn[data-size="md"]{padding:12px 22px;font-size:var(--fs-body-m);gap:8px;min-height:46px}
 .ds-btn[data-size="lg"]{padding:16px 30px;font-size:var(--fs-body-l);gap:10px;min-height:56px}
 
+/* Fallback: il sorgente fa VARIANTS[variant] || VARIANTS.primary, quindi una
+   variante sconosciuta deve rendere come primary, non senza stile. */
+.ds-btn{--btn-bg:var(--surface-brand);--btn-fg:var(--text-invert);
+  --btn-bd:var(--bw-strong) solid var(--ink-950);--btn-sh:var(--sh-sticker-sm);
+  --btn-bg-hover:var(--surface-brand-hover)}
 .ds-btn[data-variant="primary"]{--btn-bg:var(--surface-brand);--btn-fg:var(--text-invert);
   --btn-bd:var(--bw-strong) solid var(--ink-950);--btn-sh:var(--sh-sticker-sm);
   --btn-bg-hover:var(--surface-brand-hover)}
@@ -1820,7 +1923,9 @@ Confronto con la sorgente, riga per riga: `padding`, `fontSize`, `gap`, `minHeig
 **Files:**
 - Create: `src/components/ds/{CardArt,Badge,RarityBadge,ConditionBadge,SpecList,Skeleton,EmptyState}.svelte`
 - Modify: `src/styles/ds.css`
-- Create: `src/pages/__ds.astro` (galleria di verifica, rimossa al Task 25)
+- Create: `src/pages/ds-gallery.astro` (galleria di verifica, rimossa al Task 27)
+
+**Nota sul nome del file:** non usare un nome che inizi per `_`. Astro esclude dal routing ogni segmento di percorso che comincia con un underscore, quindi `__ds.astro` restituirebbe 404 sia in dev sia nel build.
 
 **Interfaces:**
 - Consumes: `Icon` (Task 4), token (Task 3), tipi `Rarity`/`Condition` (Task 5)
@@ -1846,7 +1951,7 @@ Per ciascuno seguire il protocollo a 5 passi. Nessuno di questi ha stato di inte
 
 - [ ] **Step 3: Costruire la galleria di verifica**
 
-`src/pages/__ds.astro` mostra ogni componente in tutte le sue varianti, affiancate:
+`src/pages/ds-gallery.astro` mostra ogni componente in tutte le sue varianti, affiancate:
 
 ```astro
 ---
@@ -1892,7 +1997,7 @@ const COND = ['mint','near-mint','excellent','good','played'] as const
 
 - [ ] **Step 4: Verificare la fedeltà**
 
-Aprire `http://localhost:4321/__ds` accanto a `http://localhost:4322/index.html`.
+Aprire `http://localhost:4321/ds-gallery` accanto a `http://localhost:4322/index.html`.
 
 - Le sei `CardArt` con rarità alta (`holo`, `ultra`, `secret`) devono avere il fondo foil arcobaleno; le altre il retino a punti su grigio caldo.
 - I pallini di `RarityBadge` devono essere 1, 2, 3, 4, 5, 6 e il bordo del colore della rarità.
@@ -1921,7 +2026,7 @@ affiancato col prototipo."
 
 **Files:**
 - Create: `src/components/ds/{Button,IconButton,Chip,Panel,Tooltip}.svelte`
-- Modify: `src/styles/ds.css`, `src/pages/__ds.astro`
+- Modify: `src/styles/ds.css`, `src/pages/ds-gallery.astro`
 
 **Interfaces:**
 - Produces: `Button` (props `variant`, `size`, `fullWidth`, `disabled`, `href`, `onclick`, snippet `icon`/`iconRight`/`children`), `IconButton` (`icon: IconName`, `variant`, `size`, `label`, `onclick`), `Chip` (`onclick`, `onRemove`, snippet `children`), `Panel` (`variant`, `padding`, `hoverLift`, `as`), `Tooltip` (`label`, `side`)
@@ -1976,7 +2081,7 @@ Per `Tooltip`:
 
 - [ ] **Step 3: Estendere la galleria**
 
-Aggiungere a `src/pages/__ds.astro`: le 5 varianti di `Button` × 3 dimensioni, più uno `disabled` e uno `fullWidth`; `IconButton` in tutte le varianti; `Chip` con e senza `onRemove`; i 5 `Panel` con e senza `hoverLift`; `Tooltip` nelle 4 posizioni.
+Aggiungere a `src/pages/ds-gallery.astro`: le 5 varianti di `Button` × 3 dimensioni, più uno `disabled` e uno `fullWidth`; `IconButton` in tutte le varianti; `Chip` con e senza `onRemove`; i 5 `Panel` con e senza `hoverLift`; `Tooltip` nelle 4 posizioni.
 
 - [ ] **Step 4: Verificare hover, press e tastiera**
 
@@ -2011,7 +2116,7 @@ controlli funzionano in pagine che non idratano nulla."
 
 **Files:**
 - Create: `src/components/ds/{Input,SearchField,Select,Checkbox,Switch,FilterGroup}.svelte`
-- Modify: `src/styles/ds.css`, `src/pages/__ds.astro`
+- Modify: `src/styles/ds.css`, `src/pages/ds-gallery.astro`
 
 **Interfaces:**
 - Produces: `Input`, `SearchField` (`value`, `oninput`, `onclear`, `suggestions`, `onpick`, `size`), `Select` (`value`, `options`, `onchange`, `size`), `Checkbox` (`checked`, `label`, `description`, `count`, `onchange`), `Switch` (`checked`, `label`, `onchange`), `FilterGroup` (`title`, `activeCount`, `defaultOpen`, snippet `children`)
@@ -2024,7 +2129,7 @@ controlli funzionano in pagine che non idratano nulla."
 | `Select` | `bundle:1597-1670` | Resta un `<select>` nativo: accessibile e senza JS di posizionamento |
 | `Checkbox` | `bundle:1323-1410` | `<input type="checkbox">` reale nascosto + riquadro disegnato, così Tab e Spazio funzionano da soli |
 | `Switch` | `bundle:1671-1736` | `<input type="checkbox" role="switch">` |
-| `FilterGroup` | `bundle:534-609` | L'apertura era `useState`. Usare `<details open={defaultOpen}>` + `<summary>`: apre e chiude **senza JavaScript**, con tastiera funzionante di serie. Il chevron ruota con `details[open] .ds-fg__chev{transform:rotate(180deg)}` |
+| `FilterGroup` | `bundle:534-609` | L'apertura era `useState`. Usare `<details open={defaultOpen}>` + `<summary>`: apre e chiude **senza JavaScript**, con tastiera funzionante di serie. Il chevron riproduce i valori del sorgente (`bundle:592`): `transform: open ? "rotate(0deg)" : "rotate(-90deg)"` su un glifo `chevron-down`, cioe' **chiuso punta a destra, aperto punta in basso** — la convenzione classica. In CSS: `.ds-fg__chev{transform:rotate(-90deg)}` e `details.ds-fg[open] .ds-fg__chev{transform:rotate(0deg)}`. **Non** `rotate(180deg)`, che darebbe un chevron in basso da chiuso e in alto da aperto: entrambi gli stati sbagliati |
 
 **`SearchField` — due miglioramenti dichiarati.** Il prototipo (`bundle:1483-1596`) chiude il pannello dei suggerimenti con `onBlur: () => setTimeout(() => setFocus(false), 120)` e li seleziona con `onMouseDown`. Sono due limiti reali:
 
@@ -2039,11 +2144,11 @@ Seguire il protocollo. Per `FilterGroup` la conversione a `<details>` è un camb
 
 - [ ] **Step 2: Estendere la galleria**
 
-Dentro `__ds.astro` serve un'isola contenitore, perché questi componenti hanno stato. Creare `src/components/islands/__DsForms.svelte` che li monta tutti con valori locali, e montarlo con `client:load`.
+Dentro `ds-gallery.astro` serve un'isola contenitore, perché questi componenti hanno stato. Creare `src/components/islands/DsForms.svelte` che li monta tutti con valori locali, e montarlo con `client:load`.
 
 - [ ] **Step 3: Verificare la tastiera**
 
-Su `http://localhost:4321/__ds`:
+Su `http://localhost:4321/ds-gallery`:
 - Tab raggiunge ogni campo; `Checkbox` e `Switch` si attivano con Spazio;
 - `FilterGroup` apre e chiude con Invio sul `<summary>`;
 - in `SearchField`, scrivendo appare la lista: `↓` evidenzia la prima voce, `Invio` la sceglie, `Esc` chiude;
@@ -2165,11 +2270,11 @@ della sorgente; lo scrim passa su ::backdrop."
 
 **Files:**
 - Create: `src/components/ds/{Tabs,Pagination,Breadcrumb}.svelte`
-- Create: `src/components/NavBar.astro`, `src/components/Footer.astro`
-- Modify: `src/styles/ds.css`
+- Create: `src/components/NavBar.astro`, `src/components/Footer.astro`, `src/config/nav.ts`
+- Modify: `src/styles/ds.css`, `src/pages/ds-gallery.astro`
 
 **Interfaces:**
-- Produces: `Tabs` (`items`, `value`, `onchange`, `variant`), `Pagination` (`page`, `pages`, `onchange`), `Breadcrumb` (`items`), `NavBar.astro` (`active: string`), `Footer.astro`
+- Produces: `Tabs` (`items`, `value`, `onchange`, `variant`), `Pagination` (`page`, `pages`, `onchange`), `Breadcrumb` (`items`), `NavBar.astro` (props `{ active: string; catalogCount?: number }`), `Footer.astro`
 
 | Componente | Sorgente | Nota di porting |
 |---|---|---|
@@ -2186,7 +2291,8 @@ della sorgente; lo scrim passa su ::backdrop."
 import { SITE } from '~/config/site'
 import Icon from '~/components/ds/Icon.svelte'
 import { NAV } from '~/config/nav'
-const { active } = Astro.props as { active: string }
+const { active, catalogCount } = Astro.props as { active: string; catalogCount?: number }
+const voci = NAV.map((v) => (v.id === 'catalogo' ? { ...v, count: catalogCount } : v))
 ---
 <header class="ds-nav" data-scrolled="false">
   <nav class="ds-nav__inner">
@@ -2195,7 +2301,7 @@ const { active } = Astro.props as { active: string }
       <span>{SITE.brand}</span>
     </a>
     <div class="ds-nav__links">
-      {NAV.map((it) => (
+      {voci.map((it) => (
         <a href={it.href} class="ds-nav__link" data-on={it.id === active}
            aria-current={it.id === active ? 'page' : undefined}>
           {it.label}
@@ -2240,7 +2346,7 @@ Porting di `design-reference/guscio.jsx`, funzione `Footer`. Quattro colonne (`.
 
 - [ ] **Step 4: Verificare**
 
-Con la NavBar montata in `__ds.astro`: a scroll 0 il fondo è `var(--surface-page)` senza bordo; superati 8px compaiono vetro, sfocatura e bordo. Il confronto va fatto affiancato al prototipo, che si comporta identico.
+Con la NavBar montata in `ds-gallery.astro`: a scroll 0 il fondo è `var(--surface-page)` senza bordo; superati 8px compaiono vetro, sfocatura e bordo. Il confronto va fatto affiancato al prototipo, che si comporta identico.
 
 - [ ] **Step 5: Commit**
 
@@ -2261,7 +2367,7 @@ Il tilt dipende dalla posizione del puntatore dentro l'elemento: `rotateY = (x/w
 
 **Files:**
 - Create: `src/components/ds/CardTile.svelte`
-- Modify: `src/styles/ds.css`, `src/pages/__ds.astro`
+- Modify: `src/styles/ds.css`, `src/pages/ds-gallery.astro`
 
 **Interfaces:**
 - Consumes: `CardArt` (Task 9), `RarityBadge` (Task 9), `IconButton` (Task 10)
@@ -2321,12 +2427,45 @@ e' in CSS, quindi la tessera resta corretta anche senza idratazione."
 ---
 # FASE 3 — Shell e pagine
 
+## I quattro helper di `pezzi.jsx` sono componenti, non stili da ricopiare
+
+Scoperto al Task 16 con un difetto vero: tre sezioni su cinque rendevano il testo in
+`#241D2C` invece di `#6B6178`, perche' nel ricopiare a mano gli stili inline di `Testo`
+era caduta la dichiarazione `color`, e i paragrafi ereditavano il colore del `Panel`.
+Il confronto a schermate non l'ha intercettato: a occhio un grigio scuro e un nero quasi
+si somigliano.
+
+`design-reference/pezzi.jsx` definisce **quattro componenti condivisi** che le pagine del
+prototipo usano ovunque:
+
+| Componente | Righe | Cosa incapsula |
+|---|---|---|
+| `Occhiello` | 9-11 | l'etichetta maiuscoletta sopra i titoli, con `tone` chiaro/scuro |
+| `Titolo` | 13-21 | quattro livelli (`hero`, `pagina`, `sezione`, `piccolo`), ognuno con font e tracking propri, e il tag HTML che ne consegue |
+| `Testo` | 23-25 | il paragrafo, con `grande`, `tone` e **sempre** un `color` esplicito |
+| `TestaSezione` | 27-36 | occhiello + titolo + testo + azione, con la loro spaziatura |
+
+Vanno portati **una volta sola, come componenti**, non inlineati in ogni pagina. E' anche
+la scelta piu' fedele: nel prototipo sono componenti, non stili sparsi.
+
+**Dove e come:** `src/components/{Occhiello,Titolo,Testo,TestaSezione}.svelte`. In Svelte e
+non in Astro perche' cosi' servono a entrambi i lati del confine — una pagina `.astro` li
+rende staticamente (nessuna direttiva `client:`, nessun JavaScript spedito), e un'isola
+puo' importarli come qualsiasi altro componente. `SiteChrome` ne usa gia' due inlineati e
+andra' allineato quando li si tocca.
+
+I Task 17-22 usano questi componenti. Se una pagina scrive a mano
+`style="font:var(--type-body);…"` per un paragrafo, sta reintroducendo il difetto.
+
+
+
 L'ordine delle pagine non è casuale: si parte dalla più semplice (`/chi-siamo`, zero interazione) per validare la catena layout → token → componenti su un caso senza variabili, e si finisce con la più complessa (`/catalogo`).
 
 ### Task 15: Layout di base e shell interattiva
 
 **Files:**
-- Create: `src/layouts/Base.astro`, `src/components/islands/SiteChrome.svelte`, `src/stores/chrome.ts`, `src/config/nav.ts`
+- Create: `src/layouts/Base.astro`, `src/components/islands/SiteChrome.svelte`, `src/stores/chrome.ts`
+- Consuma (creato al Task 13): `src/config/nav.ts`
 - Create: `public/assets/logo-mark.svg`, `public/assets/logo.svg`
 
 **Interfaces:**
@@ -2560,6 +2699,39 @@ attributo: la pagina e' completa senza JS e il filtro e' istantaneo."
 
 ---
 
+## Le isole non trasportano dati: li chiedono al seam
+
+Deciso al Task 18, dopo che la review ha misurato il costo reale.
+
+`SetFilter` era stato costruito montando **l'intera lista** dentro l'isola, con tutti e sei
+gli oggetti `Card` completi passati come props. Misurato sul build: **21 KB di JSON**
+incorporati nell'HTML per sei elementi, che duplicano dati gia' presenti come markup reso,
+piu' sei alberi di componenti idratati che non hanno alcun motivo di essere reattivi.
+
+Su sei espansioni non si nota. Sulla home, sul catalogo e sulla scheda carta si', ed e'
+esattamente dove il pilastro delle prestazioni conta di piu'.
+
+**La regola, per i Task 19-21:**
+
+> La lista si rende in Astro, staticamente. L'isola monta solo i controlli, e i dati che le
+> servono se li procura **dal seam**, non dalle props.
+
+Il quick-view e' il caso che sembrava richiedere le props: per aprirlo serve una `Card`
+intera. Ma `/api/catalog.json` esiste gia' dal Task 8, ed e' proprio il canale previsto per
+questo. Quindi:
+
+- ogni tessera statica porta un attributo `data-carta="<slug>"`;
+- `SiteChrome` scarica `/api/catalog.json` **la prima volta** che serve un quick-view, e da
+  li' in poi lo tiene;
+- la ricerca e' per slug, e le props incorporate scendono a zero.
+
+E' lo stesso schema gia' usato per `data-chiedi-trigger`, ed e' il motivo per cui il seam
+era stato costruito: **oggi quel file arriva da un CSV, domani da Supabase, e le pagine non
+cambiano.** Usarlo qui significa che il quick-view funzionera' identico il giorno del
+passaggio.
+
+Un'isola che riceve `Card[]` come props sta reintroducendo il difetto.
+
 ### Task 19: `/` — la vetrina
 
 **Files:**
@@ -2670,6 +2842,8 @@ Run: `pnpm test src/lib/catalog/url` → FAIL, import non risolto.
 Validare ogni valore contro le costanti di `labels.ts`: la querystring è input esterno e non va mai passata ai filtri senza controllo. Chiavi: `q`, `set` (ripetibile), `rar` (ripetibile), `cond` (ripetibile), `lang` (ripetibile), `foil`, `sort`, `p`.
 
 - [ ] **Step 4: Eseguire il test e verificare che passi** → PASS, 5 test.
+
+Aggiungere poi `export * from './url'` a `src/lib/catalog/index.ts`, cosi' le pagine continuano a importare solo da `~/lib/catalog`.
 
 - [ ] **Step 5: Renderizzare staticamente la prima pagina**
 
@@ -2833,7 +3007,8 @@ Il prototipo non ha nessuna immagine: `CardArt` senza `src` mostra il placeholde
 
 **Files:**
 - Create: `src/components/CardImage.astro`, `scripts/upload-immagini.ts`
-- Modify: `src/config/site.ts`, `docs/CONTENUTI.md`
+- Modify: `src/config/site.ts`
+- Create: `docs/CONTENUTI.md` (primo scrittore; il Task 27 lo completa)
 - **Non** si crea `src/assets/cards/`: nel repository non finiscono binari
 
 **Interfaces:**
@@ -3317,8 +3492,9 @@ cosi' un errore di tipo non arriva in produzione."
 È il task che chiude il pilastro 1. Non va saltato.
 
 **Files:**
-- Delete: `src/pages/__ds.astro`
-- Create: `README.md`, `docs/CONTENUTI.md`, `docs/FEDELTA.md`
+- Delete: `src/pages/ds-gallery.astro`
+- Create: `README.md`, `docs/FEDELTA.md`
+- Modify: `docs/CONTENUTI.md` (creato al Task 23, qui si completa)
 
 - [ ] **Step 1: Confronto affiancato completo**
 
@@ -3336,17 +3512,36 @@ Punti su cui si accumulano gli scostamenti, da controllare per primi:
 
 - [ ] **Step 2: Verificare l'aderenza ai token**
 
+Il design system porta con sé `_adherence.oxlintrc.json`, che vieta i valori hardcoded.
+**Non è utilizzabile qui**: i suoi selettori sono `JSXOpeningElement` e le sue regole
+cercano literal JavaScript, quindi valida React e non vede né i `.svelte` né i `.css`.
+I contratti di prop che conteneva sono stati estratti in
+`design-reference/CONTRATTI-COMPONENTI.md`; le tre regole di aderenza che sopravvivono
+al porting si verificano così:
+
 ```bash
-pnpm exec oxlint --config design-reference/_ds/cartafolia-design-system-3cbf7559-ef12-4ca1-9d34-2c119fcda054/_adherence.oxlintrc.json src
+# 1. Nessun colore esadecimale grezzo fuori dai file che definiscono i token
+grep -rnE '#[0-9a-fA-F]{3,8}\b' src --include='*.svelte' --include='*.astro'   --include='*.css' --include='*.ts' | grep -v '^src/styles/tokens/' || echo "ok: nessun hex grezzo"
+
+# 2. Nessun px grezzo in ds.css e layout.css (i token li definiscono altrove)
+grep -nE '[^-a-zA-Z(]([0-9]+)px' src/styles/ds.css src/styles/layout.css || echo "ok: nessun px grezzo"
+
+# 3. Solo le tre famiglie del design system
+grep -rn 'font-family' src --include='*.svelte' --include='*.astro' --include='*.css'   | grep -v 'var(--font-' | grep -v '^src/styles/tokens/' || echo "ok: solo font del design system"
 ```
 
-Questa configurazione arriva dal design system e vieta i valori hardcoded al posto dei token. Ogni segnalazione va risolta o giustificata in `docs/FEDELTA.md`.
+Il punto 2 produrrà dei riscontri legittimi: i valori che il prototipo stesso scrive come
+numeri nudi (`gap: 12` e `padding: 12` in `CardTile`, `padding: "8px 16px"` in `Button`,
+le altezze delle barre di `ConditionBadge`). La regola del progetto è **fedeltà letterale
+alla sorgente**, non normalizzazione: ognuno di questi va confrontato con l'intervallo di
+righe nel bundle e, se corrisponde, annotato in `docs/FEDELTA.md` come atteso. Ciò che non
+corrisponde a nulla nella sorgente è invece un difetto da correggere.
 
 - [ ] **Step 3: Rimuovere la galleria di sviluppo**
 
 ```bash
-rm src/pages/__ds.astro
-rm -f src/components/islands/__DsForms.svelte
+rm src/pages/ds-gallery.astro
+rm -f src/components/islands/DsForms.svelte
 ```
 
 - [ ] **Step 4: Scrivere `README.md`**

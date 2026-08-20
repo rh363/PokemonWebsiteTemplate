@@ -1,0 +1,184 @@
+---
+// Porting di design-reference/espansioni.jsx, funzione Espansioni().
+//
+// Retrofit del Task 19 (vedi commento in src/components/islands/SetFilter.svelte):
+// le sei espansioni si renderizzano tutte qui, staticamente — SetFilter.svelte
+// e' ridotta ai soli Tabs, non riceve piu' alcuna Card come prop. Il filtro
+// commuta l'attributo data-tab su #sets-list, e il CSS qui sotto nasconde
+// le righe che non corrispondono: la pagina resta completa senza JS (il tab
+// di default "tutte" mostra tutto) e il filtro e' istantaneo.
+//
+// Le miniature aprivano il quick-view chiamando quick.set(card) dall'interno
+// dell'isola (avevano la Card in mano). Ora sono bottoni statici con
+// data-carta="<slug>": il click e' delegato dallo stesso script di
+// NavBar.astro che gia' gestisce data-chiedi-trigger, e SiteChrome risolve
+// lo slug in Card interrogando /api/catalog.json alla prima richiesta.
+import Base from '~/layouts/Base.astro'
+import Occhiello from '~/components/Occhiello.svelte'
+import Titolo from '~/components/Titolo.svelte'
+import Testo from '~/components/Testo.svelte'
+import Panel from '~/components/ds/Panel.svelte'
+import Badge from '~/components/ds/Badge.svelte'
+import Button from '~/components/ds/Button.svelte'
+import Icon from '~/components/ds/Icon.svelte'
+import CardArt from '~/components/ds/CardArt.svelte'
+import SetFilter from '~/components/islands/SetFilter.svelte'
+import { SITE } from '~/config/site'
+import { getAllSets, getAllCards } from '~/lib/catalog'
+import { inVetrina } from '~/lib/catalog/labels'
+import { immaginiAttive, urlImmagine } from '~/lib/immagini'
+
+// Task 23: vedi lo stesso pattern in index.astro/catalogo.astro.
+const fotoAttive = immaginiAttive()
+const srcCarta = (c: { image?: string }) => (fotoAttive && c.image ? urlImmagine(c.image, 150) : undefined)
+
+// L'ordine di visualizzazione (quello di sets.json) e' gia' garantito da
+// getAllSets(): vedi il commento in src/lib/catalog/source.static.astro.ts.
+const [sets, cards] = await Promise.all([getAllSets(), getAllCards()])
+
+// carte.length del sorgente (design-reference/espansioni.jsx riga 24): il
+// conteggio reale delle carte schedate in quell'espansione, non la stima
+// inVetrina() che alimenta solo la barra di riempimento. "miniature" resta
+// dati server-side puri: non e' mai spedita al browser come prop di isola,
+// solo come markup gia' reso (le CardArt qui sotto).
+const setsVM = sets.map((s) => {
+  const carte = cards.filter((c) => c.set === s.id)
+  return { ...s, count: carte.length, miniature: carte.slice(0, 6) }
+})
+---
+
+<Base title={`Espansioni — ${SITE.nome}`} active="espansioni" catalogCount={cards.length}>
+  <div class="wrap" style="padding-top:var(--sp-10);padding-bottom:var(--section-y)">
+    <div style="display:grid;gap:var(--sp-4);margin-bottom:var(--sp-8)">
+      <Occhiello>{sets.length} espansioni</Occhiello>
+      <Titolo livello="pagina">Espansioni</Titolo>
+      <Testo grande>
+        Teniamo in vetrina una parte di ogni espansione. Qui vedi quante carte abbiamo schedato, e da lì entri nel
+        catalogo già filtrato.
+      </Testo>
+      <SetFilter client:visible />
+    </div>
+
+    <div id="sets-list" data-tab="tutte" style="display:grid;gap:var(--sp-5)">
+      {
+        setsVM.map((s) => (
+          <Panel
+            hoverLift
+            padding="var(--panel-set-row-padding)"
+            data-recente={s.year >= 2023}
+            data-panel="set-row">
+            <div style="display:grid;gap:var(--sp-3);min-width:0">
+              <div style="display:flex;align-items:center;gap:var(--sp-3);flex-wrap:wrap">
+                <span style={`width:38px;height:38px;border-radius:var(--r-sm);background:${s.color};flex:none`} />
+                <Titolo livello="piccolo" as="h2">
+                  {s.name}
+                </Titolo>
+                <span style="font:var(--type-code);color:var(--text-faint)">
+                  {s.code} · {s.year} · {s.count} schedate
+                </span>
+                {s.year < 2010 && <Badge tone="neutral">Vintage</Badge>}
+              </div>
+
+              <div style="display:grid;gap:6px">
+                <div style="display:flex;justify-content:space-between;font:var(--type-code);color:var(--text-muted)">
+                  <span>{inVetrina(s)} in vetrina</span>
+                  <span>{s.total} nell'espansione</span>
+                </div>
+                <div style="height:8px;border-radius:var(--r-pill);background:var(--surface-sunken);overflow:hidden;border:1px solid var(--border-hairline)">
+                  <div
+                    style={`width:${Math.round((inVetrina(s) / s.total) * 100)}%;height:100%;background:${s.color};transition:width var(--dur-slow) var(--ease-out)`}
+                  />
+                </div>
+              </div>
+
+              <div class="set-miniature" style="display:flex;gap:var(--sp-2);flex-wrap:wrap;margin-top:var(--sp-1)">
+                {s.miniature.map((c) => (
+                  <button
+                    type="button"
+                    data-carta={c.slug}
+                    title={c.name}
+                    aria-label={c.name}
+                    style="all:unset;cursor:pointer;width:52px;border-radius:var(--r-cardart)"
+                  >
+                    <CardArt rarity={c.rarity} src={srcCarta(c)} />
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div data-panel="set-actions">
+              <Button variant="secondary" as="a" href={`/catalogo?set=${s.id}`}>
+                Vedi le carte
+                <Icon slot="iconRight" name="arrow-right" size={16} />
+              </Button>
+            </div>
+          </Panel>
+        ))
+      }
+    </div>
+  </div>
+</Base>
+
+<style is:global>
+  /* espansioni.jsx: tab==="recenti" tiene solo s.year>=2023, tab==="vintage"
+     solo s.year<2023. Qui l'HTML e' sempre completo: il CSS nasconde.
+     is:global perche' [data-panel] e [data-recente] sono sul nodo reso da
+     Panel/CardArt (componenti Svelte), fuori dalla portata dello scoping di
+     Astro — stesso motivo per cui la versione precedente (dentro
+     SetFilter.svelte) usava :global(). #sets-list e' un id di pagina, non
+     collide con nient'altro. */
+  #sets-list[data-tab='recenti'] [data-recente='false'] {
+    display: none;
+  }
+  #sets-list[data-tab='vintage'] [data-recente='true'] {
+    display: none;
+  }
+
+  /* Il Panel di ogni riga: due colonne (contenuto, azione) da 1080px in su,
+     una sola sotto — stesso breakpoint di .g2 in layout.css. */
+  #sets-list {
+    /* espansioni.jsx: padding={mobile?"var(--sp-5)":"var(--sp-6)"}, con
+       mobile = useMedia("(max-width:1080px)"). Qui non c'e' JS: la custom
+       property risolve lo stesso valore via cascata, letta dal var() nello
+       style inline del Panel (Task 27: 24px fisso a 1024px era la deriva,
+       trovata misurando il padding reale, non a occhio). */
+    --panel-set-row-padding: var(--sp-6);
+  }
+  #sets-list [data-panel='set-row'] {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--sp-6);
+    align-items: center;
+  }
+  #sets-list [data-panel='set-actions'] {
+    display: grid;
+    gap: var(--sp-2);
+    justify-items: end;
+  }
+  @media (max-width: 1080px) {
+    #sets-list {
+      --panel-set-row-padding: var(--sp-5);
+    }
+    #sets-list [data-panel='set-row'] {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    #sets-list [data-panel='set-actions'] {
+      justify-items: stretch;
+    }
+
+    /* espansioni.jsx riga 39: miniature.slice(0, mobile ? 4 : 6) — sotto
+       1080px il prototipo mostra 4 miniature, non 6. Qui il markup e' sempre
+       completo (fedele al pattern "HTML completo, CSS nasconde" di questo
+       file); sotto il breakpoint si nascondono la quinta e la sesta.
+       !important necessario: ogni bottone porta style="all:unset;..." inline
+       (per azzerare lo stile nativo di <button>), e uno stile inline vince
+       sempre su un selettore di foglio esterno indipendentemente dalla sua
+       specificita' — verificato in browser: senza !important restava
+       display:inline (il valore iniziale a cui "all:unset" resetta
+       display), le sei miniature restavano tutte visibili anche sotto
+       1080px. */
+    .set-miniature button:nth-child(n + 5) {
+      display: none !important;
+    }
+  }
+</style>

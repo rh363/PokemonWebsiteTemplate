@@ -1,0 +1,14 @@
+/* Reset minimo e default tipografici. Nessuna classe utility: i componenti
+   usano stili inline che leggono le custom property. */
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--surface-page);color:var(--text-body);font:var(--type-body);-webkit-font-smoothing:antialiased;text-wrap:pretty}
+h1,h2,h3,h4{font-family:var(--font-display);color:var(--text-strong);margin:0;font-weight:var(--fw-bold);letter-spacing:var(--ls-title-m)}
+p{margin:0}
+a{color:var(--text-link);text-decoration-color:var(--cherry-200);text-decoration-thickness:2px;text-underline-offset:3px;transition:color var(--dur-fast) var(--ease-out)}
+a:hover{color:var(--text-link-hover);text-decoration-color:var(--cherry-500)}
+button{font:inherit}
+:focus-visible{outline:2px solid var(--focus-ring);outline-offset:2px}
+::selection{background:var(--cyan-300);color:var(--ink-950)}
+code,kbd{font-family:var(--font-mono)}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}

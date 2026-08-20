@@ -1,0 +1,26 @@
+.wrap{max-width:var(--page-max);margin:0 auto;padding-left:var(--gutter-lg);padding-right:var(--gutter-lg)}
+.sez{padding-top:var(--section-y);padding-bottom:var(--section-y)}
+.g2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--sp-12);align-items:center}
+/* vetrina.jsx riga 8: Hero() dimezza il padding verticale sotto 1080px
+   (paddingTop/paddingBottom nel mobile ? "var(--sp-10)" : ...). Puro CSS,
+   nessuna hydration necessaria: stesso breakpoint gia' usato qui sotto per
+   .hero{grid-template-columns}. */
+.hero{grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);padding-top:var(--sp-20);padding-bottom:var(--sp-16)}
+.g3{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:var(--sp-4)}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(var(--grid-card-min),1fr));gap:var(--grid-gap)}
+.cat{display:grid;grid-template-columns:264px minmax(0,1fr);gap:var(--sp-10);align-items:start}
+.side{position:sticky;top:92px;display:grid;gap:var(--sp-2)}
+.det{display:grid;grid-template-columns:minmax(0,400px) minmax(0,1fr);gap:var(--sp-16);align-items:start}
+.det-fix{position:sticky;top:100px;display:grid;gap:var(--sp-4)}
+.foot{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:var(--sp-10)}
+.only-mob{display:none!important}
+.sheet-in{animation:sheetUp var(--dur-slow,340ms) var(--ease-out)}
+@keyframes sheetUp{from{transform:translateY(101%)}to{transform:translateY(0)}}
+.fade-in{animation:fadeIn 220ms var(--ease-out)}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.rise{animation:rise 340ms var(--ease-out) both}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@media (max-width:1080px){.cat{grid-template-columns:minmax(0,1fr)}.hero{grid-template-columns:minmax(0,1fr);padding-top:var(--sp-10);padding-bottom:var(--sp-10)}.g2{grid-template-columns:minmax(0,1fr);gap:var(--sp-8)}.det{grid-template-columns:minmax(0,1fr);gap:var(--sp-8)}.det-fix{position:static;max-width:340px;margin-left:auto;margin-right:auto;justify-items:center}.foot{grid-template-columns:1fr 1fr}}
+@media (max-width:1080px){.hide-mob{display:none!important}.only-mob{display:block!important}.side{display:none}}
+@media (max-width:760px){:root{--fs-display-xl:42px;--fs-display-l:34px;--fs-display-m:27px;--fs-title-l:24px;--section-y:56px;--gutter-lg:20px;--grid-card-min:148px;--grid-gap:14px}.foot{grid-template-columns:minmax(0,1fr)}.g2{gap:var(--sp-6)}}
+@media (prefers-reduced-motion:reduce){.rise,.fade-in,.sheet-in{animation:none}}

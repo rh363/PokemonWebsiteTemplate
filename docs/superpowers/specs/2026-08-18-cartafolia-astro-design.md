@@ -185,7 +185,26 @@ scan lineare. Riproduce la semantica di ricerca del prototipo alla lettera ed è
 istantaneo fino a qualche migliaio di carte. Oltre quella soglia si sostituisce con un
 indice invertito o si passa a ricerca server-side; il seam HTTP copre entrambi i casi.
 
-### 5.4 Limite noto dell'output statico
+### 5.4 La facade vale per il server, non per le isole
+
+Scoperto al Task 15, e non ovvio: `src/lib/catalog/index.ts` ri-esporta anche
+`source.static.astro.ts`, che importa `astro:content`. Un'isola idratata che importi dal
+barrel si trascina quindi `astro:content` **nel bundle del browser**, dove non ha senso e
+dove fa fallire il build.
+
+La regola ha due metà:
+
+| Chi importa | Da dove |
+|---|---|
+| Pagine `.astro`, endpoint, codice di build | `~/lib/catalog` — la facade |
+| Componenti Svelte montati con `client:` | `~/lib/catalog/labels`, `/types`, `/query`, `/search` — i moduli puri |
+
+Non è un'eccezione alla regola «le pagine importano solo dalla facade»: è la sua
+precisazione. La facade è il confine del **server**. Le isole vivono dall'altra parte di
+un confine diverso — quello del browser — e possono usare solo la parte pura dello strato
+dati, che è esattamente la parte progettata per non toccare I/O.
+
+### 5.5 Limite noto dell'output statico
 
 Con `output: 'static'` ogni carta è una pagina HTML prerenderizzata. Il limite Cloudflare
 sul piano free è 20.000 file per versione (25 MiB per file), quindi ~5.000 carte stanno
@@ -229,6 +248,38 @@ l'import allo stesso modulo.
 **Assunzione da verificare per prima cosa**, prima di iniziare il porting dei componenti.
 Fallback se non regge: `CustomEvent` su `window`. Nessun impatto sul design in entrambi
 i casi.
+
+**Esito della verifica (2026-08-18):** confermata — due prove indipendenti, comportamentale
+(Playwright su dev server) e strutturale (grafo degli import nel build di produzione),
+concordi. Non serve il fallback a `CustomEvent`.
+
+### 6.4 Click persi prima dell'idratazione
+
+Lo spike ha però mostrato un secondo fatto, non richiesto ma importante: nella prima
+esecuzione a freddo il contatore ha letto **2 invece di 3**. Un click era arrivato prima
+che l'isola fosse idratata, ed è andato perso.
+
+Non intacca la conclusione sopra — un valore diverso da zero è possibile solo se lo store
+è condiviso — ma descrive un comportamento reale del sito:
+
+> Finché un'isola non è idratata, i click sui suoi controlli non fanno niente e non
+> lasciano traccia. Non c'è coda, non c'è recupero.
+
+Riguarda direttamente `SiteChrome`, che §6.2 monta con `client:idle`, cioè **più tardi**
+di `client:load`. Un utente che tocca il menu mobile o «Chiedi una carta» appena la pagina
+compare può non ottenere risposta.
+
+Il Task 15 deve affrontarlo, scegliendo fra:
+
+1. **`client:load` invece di `client:idle`** per `SiteChrome` — idrata prima, ma compete
+   col first paint e quindi col pilastro 3;
+2. **degradare senza JavaScript** — il menu mobile diventa un `<dialog>` o un `<details>`
+   apribile dal browser da solo, e l'isola lo arricchisce quando arriva. È la strada
+   coerente con le scelte già fatte per `FilterGroup` (§Task 11) e costa un controllo
+   che funziona sempre;
+3. **accettarlo e dirlo** — la finestra è di poche centinaia di millisecondi.
+
+La scelta 2 è quella allineata al resto del progetto e va preferita salvo motivi contrari.
 
 ---
 
@@ -297,7 +348,7 @@ Astro View Transitions, per mantenere la fluidità percepita della SPA.
 - **`src/config/site.ts`** — un solo file per tutto il branding: nome negozio, via, CAP,
   città, orari, Instagram/TikTok/WhatsApp, metadati SEO.
 - **`src/content/cards.csv`** — una carta per riga — e **`src/content/sets.json`**,
-  entrambi validati con Zod in `src/content/config.ts`. Un campo sbagliato fa fallire
+  entrambi validati con Zod in `src/content.config.ts`. Un campo sbagliato fa fallire
   il build con un messaggio chiaro, invece di produrre una pagina rotta.
 
 ### Perche' CSV e non un file per carta

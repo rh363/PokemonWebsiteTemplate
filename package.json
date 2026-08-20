@@ -1,0 +1,44 @@
+{
+  "name": "cartafolia",
+  "type": "module",
+  "version": "0.1.0",
+  "scripts": {
+    "dev": "astro dev --port 4321",
+    "dev:ref": "serve design-reference -l 4322",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "astro check && svelte-check --tsconfig ./tsconfig.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "lint": "oxlint --config oxlintrc.json src",
+    "format": "prettier --write .",
+    "seed": "tsx scripts/seed-demo.ts",
+    "upload:img": "tsx scripts/upload-immagini.ts",
+    "deploy": "pnpm build && wrangler deploy"
+  },
+  "dependencies": {
+    "@astrojs/sitemap": "^3.7.3",
+    "@astrojs/svelte": "^9.0.1",
+    "@fontsource-variable/bricolage-grotesque": "^5.3.0",
+    "@fontsource-variable/jetbrains-mono": "^5.3.0",
+    "@fontsource-variable/plus-jakarta-sans": "^5.3.0",
+    "astro": "^7.2.2",
+    "csv-parse": "^7.0.2",
+    "svelte": "^5.56.9"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "@playwright/test": "^1.62.1",
+    "oxlint": "^1.78.0",
+    "prettier": "^3.9.6",
+    "prettier-plugin-astro": "^0.14.1",
+    "prettier-plugin-svelte": "^3.5.2",
+    "serve": "^14.2.6",
+    "svelte-check": "^4.7.6",
+    "tsx": "^4.23.12",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.7",
+    "wrangler": "^4.123.0"
+  }
+}

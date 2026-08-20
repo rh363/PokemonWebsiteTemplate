@@ -1,0 +1,50 @@
+[
+  {
+    "id": "alb",
+    "name": "Alba Cromatica",
+    "code": "ALB",
+    "year": 2024,
+    "total": 198,
+    "color": "var(--cherry-500)"
+  },
+  {
+    "id": "eco",
+    "name": "Eco del Vulcano",
+    "code": "ECO",
+    "year": 2024,
+    "total": 165,
+    "color": "var(--lemon-500)"
+  },
+  {
+    "id": "mar",
+    "name": "Marea Silente",
+    "code": "MAR",
+    "year": 2023,
+    "total": 172,
+    "color": "var(--cyan-500)"
+  },
+  {
+    "id": "rad",
+    "name": "Radici Profonde",
+    "code": "RAD",
+    "year": 2023,
+    "total": 154,
+    "color": "var(--lime-500)"
+  },
+  {
+    "id": "cie",
+    "name": "Cieli Spezzati",
+    "code": "CIE",
+    "year": 2022,
+    "total": 189,
+    "color": "var(--grape-500)"
+  },
+  {
+    "id": "for",
+    "name": "Fornace Antica",
+    "code": "FOR",
+    "year": 1999,
+    "total": 102,
+    "color": "var(--ink-500)"
+  }
+]

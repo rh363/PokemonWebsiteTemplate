@@ -1,0 +1,62 @@
+---
+// Footer — design-reference/guscio.jsx, funzione Footer (righe 44-76).
+// Quattro colonne (.wrap.foot, la griglia e' gia' in layout.css). Tutti i
+// link sono <a href> reali: il sorgente usava onClick+preventDefault perche'
+// era un'app hash-routed senza pagine vere. Il logo usa un percorso assoluto
+// (/assets/logo-mark.svg) invece del relativo del sorgente (assets/...):
+// nel prototipo, hash-routed su un solo index.html, il relativo funzionava
+// sempre; qui il sito ha pagine annidate (es. /catalogo/x) dove un percorso
+// relativo romperebbe la risoluzione dell'immagine — stessa convenzione
+// assoluta gia' usata dal default di NavBar.
+import Icon from '~/components/ds/Icon.svelte'
+import { SITE } from '~/config/site'
+import { NAV } from '~/config/nav'
+---
+
+<footer class="ds-foot">
+  <div class="wrap foot ds-foot__top">
+    <div class="ds-foot__col">
+      <div class="ds-foot__brand">
+        <img src="/assets/logo-mark.svg" width="28" height="28" alt="" />
+        <span class="ds-foot__brandname">{SITE.brand}</span>
+      </div>
+      <p class="ds-foot__desc">
+        Vetrina e catalogo di carte da collezione. {SITE.via}, {SITE.citta}. Non vendiamo online: passa in
+        negozio.
+      </p>
+    </div>
+    <div class="ds-foot__col">
+      <span class="ds-foot__label">Sito</span>
+      {NAV.map((it) => <a href={it.href} class="ds-foot__link">{it.label}</a>)}
+    </div>
+    <div class="ds-foot__col">
+      <span class="ds-foot__label">Orari</span>
+      {
+        SITE.orari.map(([giorno, ore]) => (
+          <span class="ds-foot__hours">
+            {giorno}
+            <br />
+            <span class="ds-foot__hours-value">{ore}</span>
+          </span>
+        ))
+      }
+    </div>
+    <div class="ds-foot__col">
+      <span class="ds-foot__label">Scrivici</span>
+      {
+        SITE.social.map((s) => (
+          <a href={s.href} class="ds-foot__social">
+            <Icon name={s.icon} size={14} />
+            {s.valore}
+          </a>
+        ))
+      }
+    </div>
+  </div>
+  <div class="ds-foot__bottom">
+    <div class="wrap ds-foot__bottom-inner">
+      <span class="ds-foot__copy">© {SITE.anno} {SITE.nome} · {SITE.cap}</span>
+      <span class="ds-foot__rights">Le carte mostrate sono proprietà dei rispettivi titolari.</span>
+    </div>
+  </div>
+</footer>

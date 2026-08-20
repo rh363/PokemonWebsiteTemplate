@@ -1,0 +1,179 @@
+---
+// NavBar — bundle:1793-1907. L'unico stato del sorgente era `scrolled`
+// (uno useState su scroll > 8px): qui e' un attributo data-scrolled
+// sincronizzato da dieci righe di script inline, non un'isola Svelte. Cosi'
+// la barra resta HTML statico su ogni pagina del sito (nessun client:).
+//
+// count del catalogo: il produttore (questo componente) non conosce il
+// numero reale di carte, lo riceve dalla pagina che lo monta via prop
+// catalogCount e lo inietta solo nella voce 'catalogo'.
+import { SITE } from '~/config/site'
+import { NAV } from '~/config/nav'
+import Icon from '~/components/ds/Icon.svelte'
+
+interface Props {
+  active: string
+  catalogCount?: number
+}
+const { active, catalogCount } = Astro.props as Props
+const voci = NAV.map((v) => (v.id === 'catalogo' ? { ...v, count: catalogCount } : v))
+---
+
+<header class="ds-nav" data-scrolled="false">
+  <nav class="ds-nav__inner">
+    <a class="ds-nav__brand" href="/">
+      <img src="/assets/logo-mark.svg" alt="" width="32" height="32" />
+      <span class="ds-nav__brandname">{SITE.brand}</span>
+    </a>
+    <div class="ds-nav__links">
+      {
+        voci.map((it) => (
+          <a
+            href={it.href}
+            class="ds-nav__link"
+            data-on={it.id === active}
+            aria-current={it.id === active ? 'page' : undefined}
+          >
+            {it.label}
+            {it.count != null && <span class="ds-nav__count">{it.count}</span>}
+          </a>
+        ))
+      }
+    </div>
+    <div class="ds-nav__right">
+      <slot />
+    </div>
+    <!--
+      Menu mobile — §6.4 della spec: un'isola idratata con client:idle puo'
+      arrivare dopo il primo tap dell'utente, e un tap perso prima
+      dell'idratazione non lascia traccia (era l'esito dello spike del
+      Task 2). Qui non c'e' nulla da idratare: <details>/<summary> e' aperto
+      e chiuso dal browser stesso, sempre, anche a JavaScript disattivato.
+      Il bottone "Chiedi una carta" dentro il pannello resta cablato dallo
+      script qui sotto (stesso meccanismo del bottone gemello nello slot
+      desktop), non da un'isola Svelte.
+    -->
+    <div class="ds-nav__mobile">
+      <a class="ds-iconbtn" data-variant="ghost" data-size="md" aria-label="Cerca una carta" href="/catalogo">
+        <Icon name="search" size={18} />
+      </a>
+      <details class="ds-nav__menu">
+        <summary class="ds-iconbtn" data-variant="secondary" data-size="md" aria-label="Menu">
+          <Icon name="list" size={18} />
+        </summary>
+        <div class="ds-nav__menu-panel">
+          <div class="ds-nav__menu-links">
+            {
+              voci.map((it) => (
+                <a
+                  href={it.href}
+                  class="ds-nav__menu-link"
+                  data-on={it.id === active}
+                  aria-current={it.id === active ? 'page' : undefined}
+                >
+                  <span>{it.label}</span>
+                  {it.count != null && <span class="ds-nav__count">{it.count}</span>}
+                  <Icon name="chevron-right" size={18} style="color:var(--text-faint)" />
+                </a>
+              ))
+            }
+          </div>
+          <button type="button" class="ds-btn ds-btn--full" data-variant="primary" data-size="md" data-chiedi-trigger>
+            <Icon name="instagram" size={16} />
+            Chiedi una carta
+          </button>
+        </div>
+      </details>
+    </div>
+  </nav>
+</header>
+
+<script>
+  import { apriChiedi, apriQuick } from '~/stores/chrome'
+
+  // <ClientRouter /> (Base.astro) trasforma la navigazione interna in uno
+  // swap soft: Astro reinserisce questo <script> nel nuovo documento, ma un
+  // browser non rivaluta mai un URL di modulo gia' valutato in precedenza —
+  // quindi il corpo qui sotto non ripartirebbe da solo dopo il primo swap.
+  // 'astro:page-load' spara sia al primo caricamento sia dopo ogni swap, ed
+  // e' il rimpiazzo raccomandato da Astro per il codice che deve rieseguirsi
+  // a ogni navigazione. Ma 'window' sopravvive allo swap per tutta la
+  // sessione della tab: un addEventListener a livello di script dentro
+  // 'astro:page-load' si accumulerebbe a ogni navigazione invece di
+  // ripartire da zero. Per questo il listener 'scroll' e i due listener a
+  // livello di document (Escape, click-fuori del menu) restano fuori,
+  // attaccati una volta sola piu' sotto, e ri-cercano il loro elemento al
+  // momento dell'evento invece di chiudersi su un riferimento che lo swap
+  // potrebbe aver scartato. 'sync' segue la stessa regola — e' definita qui
+  // sopra cosi' sia il listener 'scroll' (attaccato una volta) sia il
+  // callback qui sotto (che deve solo richiamarla a ogni swap, perche' la
+  // navigazione azzera lo scroll) possano vederla senza ridefinirla.
+  const sync = () => {
+    const doc = document.scrollingElement || document.documentElement
+    const nav = document.querySelector<HTMLElement>('.ds-nav')
+    nav?.setAttribute('data-scrolled', String(doc.scrollTop > 8))
+  }
+
+  document.addEventListener('astro:page-load', () => {
+    sync()
+
+    // "Chiedi una carta": un <button> qualsiasi, non un'isola. Scrive
+    // direttamente nello store condiviso con SiteChrome (stesso modulo, stesso
+    // meccanismo verificato dal Task 2, §6.3) cosi' un tap arrivato prima che
+    // SiteChrome idrati non va perso: resta nello stato dello store, e
+    // SiteChrome lo trova gia' pronto al mount invece di perderlo come il
+    // contatore dello spike del Task 2.
+    //
+    // preventDefault sempre: design-reference/negozio.jsx applica lo stesso
+    // trigger ai tre Panel "Scrivici" (as="a" href="#"), dove il sorgente fa
+    // e.preventDefault() prima di onChiedi(true) — un placeholder "#" che non
+    // deve far saltare la pagina in cima. Su un <button> preventDefault e' un
+    // no-op innocuo.
+    document.querySelectorAll<HTMLElement>('[data-chiedi-trigger]').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault()
+        apriChiedi(true)
+        btn.closest('details')?.removeAttribute('open')
+      })
+    })
+
+    // Quick-view (Task 19, retrofit del seam): ogni tessera statica porta
+    // data-carta="<slug>", stesso schema esatto di data-chiedi-trigger sopra —
+    // il click scrive lo slug nello store condiviso, SiteChrome lo risolve in
+    // Card interrogando /api/catalog.json la prima volta che serve (vedi
+    // ~/stores/catalog). Un delegato unico qui, non un listener per tessera,
+    // perche' le tessere sono HTML statico (CardTile, CardArt) senza isola
+    // propria: nessun client:* le idrata, quindi nessun onclick Svelte si
+    // attaccherebbe da solo.
+    document.querySelectorAll<HTMLElement>('[data-carta]').forEach((tessera) => {
+      tessera.addEventListener('click', (e) => {
+        e.preventDefault()
+        apriQuick(tessera.dataset.carta!)
+      })
+    })
+  })
+
+  // Sincronizza data-scrolled a ogni scroll. Attaccato una volta sola qui
+  // (non dentro 'astro:page-load'): 'sync' ri-cerca .ds-nav e
+  // document.scrollingElement al momento della chiamata, quindi non ha
+  // bisogno di essere ri-registrato a ogni swap — solo richiamato, il che
+  // avviene gia' dentro 'astro:page-load' qui sopra.
+  addEventListener('scroll', sync, { passive: true })
+
+  // Arricchimento del menu nativo: <details> non chiude da solo su Escape o
+  // su click fuori (a differenza di <dialog>). Nessuna isola richiesta:
+  // qualche riga di JS puro basta, e funziona indipendentemente da SiteChrome.
+  // Attaccati una volta sola (non dentro 'astro:page-load', altrimenti si
+  // accumulerebbero a ogni swap): ri-cercano .ds-nav__menu a ogni evento
+  // cosi' seguono il nodo reinserito dallo swap invece di chiudersi su
+  // quello scartato.
+  document.addEventListener('click', (e) => {
+    const menu = document.querySelector<HTMLDetailsElement>('.ds-nav__menu')
+    if (menu?.open && !menu.contains(e.target as Node)) menu.removeAttribute('open')
+  })
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return
+    const menu = document.querySelector<HTMLDetailsElement>('.ds-nav__menu')
+    if (menu?.open) menu.removeAttribute('open')
+  })
+</script>

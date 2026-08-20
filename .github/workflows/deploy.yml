@@ -1,0 +1,31 @@
+name: deploy
+on:
+  push: { branches: [main] }
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 11 }
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      # check e test girano PRIMA del build: un errore di tipo o un test
+      # rotto non arrivano mai in produzione.
+      - run: pnpm check
+      - run: pnpm test
+      # test:e2e (Task 25) guarda il sito COSTRUITO (playwright.config.ts fa
+      # esso stesso `pnpm build && pnpm preview`): e' l'unico test che
+      # verifica "/catalogo rende 24 tessere vere a JavaScript disattivato",
+      # la decisione architetturale centrale del branch — prima di questo fix
+      # girava solo in locale, mai in CI.
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm test:e2e
+      - run: pnpm build
+      - uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

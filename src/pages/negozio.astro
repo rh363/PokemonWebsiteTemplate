@@ -1,0 +1,126 @@
+---
+// Porting di design-reference/negozio.jsx, funzione Negozio(). Pagina quasi
+// interamente statica: intestazione, due colonne (indirizzo/orari e mappa),
+// sezione "Scrivici" con i tre social e sezione "In negozio" con quattro
+// pannelli. Zero isole per il contenuto — l'unica interattivita' della
+// pagina ("Chiedi una carta") passa dall'attributo data-chiedi-trigger gia'
+// cablato globalmente dallo script inline di NavBar.astro (stesso
+// meccanismo di chi-siamo.astro), non da un'isola dedicata.
+import Base from '~/layouts/Base.astro'
+import Panel from '~/components/ds/Panel.svelte'
+import Button from '~/components/ds/Button.svelte'
+import Icon from '~/components/ds/Icon.svelte'
+import Occhiello from '~/components/Occhiello.svelte'
+import Titolo from '~/components/Titolo.svelte'
+import Testo from '~/components/Testo.svelte'
+import TestaSezione from '~/components/TestaSezione.svelte'
+import Mappa from '~/components/Mappa.astro'
+import { SITE } from '~/config/site'
+import { IN_NEGOZIO } from '~/config/negozio'
+import { getAllCards } from '~/lib/catalog'
+
+const cards = await getAllCards()
+---
+
+<Base title={`Il negozio — ${SITE.nome}`} active="negozio" catalogCount={cards.length}>
+  <div class="wrap" style="padding-top:var(--sp-10);padding-bottom:var(--section-y)">
+    <div style="display:grid;gap:var(--sp-4);margin-bottom:var(--sp-10)">
+      <Occhiello>{SITE.cap}</Occhiello>
+      <Titolo livello="pagina">Il negozio</Titolo>
+      <Testo grande>
+        Due vetrine, un tavolo grande e una scatola di bustine nuove ogni martedì. Le carte del catalogo sono tutte
+        qui: chiedile e le tiriamo fuori.
+      </Testo>
+    </div>
+
+    <div class="g2" style="align-items:start;gap:var(--sp-8)">
+      <div style="display:grid;gap:var(--sp-5)">
+        <Panel padding="var(--sp-6)" style="display:grid;gap:var(--sp-4)">
+          <div style="display:flex;gap:var(--sp-3);align-items:flex-start">
+            <Icon name="map-pin" size={20} style="color:var(--cherry-500);margin-top:2px" />
+            <div style="display:grid;gap:2px">
+              <span style="font:var(--type-card-title);color:var(--text-strong)">{SITE.via}</span>
+              <span style="font:var(--type-code);color:var(--text-muted)">{SITE.cap}</span>
+            </div>
+          </div>
+          <Testo style="font-size:var(--fs-body-s)">
+            Dalla piazza sono due minuti a piedi. Si parcheggia nella via dietro; il sabato pomeriggio conviene
+            arrivare a piedi.
+          </Testo>
+          <div style="display:flex;gap:var(--sp-3);flex-wrap:wrap">
+            <Button data-chiedi-trigger>
+              <Icon slot="icon" name="instagram" size={16} />
+              Chiedi una carta
+            </Button>
+            <Button variant="secondary" as="a" href="/catalogo">
+              <Icon slot="icon" name="layers" size={16} />
+              Sfoglia il catalogo
+            </Button>
+          </div>
+        </Panel>
+        <Panel variant="sticker" padding="var(--sp-6)" style="display:grid;gap:var(--sp-4)">
+          <div style="display:flex;align-items:center;gap:var(--sp-2)">
+            <Icon name="clock" size={18} />
+            <span style="font:var(--type-card-title);color:var(--text-strong)">Orari</span>
+          </div>
+          {
+            SITE.orari.map(([giorno, ore]) => (
+              <div
+                style="display:flex;justify-content:space-between;gap:var(--sp-4);padding-bottom:var(--sp-3);border-bottom:1px solid var(--border-hairline)"
+              >
+                <span style="font:var(--type-label);color:var(--text-strong)">{giorno}</span>
+                <span style="font:var(--type-code);font-size:var(--fs-body-s);color:var(--text-body)">{ore}</span>
+              </div>
+            ))
+          }
+          <span
+            style="font:var(--type-label);font-size:var(--fs-caption);font-weight:var(--fw-regular);color:var(--text-muted)"
+          >
+            Il martedì apriamo le buste nuove alle 17:00. Si può guardare.
+          </span>
+        </Panel>
+      </div>
+      <Mappa />
+    </div>
+
+    <section style="margin-top:var(--section-y)">
+      <TestaSezione
+        occhiello="Scrivici"
+        titolo="Rispondiamo negli orari di apertura"
+        testo="Niente mail, niente moduli: ci trovi dove ci trovano tutti."
+      />
+      <div class="g3" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr))">
+        {
+          SITE.social.map((s) => (
+            <Panel
+              hoverLift
+              as="a"
+              href="#"
+              data-chiedi-trigger
+              padding="var(--sp-6)"
+              style="display:grid;gap:var(--sp-2);text-decoration:none"
+            >
+              <Icon name={s.icon} size={20} style="color:var(--cherry-500)" />
+              <span style="font:var(--type-card-title);color:var(--text-strong)">{s.label}</span>
+              <span style="font:var(--type-code);color:var(--text-muted)">{s.valore}</span>
+            </Panel>
+          ))
+        }
+      </div>
+    </section>
+
+    <section style="margin-top:var(--section-y)">
+      <TestaSezione occhiello="In negozio" titolo="Cosa c'è, oltre alle vetrine" />
+      <div class="g3" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr))">
+        {
+          IN_NEGOZIO.map((voce) => (
+            <Panel padding="var(--sp-5)" style="display:grid;gap:var(--sp-2);align-content:start">
+              <span style="font:var(--type-card-title);color:var(--text-strong)">{voce.titolo}</span>
+              <Testo style="font-size:var(--fs-body-s)">{voce.testo}</Testo>
+            </Panel>
+          ))
+        }
+      </div>
+    </section>
+  </div>
+</Base>

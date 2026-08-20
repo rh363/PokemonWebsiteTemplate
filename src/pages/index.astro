@@ -1,0 +1,308 @@
+---
+// Porting di design-reference/vetrina.jsx. La pagina piu' trafficata del
+// sito: cinque sezioni (Hero, NuoviArrivi, FasciaEspansioni, ComeFunziona,
+// StriscaNegozio). Sostituisce il segnaposto del Task 1.
+//
+// Pattern del seam (vedi il retrofit di /espansioni, commit precedente):
+// nessuna isola qui porta un Card[] come prop. Le due isole della pagina —
+// HeroSearch e NuoviArrivi — montano rispettivamente il campo di ricerca e i
+// Tabs, nient'altro: le tessere sono HTML statico con data-carta="<slug>",
+// stesso schema di data-chiedi-trigger, e SiteChrome risolve lo slug in
+// Card interrogando /api/catalog.json alla prima quick-view richiesta.
+import Base from '~/layouts/Base.astro'
+import Occhiello from '~/components/Occhiello.svelte'
+import Titolo from '~/components/Titolo.svelte'
+import Testo from '~/components/Testo.svelte'
+import TestaSezione from '~/components/TestaSezione.svelte'
+import Panel from '~/components/ds/Panel.svelte'
+import Badge from '~/components/ds/Badge.svelte'
+import Button from '~/components/ds/Button.svelte'
+import Icon from '~/components/ds/Icon.svelte'
+import CardTile from '~/components/ds/CardTile.svelte'
+import HeroSearch from '~/components/islands/HeroSearch.svelte'
+import NuoviArrivi from '~/components/islands/NuoviArrivi.svelte'
+import { SITE } from '~/config/site'
+import { getAllCards, getAllSets } from '~/lib/catalog'
+import { cardCode, inVetrina } from '~/lib/catalog/labels'
+import { immaginiAttive, urlImmagine } from '~/lib/immagini'
+
+const [sets, cards] = await Promise.all([getAllSets(), getAllCards()])
+const setOf = (id: string) => sets.find((s) => s.id === id)!
+
+// Task 23: con la configurazione immagini vuota immaginiAttive() e' sempre
+// falso, quindi srcCarta torna sempre undefined — CardTile ricade su
+// CardArt senza src, identico a prima che questo file sapesse di R2.
+const fotoAttive = immaginiAttive()
+const srcCarta = (c: { image?: string }) => (fotoAttive && c.image ? urlImmagine(c.image, 300) : undefined)
+
+// vetrina.jsx: window.CARDS.slice(0,4) e window.CARDS.filter(...).slice(0,10).
+// getAllCards() torna nell'ordine "di arrivo" del CSV (id in sequenza, vedi
+// il fix in source.static.astro.ts): le prime carte in quell'ordine sono i
+// nuovi arrivi, esattamente come CARDS in design-reference/dati.jsx.
+const heroCards = cards.slice(0, 4)
+
+// vetrina.jsx riga 32: window.CARDS.filter(<tab>).slice(0,10) — filtra POI
+// prende le prime dieci. Un'unica lista statica "cards.slice(0,10)" nascosta
+// via CSS (slice-poi-filtra) da' un conteggio diverso per tab quando i primi
+// dieci non sono rappresentativi del sottoinsieme (vedi fix-finale-report.md,
+// C2): con i dati demo, "Holo e oltre" scendeva a 8 tessere e "Vintage" a 2
+// invece di 10. Si rende quindi l'UNIONE delle prime dieci di ciascun tab
+// (al massimo 30 tessere, sempre statiche), e si marca ogni tessera con il
+// suo rango per tab (data-rank-tutte/-holo/-vintage). Il CSS sotto mostra
+// solo le tessere che hanno il rango del tab attivo. L'ordine della lista
+// unione segue l'ordine sorgente di `cards`: dato che filter() preserva
+// l'ordine relativo, il sottoinsieme visibile per un tab appare nell'ordine
+// giusto per quel tab senza bisogno di riordinare nel DOM.
+const holoOf = (c: (typeof cards)[number]) => c.rarity === 'holo' || c.rarity === 'ultra' || c.rarity === 'secret'
+const vintageOf = (c: (typeof cards)[number]) => setOf(c.set).year < 2010
+
+const topTutte = cards.slice(0, 10)
+const topHolo = cards.filter(holoOf).slice(0, 10)
+const topVintage = cards.filter(vintageOf).slice(0, 10)
+
+const rankTutte = new Map(topTutte.map((c, i) => [c.slug, i + 1]))
+const rankHolo = new Map(topHolo.map((c, i) => [c.slug, i + 1]))
+const rankVintage = new Map(topVintage.map((c, i) => [c.slug, i + 1]))
+
+const unione = new Set([...rankTutte.keys(), ...rankHolo.keys(), ...rankVintage.keys()])
+const arrivi = cards.filter((c) => unione.has(c.slug))
+
+// vetrina.jsx riga 17: la ternaria dentro onCerca(t==="Holo"||... ? t : t) e'
+// un no-op del sorgente — ricade sempre su t. onCerca(t) per ogni etichetta.
+const CERCATI_OGGI = ['Holo', 'Fornace Antica', 'Giapponese', 'Mint']
+
+// vetrina.jsx righe 70-74.
+const PASSI: [string, string, string][] = [
+  ['01', 'Cerca nel catalogo', "Filtra per espansione, rarità, condizione. Ogni scheda dice com'è messa la carta."],
+  ['02', 'Scrivici su Instagram o WhatsApp', 'Copia il codice della carta e mandacelo: ti diciamo se è ancora in vetrina.'],
+  ['03', 'Passa a vederla', 'Te la tiriamo fuori dalla bustina e la guardiamo insieme, sul tavolo grande.'],
+]
+---
+
+<Base title={SITE.seo.titolo} active="vetrina" catalogCount={cards.length}>
+  <div>
+    <section style="position:relative;overflow:hidden;border-bottom:1px solid var(--border-hairline)">
+      <div style="position:absolute;inset:0;background:var(--pattern-dots) 0 0/var(--pattern-dots-size);opacity:.7" />
+      {
+        /* Finding 2: il padding verticale dimezzato sotto 1080px (vetrina.jsx
+           riga 8) e' nella regola .hero di src/styles/layout.css, non qui —
+           puro CSS, nessuna isola necessaria solo per un padding. */
+      }
+      <div
+        class="wrap g2 hero"
+        style="position:relative;gap:var(--sp-12)"
+      >
+        <div style="display:grid;gap:var(--sp-6)">
+          <Occhiello>Vetrina e catalogo · {SITE.citta}</Occhiello>
+          <Titolo livello="hero">{cards.length} carte,<br />schedate a mano.</Titolo>
+          <Testo grande>
+            Questo è il catalogo del negozio: cerca una carta, guarda com'è conservata, poi passa a vederla dal
+            vero. Non vendiamo online.
+          </Testo>
+          <HeroSearch client:load />
+          <div style="display:flex;gap:var(--sp-2);flex-wrap:wrap;align-items:center">
+            <span style="font:var(--type-label);font-size:var(--fs-caption);color:var(--text-faint);margin-right:4px">
+              Cercati oggi
+            </span>
+            {
+              CERCATI_OGGI.map((t) => (
+                <a class="ds-chip ds-chip--interactive" style="text-decoration:none" href={`/catalogo?q=${encodeURIComponent(t)}`}>
+                  {t}
+                </a>
+              ))
+            }
+          </div>
+        </div>
+        <div class="cards" style="grid-template-columns:1fr 1fr;align-content:start">
+          {
+            heroCards.map((c, i) => (
+              <div style={`transform:rotate(${i % 2 ? 1.5 : -1.5}deg)`}>
+                <a href={`/carta/${c.slug}`} data-carta={c.slug} style="text-decoration:none;color:inherit">
+                  <CardTile
+                    name={c.name}
+                    code={cardCode(c, setOf(c.set))}
+                    set={setOf(c.set).name}
+                    rarity={c.rarity}
+                    src={srcCarta(c)}
+                    priority
+                    style="cursor:pointer"
+                  >
+                    {c.nuovo && (
+                      <Badge slot="badge" tone="foil">
+                        Nuovo
+                      </Badge>
+                    )}
+                  </CardTile>
+                </a>
+              </div>
+            ))
+          }
+        </div>
+      </div>
+    </section>
+
+    <section class="wrap sez">
+      <TestaSezione occhiello="Nuovi arrivi" titolo="Appena entrate in vetrina" testo="Aggiornato ogni martedì, dopo l'apertura delle buste.">
+        <NuoviArrivi slot="azione" client:visible />
+      </TestaSezione>
+      <div id="arrivi-list" data-tab="tutte" class="cards">
+        {
+          arrivi.map((c) => {
+            const set = setOf(c.set)
+            return (
+              <a
+                href={`/carta/${c.slug}`}
+                data-carta={c.slug}
+                data-rank-tutte={rankTutte.get(c.slug)}
+                data-rank-holo={rankHolo.get(c.slug)}
+                data-rank-vintage={rankVintage.get(c.slug)}
+                class="cards__item"
+                style="text-decoration:none;color:inherit"
+              >
+                <CardTile name={c.name} code={cardCode(c, set)} set={set.name} rarity={c.rarity} src={srcCarta(c)} style="cursor:pointer">
+                  {c.nuovo && (
+                    <Badge slot="badge" tone="foil">
+                      Nuovo
+                    </Badge>
+                  )}
+                </CardTile>
+              </a>
+            )
+          })
+        }
+      </div>
+      <div style="display:flex;justify-content:center;margin-top:var(--sp-10)">
+        <Button variant="secondary" as="a" href="/catalogo">
+          Sfoglia il catalogo
+          <Icon slot="iconRight" name="arrow-right" size={16} />
+        </Button>
+      </div>
+    </section>
+
+    <section style="background:var(--surface-invert);color:var(--text-invert)">
+      <div class="wrap sez" style="display:grid;gap:var(--sp-10)">
+        <TestaSezione tone="invert" occhiello="Espansioni" titolo="Sei espansioni in negozio" style="margin-bottom:0">
+          <Button slot="azione" variant="invert" as="a" href="/espansioni">
+            Vedi tutte
+            <Icon slot="iconRight" name="arrow-right" size={16} />
+          </Button>
+        </TestaSezione>
+        <div class="g3">
+          {
+            sets.map((s) => (
+              <a href={`/catalogo?set=${s.id}`} class="fascia-tile" style={`--set-color:${s.color}`}>
+                <div style="display:flex;align-items:center;justify-content:space-between">
+                  <span style={`width:34px;height:34px;border-radius:var(--r-sm);background:${s.color}`} />
+                  <span style="font:var(--type-code);color:var(--ink-400)">
+                    {s.code} · {s.year}
+                  </span>
+                </div>
+                <span style="font:var(--fw-bold) var(--fs-title-s)/var(--lh-title-s) var(--font-display);color:var(--text-invert)">
+                  {s.name}
+                </span>
+                <span style="font:var(--type-label);font-size:var(--fs-caption);font-weight:var(--fw-medium);color:var(--text-invert-muted)">
+                  {s.total} carte · {inVetrina(s)} in vetrina
+                </span>
+              </a>
+            ))
+          }
+        </div>
+      </div>
+    </section>
+
+    <section class="wrap sez">
+      <TestaSezione occhiello="Come funziona" titolo="Tre passaggi, nessun carrello">
+        <Button slot="azione" data-chiedi-trigger>
+          <Icon slot="icon" name="instagram" size={16} />
+          Chiedi una carta
+        </Button>
+      </TestaSezione>
+      <div class="g3" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr))">
+        {
+          PASSI.map(([n, t, d]) => (
+            <Panel hoverLift padding="var(--sp-6)" style="display:grid;gap:var(--sp-3);align-content:start">
+              <span style="font:var(--fw-medium) var(--fs-title-m)/1 var(--font-mono);color:var(--cherry-500)">{n}</span>
+              <span style="font:var(--type-card-title);color:var(--text-strong)">{t}</span>
+              <Testo style="font-size:var(--fs-body-s)">{d}</Testo>
+            </Panel>
+          ))
+        }
+      </div>
+    </section>
+
+    <section class="wrap sez g2" style="padding-top:0">
+      <div style="display:grid;gap:var(--sp-5)">
+        <Titolo>Il tavolo grande è sempre libero</Titolo>
+        <Testo grande>
+          Siamo in {SITE.via}, a {SITE.citta}. Le carte del catalogo sono tutte in vetrina: chiedi e te le facciamo
+          vedere dal vivo, senza fretta.
+        </Testo>
+        <div style="display:flex;gap:var(--sp-3);flex-wrap:wrap">
+          <Button as="a" href="/negozio">
+            <Icon slot="icon" name="map-pin" size={16} />
+            Come arrivare
+          </Button>
+          <Button variant="secondary" as="a" href="/chi-siamo">
+            <Icon slot="icon" name="info" size={16} />
+            Chi siamo
+          </Button>
+        </div>
+      </div>
+      <Panel variant="sticker" padding="var(--sp-8)" style="display:grid;gap:var(--sp-4)">
+        {
+          SITE.orari.map(([g, h]) => (
+            <div style="display:flex;justify-content:space-between;gap:var(--sp-4);padding-bottom:var(--sp-3);border-bottom:1px solid var(--border-hairline)">
+              <span style="font:var(--type-label);color:var(--text-strong)">{g}</span>
+              <span style="font:var(--type-code);font-size:var(--fs-body-s);color:var(--text-body)">{h}</span>
+            </div>
+          ))
+        }
+        <span style="font:var(--type-label);font-size:var(--fs-caption);font-weight:var(--fw-regular);color:var(--text-muted)">
+          Il martedì apriamo le buste nuove alle 17:00. Si può guardare.
+        </span>
+      </Panel>
+    </section>
+  </div>
+</Base>
+
+<style>
+  /* NuoviArrivi: vetrina.jsx riga 32 — filter(<tab>).slice(0,10): holo=rarita
+     in holo/ultra/secret, vintage=anno espansione<2010 (soglia diversa da
+     /espansioni, dove vintage e' anno<2023: sono davvero due concetti
+     distinti nel sorgente). arrivi qui sopra e' gia' l'UNIONE delle prime
+     dieci di ciascun tab (fino a 30 tessere, C2 di fix-finale-report.md):
+     ogni tessera porta data-rank-<tab> solo se rientra nelle prime dieci di
+     quel tab, e il CSS nasconde le altre — cosi' ogni tab mostra sempre le
+     sue dieci tessere vere invece di un sottoinsieme di "tutte". .cards__item
+     e' l'ancora scritta direttamente in questo file (non dentro CardTile),
+     quindi lo scoping normale di Astro basta: non serve is:global. */
+  #arrivi-list[data-tab='tutte'] .cards__item:not([data-rank-tutte]) {
+    display: none;
+  }
+  #arrivi-list[data-tab='holo'] .cards__item:not([data-rank-holo]) {
+    display: none;
+  }
+  #arrivi-list[data-tab='vintage'] .cards__item:not([data-rank-vintage]) {
+    display: none;
+  }
+
+  /* FasciaEspansioni: vetrina.jsx tinge il bordo al colore dell'espansione
+     su hover con onMouseEnter/onMouseLeave in JS — qui e' CSS puro, col
+     colore passato per tessera via --set-color. */
+  .fascia-tile {
+    text-decoration: none;
+    display: grid;
+    gap: var(--sp-3);
+    padding: var(--sp-5);
+    border-radius: var(--r-card);
+    background: var(--surface-invert-soft);
+    border: 1px solid var(--border-invert);
+    transition: var(--t-card);
+  }
+  @media (hover: hover) {
+    .fascia-tile:hover {
+      transform: var(--lift-hover);
+      border-color: var(--set-color);
+    }
+  }
+</style>

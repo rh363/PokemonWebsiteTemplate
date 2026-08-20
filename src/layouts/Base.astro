@@ -1,0 +1,100 @@
+---
+// Guscio del sito: NavBar e Footer statici (nessun client:), una sola isola
+// (SiteChrome) per il dialog "Chiedi una carta", la quick-view e i toast.
+// Il menu mobile non e' un'isola: e' un <details> nativo dentro NavBar.astro
+// — vedi §6.4 della spec e il commento li' per il perche'.
+import '~/styles/global.css'
+import { SITE } from '~/config/site'
+import NavBar from '~/components/NavBar.astro'
+import Footer from '~/components/Footer.astro'
+import SiteChrome from '~/components/islands/SiteChrome.svelte'
+import Icon from '~/components/ds/Icon.svelte'
+import { ClientRouter } from 'astro:transitions'
+
+interface Props {
+  title: string
+  description?: string
+  active: string
+  catalogCount?: number
+}
+const { title, description = SITE.seo.descrizione, active, catalogCount } = Astro.props as Props
+
+const canonicalUrl = new URL(Astro.url.pathname, Astro.site)
+
+// Dati strutturati del negozio (schema.org Store): per un'attivita' fisica
+// locale valgono piu' di ogni altra ottimizzazione SEO in questo task — sono
+// cio' che fa comparire indirizzo e orari nei risultati di ricerca. Costruiti
+// da SITE (src/config/site.ts), non da valori scritti qui, cosi' restano
+// veri quando il cliente cambia orari o indirizzo.
+const storeJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Store',
+  name: SITE.nome,
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: SITE.via,
+    addressLocality: SITE.citta,
+    postalCode: SITE.cap.split(' ')[0],
+    addressCountry: 'IT',
+  },
+  openingHours: SITE.orari.filter(([, h]) => h !== 'chiuso').map(([g, h]) => `${g} ${h}`),
+  url: Astro.site?.href,
+}
+---
+
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="icon" href="/assets/logo-mark.svg" />
+    <link rel="canonical" href={canonicalUrl} />
+
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:locale" content={SITE.seo.locale} />
+    <meta name="twitter:card" content="summary" />
+
+    <script type="application/ld+json" set:html={JSON.stringify(storeJsonLd)} />
+
+    {
+      /* Task 23: preload della foto grande della scheda carta, quando c'e'.
+         Slot dedicato invece di affidarsi all'hoisting automatico di Astro,
+         cosi' resta prevedibile anche dietro il condizionale del chiamante. */
+    }
+    <slot name="head" />
+
+    <ClientRouter />
+  </head>
+  <body>
+    <div class="ds-shell">
+      <NavBar {active} {catalogCount}>
+        <a class="ds-iconbtn" data-variant="ghost" data-size="md" aria-label="Cerca" href="/catalogo">
+          <Icon name="search" size={18} />
+        </a>
+        <button type="button" class="ds-btn" data-variant="primary" data-size="sm" data-chiedi-trigger>
+          <Icon name="instagram" size={16} />
+          Chiedi una carta
+        </button>
+      </NavBar>
+      <main class="ds-shell__main"><slot /></main>
+      <Footer />
+    </div>
+    <SiteChrome client:idle />
+  </body>
+</html>
+
+<style>
+  .ds-shell {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  .ds-shell__main {
+    flex: 1;
+  }
+</style>

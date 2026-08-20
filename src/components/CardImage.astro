@@ -1,0 +1,44 @@
+---
+// Foto reale della carta quando c'e', placeholder foil quando non c'e' —
+// Task 23. Usato per la carta grande della scheda (con `priority`, che
+// aggiunge anche il preload nel <head> della pagina chiamante) e per gli
+// altri punti dove serve una singola immagine autonoma, non incorniciata da
+// CardTile. Con la configurazione immagini vuota (src/config/site.ts)
+// `mostraFoto` e' sempre falso: questo componente ricade sempre sul
+// placeholder, identico a com'era prima che questo file esistesse.
+import CardArt from '~/components/ds/CardArt.svelte'
+import { cardCode } from '~/lib/catalog'
+import { immaginiAttive, srcsetImmagine, urlImmagine } from '~/lib/immagini'
+import type { Card, CardSet } from '~/lib/catalog'
+
+interface Props {
+  card: Card
+  set: CardSet
+  sizes?: string
+  priority?: boolean
+}
+const { card, set, sizes = '(max-width:760px) 45vw, 190px', priority = false } = Astro.props
+
+const mostraFoto = Boolean(card.image) && immaginiAttive()
+---
+
+{
+  mostraFoto ? (
+    <div class="ds-cardart" style="border-radius:var(--r-cardart)">
+      <img
+        class="ds-cardart__img"
+        src={urlImmagine(card.image!, 300)}
+        srcset={srcsetImmagine(card.image!)}
+        sizes={sizes}
+        alt={card.name}
+        width="63"
+        height="88"
+        loading={priority ? 'eager' : 'lazy'}
+        fetchpriority={priority ? 'high' : undefined}
+        decoding="async"
+      />
+    </div>
+  ) : (
+    <CardArt rarity={card.rarity} code={cardCode(card, set)} />
+  )
+}

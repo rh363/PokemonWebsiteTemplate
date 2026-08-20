@@ -1,0 +1,627 @@
+/* Classi dei componenti del design system.
+   Popolato dai Task 9-14, un blocco per componente, in aggiunta.
+   Nessun task riscrive questo file: ognuno accoda il proprio blocco
+   preceduto da un commento che cita la sorgente nel bundle. */
+
+/* CardArt — bundle:11-90 */
+.ds-cardart{position:relative;aspect-ratio:var(--card-aspect);width:100%;overflow:hidden;
+  background:linear-gradient(160deg,var(--ink-100),var(--paper-100));
+  box-shadow:var(--sh-inset-hairline)}
+.ds-cardart.is-foil{background:var(--foil)}
+.ds-cardart__img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.ds-cardart__ph{position:absolute;inset:0;display:grid;place-items:center;container-type:inline-size;
+  background:var(--pattern-dots) 0 0/var(--pattern-dots-size)}
+.ds-cardart.is-foil .ds-cardart__ph{
+  background:radial-gradient(120% 90% at 30% 15%,rgba(255,255,255,.65),transparent 60%)}
+.ds-cardart__code{font:var(--type-code);letter-spacing:var(--ls-eyebrow);text-transform:uppercase;
+  color:var(--text-faint);text-align:center;padding:0 8px;max-width:100%;overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap;font-size:clamp(7px,14cqw,12px);container-type:inline-size}
+.ds-cardart.is-foil .ds-cardart__code{color:rgba(14,11,18,.5)}
+.ds-cardart__sheen{position:absolute;inset:0;background:var(--foil-sheen);mix-blend-mode:screen;
+  pointer-events:none;
+  transition:opacity var(--dur-base) var(--ease-out),transform var(--dur-slow) var(--ease-out)}
+
+/* ConditionBadge — bundle:91-167. La mappa COND (label/short/level/color) e i trattini
+   height/background restano in JS: sono una formula sull'indice, non stile statico. */
+.ds-condbadge{display:inline-flex;align-items:center;gap:8px;padding:5px 10px;
+  border-radius:var(--r-xs);background:var(--surface-sunken);font:var(--type-code);
+  color:var(--text-body);white-space:nowrap}
+.ds-condbadge__bars{display:inline-flex;gap:2px;align-items:flex-end;height:12px}
+.ds-condbadge__bar{width:3px;border-radius:1px}
+
+/* RarityBadge — bundle:168-250. La mappa RARITY (label/color/dots) resta in JS: colore
+   e conteggio pallini dipendono dalla prop rarity, sono dati. size cambia solo layout
+   statico (padding, font-size, diametro pallino) e va in CSS via [data-size]. */
+.ds-raritybadge{display:inline-flex;align-items:center;gap:7px;border-radius:var(--r-pill);
+  background:var(--surface-card);border:var(--bw-hairline) solid;font:var(--type-label);
+  letter-spacing:var(--ls-eyebrow);text-transform:uppercase;white-space:nowrap}
+.ds-raritybadge[data-size="md"]{padding:5px 11px;font-size:var(--fs-caption)}
+.ds-raritybadge[data-size="sm"]{padding:3px 9px;font-size:var(--fs-micro)}
+.ds-raritybadge__dots{display:inline-flex;gap:2px}
+.ds-raritybadge__dot{border-radius:var(--r-pill)}
+.ds-raritybadge[data-size="md"] .ds-raritybadge__dot{width:6px;height:6px}
+.ds-raritybadge[data-size="sm"] .ds-raritybadge__dot{width:5px;height:5px}
+
+/* SpecList — bundle:251-299. Struttura dl/div/dt/dd semantica, invariata. it.mono
+   cambia solo il font della dd. */
+.ds-speclist{display:grid;gap:0;margin:0}
+.ds-speclist__row{display:flex;align-items:baseline;justify-content:space-between;gap:16px;
+  padding:11px 0}
+.ds-speclist__row--dense{padding:7px 0}
+.ds-speclist__row--rule{border-top:1px solid var(--border-hairline)}
+.ds-speclist__dt{font:var(--type-label);font-size:var(--fs-caption);font-weight:var(--fw-semibold);
+  letter-spacing:var(--ls-eyebrow);text-transform:uppercase;color:var(--text-muted)}
+.ds-speclist__dd{margin:0;text-align:right;color:var(--text-strong);font:var(--type-body);
+  font-size:var(--fs-body-s);font-weight:var(--fw-semibold)}
+.ds-speclist__dd--mono{font-family:var(--font-mono);font-weight:var(--fw-medium);line-height:1.3}
+
+/* Badge — bundle:300-377. La mappa TONES (neutral/brand/accent/success/warning/danger/
+   foil/invert) resta in JS: bg/fg/bd dipendono dalla prop tone, sono dati. */
+.ds-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border:1px solid;
+  border-radius:var(--r-pill);font-family:var(--font-body);font-size:var(--fs-micro);
+  font-weight:var(--fw-bold);line-height:1.3;white-space:nowrap;letter-spacing:0;
+  text-transform:none}
+.ds-badge--upper{letter-spacing:var(--ls-eyebrow);text-transform:uppercase}
+
+/* Skeleton — bundle:1192-1229. L'animazione di pulsazione era un <style> iniettato nel
+   prototipo, qui e' un @keyframes statico in ds.css. */
+.ds-skeleton{display:grid;gap:8px}
+.ds-skeleton__box{background:linear-gradient(90deg,var(--ink-100) 25%,var(--paper-100) 37%,
+  var(--ink-100) 63%);background-size:400% 100%;animation:cf-shimmer 1.4s var(--ease-in-out) infinite}
+@keyframes cf-shimmer{0%{background-position:100% 0}100%{background-position:0 0}}
+
+/* EmptyState — bundle:1131-1191. compact e' un booleano chiuso: diventa una classe. */
+.ds-emptystate{display:grid;gap:var(--sp-4);justify-items:center;text-align:center;
+  padding:var(--sp-16) var(--sp-8);background:var(--surface-sunken);
+  border:1px dashed var(--border-subtle);border-radius:var(--r-lg)}
+.ds-emptystate--compact{padding:var(--sp-8)}
+.ds-emptystate__icon{display:grid;place-items:center;width:56px;height:56px;
+  border-radius:var(--r-pill);background:var(--surface-card);
+  border:var(--bw-strong) solid var(--ink-950);box-shadow:var(--sh-sticker-sm);
+  color:var(--text-strong)}
+.ds-emptystate__text{display:grid;gap:6px;max-width:420px}
+.ds-emptystate__title{font:var(--fw-bold) var(--fs-title-s)/var(--lh-title-s) var(--font-display);
+  color:var(--text-strong)}
+.ds-emptystate__desc{font:var(--type-body);font-size:var(--fs-body-s);color:var(--text-muted)}
+
+/* Button — bundle:378-498. hover/press erano useState, qui sono :hover/:active. */
+.ds-btn{display:inline-flex;align-items:center;justify-content:center;
+  font:var(--type-label);font-weight:var(--fw-bold);letter-spacing:-.01em;
+  text-decoration:none;white-space:nowrap;border-radius:var(--r-control);cursor:pointer;
+  transition:var(--t-control);
+  background:var(--btn-bg);color:var(--btn-fg);border:var(--btn-bd);box-shadow:var(--btn-sh)}
+
+.ds-btn[data-size="sm"]{padding:8px 16px;font-size:var(--fs-body-s);gap:6px;min-height:36px}
+.ds-btn[data-size="md"]{padding:12px 22px;font-size:var(--fs-body-m);gap:8px;min-height:46px}
+.ds-btn[data-size="lg"]{padding:16px 30px;font-size:var(--fs-body-l);gap:10px;min-height:56px}
+
+/* Fallback: il sorgente fa VARIANTS[variant] || VARIANTS.primary, quindi una
+   variante sconosciuta deve rendere come primary, non senza stile. */
+.ds-btn{--btn-bg:var(--surface-brand);--btn-fg:var(--text-invert);
+  --btn-bd:var(--bw-strong) solid var(--ink-950);--btn-sh:var(--sh-sticker-sm);
+  --btn-bg-hover:var(--surface-brand-hover)}
+.ds-btn[data-variant="primary"]{--btn-bg:var(--surface-brand);--btn-fg:var(--text-invert);
+  --btn-bd:var(--bw-strong) solid var(--ink-950);--btn-sh:var(--sh-sticker-sm);
+  --btn-bg-hover:var(--surface-brand-hover)}
+.ds-btn[data-variant="secondary"]{--btn-bg:var(--surface-card);--btn-fg:var(--text-strong);
+  --btn-bd:var(--bw-strong) solid var(--ink-950);--btn-sh:var(--sh-sticker-sm);
+  --btn-bg-hover:var(--paper-100)}
+.ds-btn[data-variant="ghost"]{--btn-bg:transparent;--btn-fg:var(--text-strong);
+  --btn-bd:var(--bw-strong) solid transparent;--btn-sh:none;--btn-bg-hover:var(--ink-50)}
+.ds-btn[data-variant="foil"]{--btn-bg:var(--foil);--btn-fg:var(--ink-950);
+  --btn-bd:var(--bw-strong) solid var(--ink-950);--btn-sh:var(--sh-sticker-sm);
+  --btn-bg-hover:var(--foil)}
+.ds-btn[data-variant="invert"]{--btn-bg:var(--surface-invert);--btn-fg:var(--text-invert);
+  --btn-bd:var(--bw-strong) solid var(--ink-950);--btn-sh:none;--btn-bg-hover:var(--ink-800)}
+
+@media (hover:hover){
+  .ds-btn:not(:disabled):hover{background:var(--btn-bg-hover);
+    box-shadow:var(--sh-sticker);transform:translateY(-2px)}
+}
+.ds-btn:not(:disabled):active{box-shadow:none;transform:translate(2px,2px)}
+.ds-btn:disabled,.ds-btn[aria-disabled="true"]{opacity:.4;cursor:not-allowed;
+  box-shadow:none;transform:none}
+.ds-btn--full{width:100%}
+
+/* IconButton — bundle:674-754. Stessa struttura di Button ma quadrato, sempre
+   <button>. shadow di base e' sempre "none" nel sorgente (varia solo in hover);
+   variant="ghost" non prende mai ombra, nemmeno in hover. active (aria-pressed)
+   e' persistente e vince su hover/base, ma non tocca shadow/transform. */
+.ds-iconbtn{display:inline-grid;place-items:center;border-radius:var(--r-pill);
+  cursor:pointer;transition:var(--t-control);
+  background:var(--icbtn-bg);color:var(--icbtn-fg);border:var(--icbtn-bd);box-shadow:none}
+
+.ds-iconbtn[data-size="sm"]{width:32px;height:32px}
+.ds-iconbtn[data-size="md"]{width:40px;height:40px}
+.ds-iconbtn[data-size="lg"]{width:48px;height:48px}
+
+.ds-iconbtn[data-variant="secondary"]{--icbtn-bg:var(--surface-card);--icbtn-fg:var(--text-strong);
+  --icbtn-bd:var(--bw-strong) solid var(--ink-950);
+  --icbtn-bg-hover:var(--surface-card);--icbtn-sh-hover:var(--sh-sticker-sm)}
+.ds-iconbtn[data-variant="ghost"]{--icbtn-bg:transparent;--icbtn-fg:var(--text-muted);
+  --icbtn-bd:var(--bw-strong) solid transparent;
+  --icbtn-bg-hover:var(--ink-50);--icbtn-sh-hover:none}
+.ds-iconbtn[data-variant="brand"]{--icbtn-bg:var(--surface-brand);--icbtn-fg:var(--text-invert);
+  --icbtn-bd:var(--bw-strong) solid var(--ink-950);
+  --icbtn-bg-hover:var(--surface-brand);--icbtn-sh-hover:var(--sh-sticker-sm)}
+.ds-iconbtn[data-variant="invert"]{--icbtn-bg:var(--ink-800);--icbtn-fg:var(--text-invert);
+  --icbtn-bd:var(--bw-strong) solid transparent;
+  --icbtn-bg-hover:var(--ink-800);--icbtn-sh-hover:var(--sh-sticker-sm)}
+
+@media (hover:hover){
+  .ds-iconbtn:not(:disabled):hover{background:var(--icbtn-bg-hover);
+    box-shadow:var(--icbtn-sh-hover);transform:translateY(-2px)}
+  .ds-iconbtn[aria-pressed="true"]:not(:disabled):hover{background:var(--surface-brand-soft)}
+}
+.ds-iconbtn:not(:disabled):active{box-shadow:none;transform:translate(2px,2px)}
+.ds-iconbtn:disabled{opacity:.4;cursor:not-allowed;box-shadow:none;transform:none}
+.ds-iconbtn[aria-pressed="true"]{background:var(--surface-brand-soft);color:var(--text-brand)}
+
+/* Chip — bundle:610-673. Nessuno stato press/shadow nel sorgente: solo hover
+   (bg + lift 1px), e solo se interactive (onClick o onRemove presenti). Il
+   bottone di rimozione e' annidato con onclick che ferma la propagazione
+   (bundle:651), altrimenti scatta anche il click del chip. */
+.ds-chip{display:inline-flex;align-items:center;gap:7px;padding:7px 14px;min-height:36px;
+  background:var(--surface-card);color:var(--text-body);
+  border:var(--bw-hairline) solid var(--border-subtle);border-radius:var(--r-pill);
+  font:var(--type-label);cursor:default;transition:var(--t-control)}
+.ds-chip--interactive{cursor:pointer}
+.ds-chip--selected{background:var(--ink-950);color:var(--text-invert);border-color:var(--ink-950)}
+.ds-chip:disabled{cursor:not-allowed;opacity:.45}
+
+@media (hover:hover){
+  .ds-chip--interactive:not(:disabled):hover{background:var(--paper-100);transform:translateY(-1px)}
+  .ds-chip--interactive.ds-chip--selected:not(:disabled):hover{background:var(--ink-950)}
+}
+.ds-chip__count{font:var(--type-code);opacity:.6}
+.ds-chip__remove{display:inline-grid;place-items:center;margin-right:-4px;opacity:.7}
+
+/* Panel — bundle:902-965. Cinque SKINS come custom property, sul modello di
+   Button. hoverLift diventa .ds-panel--lift: solo quella classe attiva
+   :hover, esattamente come nel sorgente solo hoverLift attacca i listener.
+   sticker/foil hanno l'ombra hover piena 6px anziche' var(--sh-3). */
+.ds-panel{border-radius:var(--r-card);transition:var(--t-card);
+  background:var(--panel-bg);color:var(--panel-fg);border:var(--panel-bd);box-shadow:var(--panel-sh)}
+
+.ds-panel[data-variant="card"]{--panel-bg:var(--surface-card);--panel-fg:var(--text-body);
+  --panel-bd:var(--bw-hairline) solid var(--border-hairline);--panel-sh:var(--sh-1)}
+.ds-panel[data-variant="sunken"]{--panel-bg:var(--surface-sunken);--panel-fg:var(--text-body);
+  --panel-bd:var(--bw-hairline) solid var(--border-hairline);--panel-sh:none}
+.ds-panel[data-variant="sticker"]{--panel-bg:var(--surface-card);--panel-fg:var(--text-body);
+  --panel-bd:var(--bw-strong) solid var(--ink-950);--panel-sh:var(--sh-sticker)}
+.ds-panel[data-variant="invert"]{--panel-bg:var(--surface-invert);--panel-fg:var(--text-invert);
+  --panel-bd:var(--bw-hairline) solid var(--border-invert);--panel-sh:none}
+.ds-panel[data-variant="foil"]{--panel-bg:var(--foil);--panel-fg:var(--ink-950);
+  --panel-bd:var(--bw-strong) solid var(--ink-950);--panel-sh:var(--sh-sticker)}
+
+@media (hover:hover){
+  .ds-panel--lift:hover{transform:var(--lift-hover);box-shadow:var(--sh-3)}
+  .ds-panel--lift[data-variant="sticker"]:hover,
+  .ds-panel--lift[data-variant="foil"]:hover{box-shadow:6px 6px 0 var(--ink-950)}
+}
+
+/* Tooltip — bundle:966-1029. open era useState su mouse *e* focus: qui sono
+   necessari sia :hover sia :focus-within, altrimenti il Tooltip non si apre
+   da tastiera. Le quattro posizioni diventano [data-side]. */
+.ds-tooltip{position:relative;display:inline-flex}
+.ds-tooltip__bubble{position:absolute;z-index:60;pointer-events:none;opacity:0;
+  background:var(--ink-950);color:var(--text-invert);padding:6px 10px;
+  border-radius:var(--r-xs);font:var(--type-label);font-size:var(--fs-caption);
+  white-space:nowrap;box-shadow:var(--sh-2);
+  transition:opacity var(--dur-fast) var(--ease-out),transform var(--dur-fast) var(--ease-snap)}
+.ds-tooltip__bubble[data-side="top"]{bottom:calc(100% + 8px);left:50%;transform:translateX(-50%) translateY(4px)}
+.ds-tooltip__bubble[data-side="bottom"]{top:calc(100% + 8px);left:50%;transform:translateX(-50%) translateY(-4px)}
+.ds-tooltip__bubble[data-side="left"]{right:calc(100% + 8px);top:50%;transform:translateY(-50%)}
+.ds-tooltip__bubble[data-side="right"]{left:calc(100% + 8px);top:50%;transform:translateY(-50%)}
+.ds-tooltip:hover .ds-tooltip__bubble[data-side="top"],
+.ds-tooltip:focus-within .ds-tooltip__bubble[data-side="top"]{opacity:1;transform:translateX(-50%) translateY(0)}
+.ds-tooltip:hover .ds-tooltip__bubble[data-side="bottom"],
+.ds-tooltip:focus-within .ds-tooltip__bubble[data-side="bottom"]{opacity:1;transform:translateX(-50%) translateY(0)}
+.ds-tooltip:hover .ds-tooltip__bubble[data-side="left"],
+.ds-tooltip:focus-within .ds-tooltip__bubble[data-side="left"],
+.ds-tooltip:hover .ds-tooltip__bubble[data-side="right"],
+.ds-tooltip:focus-within .ds-tooltip__bubble[data-side="right"]{opacity:1}
+
+/* Input — bundle:1411-1482. focus era useState su .field: qui e'
+   :focus-within sul contenitore. error ha priorita' su focus per il colore
+   del bordo (nel sorgente il ternario controlla entrambi, error vince). Il
+   size "lg" condivide fs-body-m con "md" nel sorgente: solo sm cambia. */
+.ds-input{display:grid;gap:6px}
+.ds-input__label{font:var(--type-label);color:var(--text-strong)}
+.ds-input__field{display:flex;align-items:center;gap:8px;box-sizing:border-box;
+  background:var(--surface-card);border:var(--bw-hairline) solid var(--border-subtle);
+  border-radius:var(--r-field);box-shadow:none;color:var(--text-muted);
+  transition:box-shadow var(--dur-fast) var(--ease-out),border-color var(--dur-fast) var(--ease-out)}
+.ds-input[data-size="sm"] .ds-input__field{padding:8px 12px}
+.ds-input[data-size="md"] .ds-input__field{padding:11px 14px}
+.ds-input[data-size="lg"] .ds-input__field{padding:14px 16px}
+.ds-input__field:focus-within{border-color:var(--ink-950);box-shadow:var(--sh-focus)}
+.ds-input__field.is-error,
+.ds-input__field.is-error:focus-within{border-color:var(--state-danger)}
+.ds-input__field.is-disabled{background:var(--surface-sunken);opacity:.6}
+.ds-input__control{all:unset;flex:1;min-width:0;font:var(--type-body);
+  font-size:var(--fs-body-m);color:var(--text-strong)}
+.ds-input[data-size="sm"] .ds-input__control{font-size:var(--fs-body-s)}
+.ds-input__msg{font:var(--type-label);font-size:var(--fs-caption);font-weight:var(--fw-medium);
+  color:var(--text-muted)}
+.ds-input__msg.is-error{color:var(--state-danger)}
+
+/* SearchField — bundle:1483-1596. focus era useState: qui e' :focus-within
+   su .ds-search__bar. La lista dei suggerimenti resta un pannello assoluto
+   identico al sorgente; la voce evidenziata da tastiera (.is-active) e' una
+   classe nuova, assente nel sorgente (che non aveva navigazione), colorata
+   con lo stesso --ink-50 usato per l'hover ghost di Button/IconButton. */
+.ds-search{position:relative}
+.ds-search__bar{display:flex;align-items:center;gap:10px;box-sizing:border-box;
+  background:var(--surface-card);border:var(--bw-strong) solid var(--border-subtle);
+  border-radius:var(--r-pill);box-shadow:var(--sh-1);
+  transition:box-shadow var(--dur-base) var(--ease-out),border-color var(--dur-fast) var(--ease-out)}
+.ds-search[data-size="lg"] .ds-search__bar{padding:14px 18px}
+.ds-search[data-size="md"] .ds-search__bar{padding:10px 14px}
+.ds-search__bar.is-focus{border-color:var(--ink-950);box-shadow:var(--sh-focus)}
+.ds-search__icon{display:grid;color:var(--text-muted)}
+.ds-search__bar.is-focus .ds-search__icon{color:var(--text-strong)}
+.ds-search__input{all:unset;flex:1;min-width:0;font:var(--type-body);
+  font-size:var(--fs-body-m);color:var(--text-strong)}
+.ds-search[data-size="lg"] .ds-search__input{font-size:var(--fs-body-l)}
+.ds-search__clear{all:unset;cursor:pointer;display:grid;place-items:center;color:var(--text-muted)}
+.ds-search__panel{position:absolute;top:calc(100% + 8px);left:0;right:0;z-index:40;
+  background:var(--surface-card);border:var(--bw-hairline) solid var(--border-subtle);
+  border-radius:var(--r-md);box-shadow:var(--sh-3);overflow:hidden}
+.ds-search__opt{all:unset;box-sizing:border-box;display:flex;width:100%;align-items:center;
+  gap:10px;padding:11px 16px;cursor:pointer;font:var(--type-body);font-size:var(--fs-body-s);
+  color:var(--text-body)}
+.ds-search__opt + .ds-search__opt{border-top:1px solid var(--border-hairline)}
+.ds-search__opt.is-active{background:var(--ink-50)}
+.ds-search__meta{margin-left:auto;font:var(--type-code);color:var(--text-faint)}
+
+/* Select — bundle:1597-1670. Resta un <select> nativo: accessibile di
+   serie, senza logica di posizionamento propria. focus era useState: qui e'
+   :focus sul <select>. */
+.ds-select{display:grid;gap:6px}
+.ds-select__label{font:var(--type-label);color:var(--text-strong)}
+.ds-select__wrap{position:relative;display:flex;align-items:center}
+.ds-select__control{all:unset;box-sizing:border-box;width:100%;cursor:pointer;
+  background:var(--surface-card);border:var(--bw-hairline) solid var(--border-subtle);
+  border-radius:var(--r-field);font:var(--type-body);color:var(--text-strong);box-shadow:none;
+  transition:box-shadow var(--dur-fast) var(--ease-out)}
+.ds-select[data-size="sm"] .ds-select__control{padding:8px 34px 8px 12px;font-size:var(--fs-body-s)}
+.ds-select[data-size="md"] .ds-select__control{padding:11px 38px 11px 14px;font-size:var(--fs-body-m)}
+.ds-select__control:focus{border-color:var(--ink-950);box-shadow:var(--sh-focus)}
+.ds-select__control:disabled{background:var(--surface-sunken);opacity:.6;cursor:not-allowed}
+.ds-select__chev{position:absolute;right:14px;pointer-events:none;color:var(--text-muted);display:grid}
+
+/* Checkbox — bundle:1323-1410. Un <input type="checkbox"> reale e'
+   nascosto (posizione assoluta, opacita' 0) accanto al riquadro disegnato:
+   Tab e Spazio funzionano da soli. hover era useState e nel sorgente cambia
+   il bordo SOLO quando non checked (checked vince sempre sul ternario);
+   qui e' lo stesso: la regola is-checked ha priorita' su :hover, scritta
+   anche nella sua variante :hover, altrimenti la spunta sparirebbe sotto
+   il mouse (lezione del Task 10). */
+.ds-checkbox{display:flex;gap:10px;align-items:center;cursor:pointer;padding:4px 0}
+.ds-checkbox.has-description{align-items:flex-start}
+.ds-checkbox.is-disabled{cursor:not-allowed;opacity:.45}
+.ds-checkbox__input{position:absolute;opacity:0;width:0;height:0}
+.ds-checkbox__box{width:20px;height:20px;flex:none;display:grid;place-items:center;
+  background:var(--surface-card);border:var(--bw-strong) solid var(--border-subtle);
+  border-radius:var(--r-xs);color:var(--text-invert);transition:var(--t-control);
+  transform:scale(.96)}
+.ds-checkbox.has-description .ds-checkbox__box{margin-top:2px}
+@media (hover:hover){
+  .ds-checkbox:hover .ds-checkbox__box{border-color:var(--ink-500)}
+}
+.ds-checkbox.is-checked .ds-checkbox__box,
+.ds-checkbox.is-checked:hover .ds-checkbox__box{
+  background:var(--ink-950);border-color:var(--ink-950);transform:scale(1)}
+.ds-checkbox__text{display:grid;gap:2px;flex:1;min-width:0}
+.ds-checkbox__label{font:var(--type-body);font-size:var(--fs-body-s);color:var(--text-strong);
+  font-weight:var(--fw-regular)}
+.ds-checkbox.is-checked .ds-checkbox__label{font-weight:var(--fw-semibold)}
+.ds-checkbox__desc{font:var(--type-label);font-size:var(--fs-caption);font-weight:var(--fw-regular);
+  color:var(--text-muted)}
+.ds-checkbox__count{font:var(--type-code);color:var(--text-faint)}
+
+/* Switch — bundle:1671-1736. Stessa costruzione di Checkbox: input reale
+   nascosto, role="switch". Il sorgente non definisce alcuno stato hover per
+   track o pomello (a differenza di Checkbox), quindi qui non ne viene
+   aggiunto uno: niente conflitto is-checked/:hover da risolvere. Il pomello
+   si sposta con justify-content sul track (fedele al sorgente, che fa lo
+   stesso: la transition su transform dichiarata li' non anima nulla, perche'
+   il sorgente non tocca mai il transform del pomello). */
+.ds-switch{display:inline-flex;align-items:center;gap:10px;cursor:pointer}
+.ds-switch.is-disabled{cursor:not-allowed;opacity:.45}
+.ds-switch__input{position:absolute;opacity:0;width:0;height:0}
+.ds-switch__track{width:44px;height:26px;flex:none;box-sizing:border-box;border-radius:var(--r-pill);
+  padding:3px;background:var(--ink-200);border:var(--bw-strong) solid var(--ink-950);
+  display:flex;justify-content:flex-start;transition:background-color var(--dur-base) var(--ease-out)}
+.ds-switch__track.is-checked{background:var(--surface-brand);justify-content:flex-end}
+.ds-switch__thumb{width:16px;height:16px;border-radius:var(--r-pill);background:var(--paper-0);
+  box-shadow:var(--sh-1);transition:transform var(--dur-base) var(--ease-spring)}
+.ds-switch__label{font:var(--type-label);color:var(--text-strong)}
+
+/* FilterGroup — bundle:534-609. Cambio deliberato: <details defaultOpen>/
+   <summary> al posto di <section>/<button>+useState. Elimina JavaScript e
+   aggiunge tastiera nativa (Invio/Spazio su summary). Il riposo di
+   .ds-fg__summary NON usa all:unset (a differenza del sorgente), cosi'
+   l'anello di focus nativo del browser resta visibile — e' il punto stesso
+   di questo componente. Il chevron segue la stessa convenzione del sorgente
+   (bundle:592, -90deg chiuso / 0deg aperto su un down-chevron): riposo
+   ruotato di -90deg (punta a destra), l'apertura lo riporta a 0deg (punta
+   in giu'). Niente animazione
+   sull'altezza del corpo: <details> apre/chiude in modo nativo e istantaneo,
+   il sorgente animava max-height/opacity via JS che qui non esiste piu'. */
+.ds-fg{border-top:1px solid var(--border-hairline);padding:14px 0}
+.ds-fg__summary{display:flex;width:100%;box-sizing:border-box;align-items:center;gap:8px;
+  cursor:pointer;list-style:none;color:inherit;font:inherit}
+.ds-fg__summary::-webkit-details-marker{display:none}
+.ds-fg__title{font:var(--type-label);font-weight:var(--fw-bold);color:var(--text-strong);
+  letter-spacing:var(--ls-eyebrow);text-transform:uppercase;font-size:var(--fs-caption)}
+.ds-fg__count{display:grid;place-items:center;min-width:18px;height:18px;padding:0 5px;
+  box-sizing:border-box;border-radius:var(--r-pill);background:var(--surface-brand);
+  color:var(--text-invert);font:var(--type-code);font-size:var(--fs-micro)}
+.ds-fg__chev{margin-left:auto;color:var(--text-muted);display:grid;
+  transform:rotate(-90deg);transition:transform var(--dur-base) var(--ease-snap)}
+details.ds-fg[open] .ds-fg__chev{transform:rotate(0deg)}
+.ds-fg__body{display:grid;gap:2px;margin-top:10px}
+
+/* Dialog — bundle:1030-1130. Il sorgente gestiva solo Escape a mano, senza
+   focus trap ne' ripristino del focus, e usava aria-label invece di
+   collegare il titolo. Qui e' <dialog> nativo con showModal(): focus trap,
+   Escape e scrim inerte arrivano dal browser. Lo scrim (outer wrapper del
+   sorgente: background scrim-modal, backdrop-filter blur 3px, padding sp-6
+   per la distanza dai bordi) diventa ::backdrop; l'inner div del sorgente
+   (width 100%, maxWidth width, overflow auto, background/border/radius/
+   shadow/padding/gap) e' il <dialog> stesso. width:calc(100% - sp-6*2)
+   riproduce la distanza dai bordi che il padding del wrapper dava.
+   display:grid e' su .ds-dialog[open], non su .ds-dialog: l'origine autore
+   batte sempre l'origine user-agent a parita' di normal/normal, quindi un
+   display impostato senza la guardia [open] avrebbe reso il dialog chiuso
+   ugualmente visibile, scavalcando la regola UA dialog:not([open]){display:
+   none} indipendentemente dalla specificita'. */
+.ds-dialog{position:fixed;inset:0;margin:auto;width:calc(100% - var(--sp-6) * 2);
+  max-height:86vh;overflow:auto;box-sizing:border-box;color:inherit;
+  background:var(--surface-card);border:var(--bw-strong) solid var(--ink-950);
+  border-radius:var(--r-xl);box-shadow:var(--sh-3);padding:var(--sp-8);
+  gap:var(--sp-5)}
+.ds-dialog[open]{display:grid}
+/* Nessuna animazione sul velo: il sorgente ha animation:"none" esplicito
+   sul wrapper (bundle:1030-1130) — a differenza di Sheet, che dissolve. */
+.ds-dialog::backdrop{background:var(--scrim-modal);backdrop-filter:blur(3px)}
+.ds-dialog__head{display:flex;align-items:flex-start;gap:var(--sp-4)}
+.ds-dialog__titles{display:grid;gap:6px;flex:1}
+.ds-dialog__eyebrow{font:var(--type-eyebrow);letter-spacing:var(--ls-eyebrow);
+  text-transform:uppercase;color:var(--text-brand)}
+.ds-dialog__title{font:var(--fw-bold) var(--fs-title-m)/var(--lh-title-m) var(--font-display);
+  letter-spacing:var(--ls-title-m)}
+.ds-dialog__body{font:var(--type-body);color:var(--text-body)}
+.ds-dialog__foot{display:flex;gap:var(--sp-3);justify-content:flex-end;flex-wrap:wrap}
+
+/* Sheet — design-reference/pezzi.jsx, funzione Sheet (non sta nel bundle).
+   Stessa logica di Dialog: <dialog> nativo al posto del div hand-rolled,
+   scrim su ::backdrop, aria-labelledby al posto di aria-label. La differenza
+   e' il posizionamento: il sorgente allineava il pannello in basso
+   (align-items:"flex-end" sul wrapper) invece di centrarlo, quindi qui si
+   sovrascrivono inset/margin della UA con bottom:0 pieno-larghezza. L'anima-
+   zione .sheet-in e la keyframe sheetUp restano quelle gia' in layout.css —
+   non ridefinite qui. Stessa guardia [open] di Dialog sul display, per lo
+   stesso motivo (origine autore batte UA a parita' di normal/normal).
+   Il velo (::backdrop) invece NON e' uguale a quello di Dialog: nel
+   sorgente il wrapper di Sheet ha className="fade-in" (pezzi.jsx:48),
+   quindi si dissolve con la keyframe fadeIn gia' in layout.css; il wrapper
+   di Dialog ha animation:"none" esplicito (bundle:1030-1130) e resta senza
+   dissolvenza. E' una differenza voluta del sorgente, non una svista di
+   porting: va riprodotta, non uniformata. */
+.ds-sheet{position:fixed;inset:auto 0 0 0;margin:0;width:100%;max-height:86vh;
+  box-sizing:border-box;color:inherit;flex-direction:column;
+  background:var(--surface-card);border:none;
+  border-top:var(--bw-strong) solid var(--ink-950);
+  border-top-left-radius:var(--r-xl);border-top-right-radius:var(--r-xl);
+  box-shadow:var(--sh-3);padding:0}
+.ds-sheet[open]{display:flex}
+.ds-sheet::backdrop{background:var(--scrim-modal);backdrop-filter:blur(3px);
+  animation:fadeIn 220ms var(--ease-out)}
+.ds-sheet__head{position:relative;display:flex;align-items:center;gap:var(--sp-4);
+  padding:var(--sp-5) var(--sp-5) var(--sp-3)}
+.ds-sheet__handle{position:absolute;top:8px;left:50%;transform:translateX(-50%);
+  width:44px;height:5px;border-radius:var(--r-pill);background:var(--ink-100)}
+.ds-sheet__title{flex:1;font:var(--fw-bold) var(--fs-title-s)/var(--lh-title-s) var(--font-display);
+  color:var(--text-strong)}
+.ds-sheet__body{flex:1;overflow:auto;padding:var(--sp-2) var(--sp-5) var(--sp-6)}
+.ds-sheet__foot{padding:var(--sp-4) var(--sp-5);border-top:1px solid var(--border-hairline);
+  display:flex;gap:var(--sp-3);background:var(--surface-card)}
+
+/* Toast — bundle:1230-1322. La mappa TONES (bg/fg/icon) resta dati: il
+   colore dipende dalla prop tone, passato come --toast-bg/--toast-fg
+   inline, stesso pattern di --btn-bg su Button. */
+.ds-toast{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;
+  background:var(--toast-bg);color:var(--toast-fg);border-radius:var(--r-md);
+  box-shadow:var(--sh-3);min-width:280px;max-width:420px}
+.ds-toast__text{display:grid;gap:3px;flex:1}
+.ds-toast__title{font:var(--type-label)}
+.ds-toast__desc{font:var(--type-label);font-size:var(--fs-caption);
+  font-weight:var(--fw-regular);opacity:.8}
+.ds-toast__close{all:unset;cursor:pointer;opacity:.7;display:grid;place-items:center}
+
+/* Tabs — bundle:1993-2050. Due varianti come [data-variant]. Il sorgente non
+   definisce alcun hover (nessun useState, nessun :hover nell'oggetto style):
+   non ne viene aggiunto uno qui, fedele all'assenza (lezione Task 11 — copiare
+   i valori del sorgente, non la sua intenzione). is-selected e' lo stato
+   persistente; essendo l'unico stato scritto (niente hover in conflitto),
+   non serve la variante :hover della regola come per Checkbox/NavBar. */
+.ds-tabs{display:flex}
+.ds-tabs[data-variant="underline"]{gap:var(--sp-5);border-bottom:1px solid var(--border-hairline);
+  background:transparent;padding:0;border-radius:0;width:auto}
+.ds-tabs[data-variant="pill"]{gap:6px;border-bottom:none;background:var(--surface-sunken);
+  padding:4px;border-radius:var(--r-pill);width:fit-content}
+.ds-tabs__tab{all:unset;cursor:pointer;box-sizing:border-box;display:inline-flex;align-items:center;
+  gap:7px;font:var(--type-label);color:var(--text-muted);transition:var(--t-control)}
+.ds-tabs[data-variant="underline"] .ds-tabs__tab{padding:12px 2px;border-radius:0;
+  border-bottom:3px solid transparent;margin-bottom:-1px}
+.ds-tabs[data-variant="pill"] .ds-tabs__tab{padding:8px 16px;border-radius:var(--r-pill)}
+.ds-tabs__tab.is-selected{color:var(--text-strong)}
+.ds-tabs[data-variant="underline"] .ds-tabs__tab.is-selected{border-bottom-color:var(--surface-brand)}
+.ds-tabs[data-variant="pill"] .ds-tabs__tab.is-selected{background:var(--surface-card);box-shadow:var(--sh-1)}
+.ds-tabs__count{font:var(--type-code);color:var(--text-faint)}
+
+/* Pagination — bundle:1908-1992. Il sorgente usava <button onClick> per ogni
+   pagina e per le frecce; nel catalogo diventa navigazione vera con <a href>.
+   Essendo <a> reali, ereditano a{color}/a:hover{color} da tokens/base.css:
+   il sorgente non ha alcun colore diverso in hover, quindi ogni regola qui
+   ridichiara esplicitamente il colore anche in :hover per neutralizzare
+   quella fuga (stessa famiglia di difetto della regola persistente-vs-hover,
+   generalizzata al colore di default degli <a>). is-current e' lo stato
+   persistente e vince anche sopra il proprio :hover. */
+.ds-pagination{display:flex;align-items:center;gap:8px}
+.ds-pagination__ellipsis{font:var(--type-code);color:var(--text-faint);padding:0 2px}
+.ds-pagination__page{all:unset;box-sizing:border-box;cursor:pointer;min-width:34px;height:34px;
+  display:grid;place-items:center;border-radius:var(--r-pill);background:transparent;
+  color:var(--text-body);font:var(--type-label);transition:var(--t-control);text-align:center}
+.ds-pagination__page:hover{color:var(--text-body)}
+.ds-pagination__page.is-current,
+.ds-pagination__page.is-current:hover{background:var(--ink-950);color:var(--text-invert)}
+.ds-pagination__arrow{display:inline-grid;place-items:center;width:32px;height:32px;
+  border-radius:var(--r-pill);background:var(--surface-card);color:var(--text-strong);
+  border:var(--bw-strong) solid var(--ink-950);text-decoration:none;transition:var(--t-control)}
+.ds-pagination__arrow:hover{color:var(--text-strong)}
+@media (hover:hover){
+  .ds-pagination__arrow:not(.is-disabled):hover{background:var(--surface-card);
+    box-shadow:var(--sh-sticker-sm);transform:translateY(-2px)}
+}
+.ds-pagination__arrow:not(.is-disabled):active{box-shadow:none;transform:translate(2px,2px)}
+.ds-pagination__arrow.is-disabled{opacity:.4;cursor:not-allowed}
+
+/* Breadcrumb — bundle:1737-1792. Il sorgente aveva gia' aria-label="Percorso"
+   e aria-current="page" sull'ultima voce: nessuna lacuna da colmare qui,
+   a differenza di Dialog. Cambia solo onNavigate/preventDefault, sostituito
+   da <a href> reali — stessa fuga di colore in hover di Pagination, stessa
+   correzione. */
+.ds-breadcrumb{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.ds-breadcrumb__current{font:var(--type-label);font-size:var(--fs-body-s);color:var(--text-strong)}
+.ds-breadcrumb__link{font:var(--type-label);font-size:var(--fs-body-s);font-weight:var(--fw-medium);
+  color:var(--text-muted);text-decoration:none}
+.ds-breadcrumb__link:hover{color:var(--text-muted)}
+
+/* NavBar — bundle:1793-1907. componente Astro (src/components/NavBar.astro),
+   non Svelte: l'unico stato del sorgente era scrolled (scroll>8px), sostituito
+   da data-scrolled sincronizzato da uno script inline di dieci righe — vedi
+   NavBar.astro. Valori dello sfondo/bordo a scrolled=true verificati contro
+   bundle:1817-1823. data-on e' lo stato persistente (voce corrente): vince
+   anche sopra il proprio :hover, e sopra la fuga di colore di a:hover
+   (stessa correzione di Pagination/Breadcrumb, perche' i link sono <a> reali). */
+.ds-nav{position:sticky;top:0;z-index:50;background:var(--surface-page);backdrop-filter:none;
+  border-bottom:1px solid transparent;
+  transition:background-color var(--dur-base) var(--ease-out),border-color var(--dur-base) var(--ease-out)}
+.ds-nav[data-scrolled="true"]{background:var(--glass-bg);backdrop-filter:var(--glass-blur);
+  border-bottom:1px solid var(--border-subtle)}
+.ds-nav__inner{max-width:var(--page-max);margin:0 auto;padding:14px var(--gutter);
+  display:flex;align-items:center;gap:var(--sp-6)}
+.ds-nav__brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+.ds-nav__brand img{display:block}
+.ds-nav__brandname{font:var(--fw-black) var(--fs-title-s)/1 var(--font-display);
+  letter-spacing:-0.04em;color:var(--text-strong)}
+.ds-nav__links{display:flex;align-items:center;gap:2px;margin-left:var(--sp-4)}
+.ds-nav__link{position:relative;padding:8px 14px;border-radius:var(--r-pill);text-decoration:none;
+  font:var(--type-label);color:var(--text-muted);background:transparent;transition:var(--t-control)}
+.ds-nav__link:hover{color:var(--text-muted)}
+.ds-nav__link[data-on="true"],
+.ds-nav__link[data-on="true"]:hover{color:var(--text-strong);background:var(--surface-brand-soft)}
+.ds-nav__count{margin-left:6px;font:var(--type-code);color:var(--text-faint)}
+.ds-nav__right{margin-left:auto;display:flex;align-items:center;gap:var(--sp-3)}
+
+/* Menu mobile — Task 15, §6.4: non ha equivalente nel bundle React (li' era
+   MenuMobile, un Sheet idratato). Qui e' un <details> nativo, sempre
+   apribile, nessuna isola. .ds-nav__right e .ds-nav__links spariscono sotto
+   1080px (stesso breakpoint di useMedia nel prototipo, gia' usato altrove in
+   layout.css) e .ds-nav__mobile prende il loro posto. */
+.ds-nav__mobile{display:none;align-items:center;gap:var(--sp-3);margin-left:auto}
+@media (max-width:1080px){
+  .ds-nav__links{display:none}
+  .ds-nav__right{display:none}
+  .ds-nav__mobile{display:flex}
+}
+.ds-nav__menu{position:relative}
+.ds-nav__menu>summary{cursor:pointer;list-style:none}
+.ds-nav__menu>summary::-webkit-details-marker{display:none}
+.ds-nav__menu-panel{position:absolute;top:calc(100% + 10px);right:0;z-index:60;
+  width:min(320px,calc(100vw - var(--gutter-lg) * 2));display:grid;gap:var(--sp-4);
+  padding:var(--sp-4);background:var(--surface-page);border:1px solid var(--border-subtle);
+  border-radius:var(--r-lg);box-shadow:var(--sh-3)}
+.ds-nav__menu-links{display:grid;gap:var(--sp-1)}
+.ds-nav__menu-link{display:flex;align-items:center;gap:var(--sp-3);min-height:56px;
+  padding:0 var(--sp-4);border-radius:var(--r-pill);text-decoration:none;
+  font:var(--fw-bold) var(--fs-title-s)/1.2 var(--font-display);color:var(--text-strong)}
+.ds-nav__menu-link span:first-child{flex:1}
+.ds-nav__menu-link[data-on="true"]{background:var(--surface-brand-soft)}
+
+/* Footer — design-reference/guscio.jsx, funzione Footer (righe 44-76).
+   Componente Astro (src/components/Footer.astro). Le colonne usano .wrap.foot,
+   la cui griglia e' gia' in layout.css. Stessa correzione anti-fuga sui link
+   reali di Sito/Scrivici. */
+.ds-foot{background:var(--surface-invert);color:var(--text-invert-muted);margin-top:var(--sp-16)}
+.ds-foot__top{padding-top:var(--sp-12);padding-bottom:var(--sp-12)}
+.ds-foot__col{display:grid;gap:var(--sp-3);align-content:start}
+.ds-foot__brand{display:flex;align-items:center;gap:10px}
+.ds-foot__brandname{font:var(--fw-black) var(--fs-title-s)/1 var(--font-display);
+  letter-spacing:-0.04em;color:var(--text-invert)}
+.ds-foot__desc{font:var(--type-body);font-size:var(--fs-body-s);max-width:320px}
+.ds-foot__label{font:var(--type-eyebrow);letter-spacing:var(--ls-eyebrow);text-transform:uppercase;
+  color:var(--ink-400)}
+.ds-foot__link{font:var(--type-body);font-size:var(--fs-body-s);color:var(--text-invert-muted);
+  text-decoration:none}
+.ds-foot__link:hover{color:var(--text-invert-muted)}
+.ds-foot__hours{font:var(--type-body);font-size:var(--fs-body-s)}
+.ds-foot__hours-value{font:var(--type-code);color:var(--ink-400)}
+.ds-foot__social{display:flex;align-items:center;gap:8px;font:var(--type-body);
+  font-size:var(--fs-body-s);color:var(--text-invert-muted);text-decoration:none}
+.ds-foot__social:hover{color:var(--text-invert-muted)}
+.ds-foot__bottom{border-top:1px solid var(--border-invert)}
+.ds-foot__bottom-inner{padding-top:var(--sp-4);padding-bottom:var(--sp-4);display:flex;
+  justify-content:space-between;gap:var(--sp-4);flex-wrap:wrap}
+.ds-foot__copy{font:var(--type-code);color:var(--ink-500)}
+.ds-foot__rights{font:var(--type-code);color:var(--ink-500)}
+
+/* CardTile — bundle:755-901. hover era un solo useState che pilotava bordo,
+   ombra, sollevamento e comparsa del bottone "mi piace": qui tutti e quattro
+   sono :hover in CSS, cosi' funzionano anche senza idratazione (vedi
+   CardTile.svelte). Sopravvive in JS solo cio' che dipende dalla posizione
+   del puntatore (rx/ry) o da un dato (sheen/scale del CardArt interno).
+   gap:12 e padding:12 sono numeri nudi nel sorgente: restano px letterali,
+   non un token di spaziatura (vedi CONTRATTI-COMPONENTI.md). */
+.ds-cardtile{position:relative;display:grid;gap:12px;padding:12px;min-width:0;
+  cursor:default;background:var(--surface-card);
+  border:var(--bw-hairline) solid var(--border-hairline);border-radius:var(--r-card);
+  box-shadow:var(--sh-1);transform:none;
+  transition:var(--t-card),border-color var(--dur-fast) var(--ease-out)}
+.ds-cardtile.is-clickable{cursor:pointer}
+@media (hover:hover){
+  .ds-cardtile:hover{border-color:var(--ink-950);box-shadow:var(--sh-3);transform:var(--lift-hover)}
+}
+.ds-cardtile__stage{perspective:700px}
+
+.ds-cardtile__badge{position:absolute;top:20px;left:20px}
+
+/* Stato persistente `liked` contro :hover — stesso trabocchetto di
+   IconButton (Task 10): senza la seconda regola, togliere il mouse da una
+   tessera gia' piaciuta farebbe sparire il bottone invece di lasciarlo
+   visibile (bundle:826, opacity: hover || liked ? 1 : 0). */
+.ds-cardtile__like{position:absolute;top:18px;right:18px;opacity:0;
+  transition:opacity var(--dur-fast) var(--ease-out)}
+@media (hover:hover){
+  .ds-cardtile:hover .ds-cardtile__like{opacity:1}
+}
+.ds-cardtile__like.is-liked,
+.ds-cardtile:hover .ds-cardtile__like.is-liked{opacity:1}
+
+.ds-cardtile__body{display:grid;gap:6px;min-width:0}
+.ds-cardtile__row{display:flex;align-items:baseline;justify-content:space-between;gap:8px;min-width:0}
+.ds-cardtile__name{font:var(--type-card-title);color:var(--text-strong);overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.ds-cardtile__code{font:var(--type-code);color:var(--text-faint);flex:none;white-space:nowrap}
+.ds-cardtile__meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+/* Riga singola (bundle:892-897): font shorthand seguito da font-size/font-weight
+   espliciti che lo sovrascrivono in parte, esattamente come nel sorgente
+   (font, poi fontSize, poi fontWeight nello stesso oggetto). Nessun
+   trabocchetto da base+modificatore qui: e' un'unica regola, l'ordine e'
+   lo stesso del sorgente. */
+.ds-cardtile__set{font:var(--type-label);font-size:var(--fs-caption);
+  font-weight:var(--fw-medium);color:var(--text-muted)}

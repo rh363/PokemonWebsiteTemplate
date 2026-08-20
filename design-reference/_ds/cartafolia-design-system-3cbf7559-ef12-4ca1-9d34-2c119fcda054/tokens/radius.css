@@ -1,0 +1,16 @@
+:root{
+  --r-xs:6px;
+  --r-sm:10px;
+  --r-md:14px;
+  --r-lg:20px;
+  --r-xl:28px;
+  --r-2xl:36px;
+  --r-pill:999px;
+  --r-card:var(--r-lg);        /* card contenitore */
+  --r-cardart:12px;            /* riquadro carta da collezione */
+  --r-control:var(--r-pill);   /* bottoni e chip: sempre pillola */
+  --r-field:var(--r-sm);       /* input e select: raggio piccolo */
+  --bw-hairline:1px;
+  --bw-strong:2px;
+  --bw-chunky:3px;
+}
