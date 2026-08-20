@@ -10,7 +10,7 @@ jobs:
     # del repository: senza questa riga il job non li vede affatto e
     # wrangler-action fallisce con un token vuoto. Il nome deve coincidere
     # con quello dell'environment su GitHub (Settings -> Environments).
-    environment: Cloudfare
+    environment: cloudflare
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
