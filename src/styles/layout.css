@@ -20,7 +20,25 @@
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 .rise{animation:rise 340ms var(--ease-out) both}
 @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
-@media (max-width:1080px){.cat{grid-template-columns:minmax(0,1fr)}.hero{grid-template-columns:minmax(0,1fr);padding-top:var(--sp-10);padding-bottom:var(--sp-10)}.g2{grid-template-columns:minmax(0,1fr);gap:var(--sp-8)}.det{grid-template-columns:minmax(0,1fr);gap:var(--sp-8)}.det-fix{position:static;max-width:340px;margin-left:auto;margin-right:auto;justify-items:center}.foot{grid-template-columns:1fr 1fr}}
+/* Unica divergenza voluta dal prototipo in questo file: index.html riga 37
+   ha, su .det-fix sotto 1080px, anche justify-items:center. Va tolto, non
+   copiato. .det-fix e' un grid, e justify-items:center fa restringere le sue
+   celle al contenuto invece di riempire la colonna: la carta grande e' un
+   .ds-cardart, cioe' width:100% e aspect-ratio con dentro solo figli in
+   position:absolute — larghezza intrinseca zero. Risultato misurato, tanto
+   sul porting quanto sul prototipo stesso a 390px: 0x0, la carta sparisce
+   dalla sua pagina. Il centraggio voluto lo fanno gia' max-width:340px piu'
+   i due margin:auto qui sopra, quindi togliendolo non si perde nulla di
+   cio' che la riga sembrava fare.
+   width:100% e' l'altra meta' della stessa correzione: in un grid, margini
+   auto sull'asse in linea assorbono lo spazio libero e disattivano lo
+   stretch della cella, quindi .det-fix si dimensionava lo stesso sul suo
+   contenuto — 255px, la larghezza della riga di suggerimento — e il
+   max-width:340px non veniva mai raggiunto da nulla. Dichiarare la
+   larghezza rimette la cella a 340px (o alla colonna, se piu' stretta) e
+   lascia ai margin:auto il solo centraggio. Misurato: 340px a 390px di
+   viewport. Vedi docs/FEDELTA.md. */
+@media (max-width:1080px){.cat{grid-template-columns:minmax(0,1fr)}.hero{grid-template-columns:minmax(0,1fr);padding-top:var(--sp-10);padding-bottom:var(--sp-10)}.g2{grid-template-columns:minmax(0,1fr);gap:var(--sp-8)}.det{grid-template-columns:minmax(0,1fr);gap:var(--sp-8)}.det-fix{position:static;width:100%;max-width:340px;margin-left:auto;margin-right:auto}.foot{grid-template-columns:1fr 1fr}}
 @media (max-width:1080px){.hide-mob{display:none!important}.only-mob{display:block!important}.side{display:none}}
 @media (max-width:760px){:root{--fs-display-xl:42px;--fs-display-l:34px;--fs-display-m:27px;--fs-title-l:24px;--section-y:56px;--gutter-lg:20px;--grid-card-min:148px;--grid-gap:14px}.foot{grid-template-columns:minmax(0,1fr)}.g2{gap:var(--sp-6)}}
 @media (prefers-reduced-motion:reduce){.rise,.fade-in,.sheet-in{animation:none}}

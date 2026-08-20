@@ -105,6 +105,49 @@ tecnica già in uso nel file per `grid-template-columns` e `justify-items`.
 Rimisurato dopo il fix: 20px a 390 e 1024px, 24px a 1440px, su entrambi i
 lati. File: `src/pages/espansioni.astro`.
 
+### Aggiunta dopo il merge: tre difetti segnalati dall'utente
+
+Questa sezione è stata scritta dopo il Task 27, in risposta a bug reali visti
+in un browser vero. Sono la prova che la campagna di misure qui sopra non
+copriva tutto: nessuna delle misure decise in anticipo guardava lo stato dei
+dialog dopo una navigazione, né la larghezza di un `<dialog>` modale, né se
+la carta grande della scheda occupasse spazio.
+
+**1. Larghezza del bottom sheet su mobile — regressione del porting.**
+Misurato sul prototipo a 390px di viewport: pannello **390px, tutta la
+larghezza**. Misurato sul porting: **352px**. La causa non è nel nostro CSS
+ma nel foglio di stile del browser: un `<dialog>` modale riceve
+`max-width:calc(100% - 2em - 6px)` — 38px in meno — e quel limite vince su
+`width:100%`. Il prototipo non lo incontrava perché il suo sheet è un `div`
+dentro un wrapper `position:fixed`, non un `<dialog>`: è un costo nascosto
+della scelta (buona per il resto: focus trap ed Escape gratis) di sostituire
+il div con l'elemento nativo. Corretto con `max-width:none` su `.ds-sheet`
+(`src/styles/ds.css`). Rimisurato: 390px, come il prototipo.
+
+**2. `justify-items:center` su `.det-fix` sotto 1080px — divergenza voluta
+dal prototipo.** `design-reference/index.html` riga 37 lo dichiara; il
+porting lo aveva copiato fedelmente, come vuole il protocollo. Copiarlo era
+sbagliato: `.det-fix` è un grid, e `justify-items:center` dimensiona le sue
+celle sul contenuto invece che sulla colonna. La carta grande è un
+`.ds-cardart` — `width:100%`, `aspect-ratio`, e dentro solo figli in
+`position:absolute` — quindi larghezza intrinseca **zero**. Misurato a
+390px: **0×0 sul porting e 0×0 sul prototipo stesso**. La carta sparisce
+dalla propria scheda in entrambi.
+
+È il primo punto del progetto in cui il prototipo è **sbagliato**, non
+semplicemente diverso: la regola di fedeltà si ferma qui, perché una scheda
+carta senza la carta non è un risultato che qualcuno volesse. Corretto in
+`src/styles/layout.css` togliendo `justify-items:center` e dichiarando
+`width:100%` sulla stessa regola — senza, i due `margin:auto` (che in un
+grid disattivano lo stretch della cella) lasciavano `.det-fix` a 255px, la
+larghezza della riga di suggerimento, e il `max-width:340px` dichiarato non
+veniva mai raggiunto da nulla. Rimisurato: carta **340×475 a 390px** di
+viewport, centrata. Presidiato da `e2e/scheda-carta.spec.ts`.
+
+**3. Anteprima rapida che resta aperta dopo la navigazione.** Non è un
+problema di fedeltà visiva ma di stato: vedi `docs/PERFORMANCE.md`, sezione
+View Transitions.
+
 ## Verifica dell'aderenza ai token
 
 `_adherence.oxlintrc.json` del design system non è utilizzabile qui: i suoi
