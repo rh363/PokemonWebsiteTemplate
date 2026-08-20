@@ -417,7 +417,15 @@ details.ds-fg[open] .ds-fg__chev{transform:rotate(0deg)}
    staccato dal bordo destro, col bottone del footer tagliato fuori. Nel
    sorgente il pannello e' un semplice div dentro un wrapper fixed, senza
    nessun limite del genere: qui il limite va disattivato, non aggirato. */
-.ds-sheet{position:fixed;inset:auto 0 0 0;margin:0;width:100%;max-width:none;max-height:86vh;
+.ds-sheet{position:fixed;inset:auto 0 0 0;margin:0;width:100%;max-width:none;
+  /* 86svh, con 86vh come ripiego per chi non conosce l'unita': su iOS `vh`
+     misura il viewport grande, quello con le barre di Safari ritirate, che
+     e' piu' alto di quello davvero visibile. Un foglio lungo arrivava cosi'
+     a 86% di un'altezza che sullo schermo non c'e', e il footer coi due
+     bottoni finiva sotto la barra degli indirizzi. `svh` prende sempre il
+     viewport piccolo: il tetto vale nello stato peggiore, e non si muove
+     quando le barre entrano ed escono durante lo scroll. */
+  max-height:86vh;max-height:86svh;
   box-sizing:border-box;color:inherit;flex-direction:column;
   background:var(--surface-card);border:none;
   border-top:var(--bw-strong) solid var(--ink-950);
@@ -432,7 +440,18 @@ details.ds-fg[open] .ds-fg__chev{transform:rotate(0deg)}
   width:44px;height:5px;border-radius:var(--r-pill);background:var(--ink-100)}
 .ds-sheet__title{flex:1;font:var(--fw-bold) var(--fs-title-s)/var(--lh-title-s) var(--font-display);
   color:var(--text-strong)}
-.ds-sheet__body{flex:1;overflow:auto;padding:var(--sp-2) var(--sp-5) var(--sp-6)}
+/* flex:1 1 auto, non flex:1. Il pannello e' un flex column senza altezza
+   propria (height:fit-content della UA, tagliata solo dal max-height): la
+   sua altezza intrinseca la decide il contenuto. Con flex:1 la base del
+   body e' 0%, e Safari su iOS — a differenza di Chrome e di WebKit
+   desktop — non risale al max-content dell'item quando calcola quella
+   altezza intrinseca: il body collassa a zero e del foglio resta solo
+   testa + footer, col contenuto tagliato dopo pochi pixel (restano i 32px
+   del suo padding). Con la base auto l'altezza di partenza e' quella del
+   contenuto in ogni motore; min-height:0 rimette lo shrink che la base
+   auto porterebbe via, cosi' quando il contenuto supera max-height il
+   body torna a comprimersi e a scrollare invece di sfondare il foglio. */
+.ds-sheet__body{flex:1 1 auto;min-height:0;overflow:auto;padding:var(--sp-2) var(--sp-5) var(--sp-6)}
 .ds-sheet__foot{padding:var(--sp-4) var(--sp-5);border-top:1px solid var(--border-hairline);
   display:flex;gap:var(--sp-3);background:var(--surface-card)}
 

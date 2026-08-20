@@ -47,3 +47,35 @@ test('su mobile il bottom sheet occupa tutta la larghezza', async ({ page, isMob
   const viewport = page.viewportSize()!
   expect({ x: box.x, width: box.width }).toEqual({ x: 0, width: viewport.width })
 })
+
+test('su mobile il bottom sheet non taglia il contenuto', async ({ page, isMobile }) => {
+  test.skip(!isMobile, 'sopra 1080px l anteprima e un Dialog centrato, non uno Sheet')
+  const sheet = await apriAnteprima(page)
+  // Il foglio entra con sheetUp, che lo trasla verso l'alto: misurarne la
+  // posizione prima della fine dell'animazione leggerebbe un fotogramma
+  // qualsiasi della salita, non il posto in cui si ferma.
+  await sheet.evaluate((d) => Promise.all(d.getAnimations().map((a) => a.finished)))
+  // Il foglio e' un flex column senza altezza propria: e' il contenuto a
+  // dettarla, fino al tetto di max-height. Finche' resta sotto quel tetto
+  // nessuno dei tre pezzi puo' essere compresso — se il body si accorcia
+  // sotto il proprio scrollHeight vuol dire che la sua altezza non arriva
+  // piu' dal contenuto, ed e' esattamente il difetto visto su iOS Safari:
+  // body collassato a zero, scheda tagliata dopo pochi pixel.
+  const misure = await sheet.evaluate((d) => {
+    const body = d.querySelector('.ds-sheet__body') as HTMLElement
+    const foot = d.querySelector('.ds-sheet__foot') as HTMLElement
+    return {
+      altezzaFoglio: d.getBoundingClientRect().height,
+      tetto: parseFloat(getComputedStyle(d).maxHeight),
+      bodyVisibile: body.clientHeight,
+      bodyContenuto: body.scrollHeight,
+      fondoFooter: foot.getBoundingClientRect().bottom,
+      viewport: window.innerHeight,
+    }
+  })
+  expect(misure.altezzaFoglio).toBeLessThan(misure.tetto)
+  expect(misure.bodyVisibile).toBeGreaterThanOrEqual(misure.bodyContenuto)
+  // E il footer con i due bottoni deve restare dentro il viewport, non
+  // finire sotto le barre del browser.
+  expect(misure.fondoFooter).toBeLessThanOrEqual(misure.viewport + 1)
+})
