@@ -191,6 +191,12 @@ sviluppo locale funzionano senza credenziali e senza rete. Il giorno in cui
 `origine` viene compilata, le carte con una colonna `image` non vuota
 mostrano la foto vera; le altre restano sul placeholder.
 
+Gli stessi due campi si possono passare da variabili d'ambiente
+(`PUBLIC_IMG_ORIGINE`, `PUBLIC_IMG_ZONA`) invece di scriverli nel file: utile
+per non committare l'indirizzo di un bucket, o per far convivere prova e
+produzione sullo stesso codice. Vedi `.env.example`. Chi aggiorna il
+catalogo non deve farci nulla: e' una scelta di chi pubblica il sito.
+
 ### I due campi non sono la stessa cosa
 
 - **`origine`** e' il bucket: e' lei che accende le foto. Da sola basta.

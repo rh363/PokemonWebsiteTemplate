@@ -11,6 +11,14 @@ jobs:
     # wrangler-action fallisce con un token vuoto. Il nome deve coincidere
     # con quello dell'environment su GitHub (Settings -> Environments).
     environment: cloudflare
+    # Valori del deploy, non del progetto: stanno nelle Variables (non nei
+    # Secrets — sono indirizzi pubblici, finiscono nell'HTML). Non impostate
+    # arrivano come stringa vuota, e i default di src/config/site.ts e
+    # astro.config.mjs restano validi. Vedi .env.example.
+    env:
+      PUBLIC_SITE_URL: ${{ vars.PUBLIC_SITE_URL }}
+      PUBLIC_IMG_ORIGINE: ${{ vars.PUBLIC_IMG_ORIGINE }}
+      PUBLIC_IMG_ZONA: ${{ vars.PUBLIC_IMG_ZONA }}
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4

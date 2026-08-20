@@ -6,7 +6,9 @@ import { readdirSync } from 'node:fs'
 import { join } from 'node:path'
 
 const cartella = process.argv[2]
-const bucket = 'cartafolia-carte'
+// Sovrascrivibile con R2_BUCKET: e' il nome del bucket sull'account
+// Cloudflare di chi pubblica, non un dato del progetto.
+const bucket = process.env.R2_BUCKET || 'cartafolia-carte'
 if (!cartella) throw new Error('uso: pnpm upload:img <cartella>')
 
 const file = readdirSync(cartella).filter((f) => /\.(jpe?g|png|webp|avif)$/i.test(f))

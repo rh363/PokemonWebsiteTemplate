@@ -79,18 +79,30 @@ cosa succede (il build si ferma, dicendo dove) se un campo è sbagliato.
 Il sito è un Worker Cloudflare "solo asset statici" (`wrangler.jsonc`,
 nessun `main`): serve `dist/` con `not_found_handling: "404-page"`.
 
-**Prima del primo deploy**, chi possiede il progetto deve:
+**Prima del primo deploy**, chi possiede il progetto deve, in GitHub →
+Settings → Secrets and variables → Actions:
 
-1. In `wrangler.jsonc`, sostituire `"name": "NOME-DEL-WORKER"` col nome
-   reale del Worker.
-2. In GitHub → Settings → Secrets and variables → Actions, aggiungere due
-   secret: `CLOUDFLARE_API_TOKEN` e `CLOUDFLARE_ACCOUNT_ID`. Non vanno
-   **mai** scritti nel repository, in un log o in una sessione di chat —
-   `.env.example` documenta i nomi, senza valori.
-3. Quando il dominio definitivo è deciso, sostituire il segnaposto
-   `site: 'https://cartafolia.example'` in `astro.config.mjs` — è l'unico
-   punto in cui il dominio compare: `robots.txt`, gli URL canonici e la
-   sitemap lo derivano tutti da lì.
+1. Creare l'environment usato dal workflow (`environment:` in
+   `.github/workflows/deploy.yml`) e metterci due **secret**:
+   `CLOUDFLARE_API_TOKEN` e `CLOUDFLARE_ACCOUNT_ID`. Non vanno **mai**
+   scritti nel repository, in un log o in una sessione di chat. I secret di
+   un environment non sono visibili a un job che non lo dichiara: se il
+   workflow fallisce con un token vuoto, il nome dell'environment è la
+   prima cosa da controllare.
+2. Verificare il nome del Worker in `wrangler.jsonc` (`name`): è anche il
+   sottodominio `.workers.dev` finché non si collega un dominio proprio.
+
+Restano poi tre valori che appartengono al deploy e non al progetto — il
+dominio pubblico e il bucket delle foto. Hanno un default committato e
+funzionante, e si sovrascrivono senza toccare il codice con le **Variables**
+di GitHub (non i Secrets: sono indirizzi pubblici, finiscono nell'HTML):
+`PUBLIC_SITE_URL`, `PUBLIC_IMG_ORIGINE`, `PUBLIC_IMG_ZONA`. In locale valgono
+le stesse variabili in un file `.env`. Sono documentate una per una in
+`.env.example`; `docs/CONTENUTI.md` spiega cosa cambia fra avere e non avere
+`PUBLIC_IMG_ZONA`.
+
+Il dominio è l'unico punto da cui derivano `robots.txt`, gli URL canonici e
+la sitemap: cambiarlo lì li cambia tutti.
 
 Da quel momento, ogni push su `main` esegue `.github/workflows/deploy.yml`:
 installa le dipendenze, gira `pnpm check` e `pnpm test` (un errore di tipo

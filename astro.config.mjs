@@ -8,7 +8,10 @@ export default defineConfig({
   // sottodominio workers.dev del deploy; sostituirlo quando il sito passa
   // su un dominio proprio (e ricordarsi che le foto su R2, se attivate,
   // hanno bisogno di quel dominio — vedi docs/CONTENUTI.md).
-  site: 'https://pokemonwebsitetemplate.alex-massaroni2004.workers.dev',
+  // Sovrascrivibile con PUBLIC_SITE_URL (vedi .env.example): il dominio
+  // appartiene al deploy, non al progetto. `||` e non `??` perche' una
+  // variabile non impostata in CI arriva come stringa vuota.
+  site: process.env.PUBLIC_SITE_URL || 'https://pokemonwebsitetemplate.alex-massaroni2004.workers.dev',
   output: 'static',
   integrations: [svelte(), sitemap()],
   build: { inlineStylesheets: 'auto' },
