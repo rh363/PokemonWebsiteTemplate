@@ -159,9 +159,9 @@ fondo, non succede mai.
 Le foto vere **non entrano mai nel repository**: una collezione di migliaia
 di foto in git resta nella storia per sempre e se la porta dietro ogni
 clone, e ripulirla dopo significa riscrivere la storia. Stanno su Cloudflare
-R2, dietro un dominio personalizzato, e il sito le richiede attraverso le
-trasformazioni Cloudflare (`/cdn-cgi/image/...`), che servono AVIF o WebP
-ridimensionati invece dell'originale.
+R2 e, quando il negozio ha un dominio proprio, il sito le richiede
+attraverso le trasformazioni Cloudflare (`/cdn-cgi/image/...`), che servono
+AVIF o WebP ridimensionati invece dell'originale.
 
 1. Metti i file in una cartella qualsiasi (per esempio `foto-carte/`, che
    `.gitignore` esclude gia' dal repository).
@@ -185,11 +185,30 @@ la storia).
 ### Perche' senza foto il sito funziona lo stesso
 
 `src/config/site.ts` ha un blocco `immagini` con `origine` e `zona` vuoti
-finche' il negozio non ha un dominio Cloudflare configurato. Con uno dei due
-vuoti, ogni carta ricade sul placeholder foil (`CardArt` senza `src`) — il
-sito e lo sviluppo locale funzionano senza credenziali e senza rete. Il
-giorno in cui `origine`/`zona` vengono compilati, le carte con una colonna
-`image` non vuota mostrano la foto vera; le altre restano sul placeholder.
+finche' il negozio non ha un bucket configurato. Con `origine` vuota ogni
+carta ricade sul placeholder foil (`CardArt` senza `src`) — il sito e lo
+sviluppo locale funzionano senza credenziali e senza rete. Il giorno in cui
+`origine` viene compilata, le carte con una colonna `image` non vuota
+mostrano la foto vera; le altre restano sul placeholder.
+
+### I due campi non sono la stessa cosa
+
+- **`origine`** e' il bucket: e' lei che accende le foto. Da sola basta.
+- **`zona`** e' il dominio del sito su Cloudflare, e serve solo alle
+  trasformazioni. Compilata, ogni foto passa da `/cdn-cgi/image/...` e
+  arriva ridimensionata in AVIF o WebP, con un `srcset` per larghezza.
+  Vuota, il sito serve la foto **originale** dal bucket, uguale per tutti i
+  formati.
+
+Serve un dominio proprio dentro l'account Cloudflare: le trasformazioni non
+esistono su un sottodominio `.workers.dev`, e nemmeno un dominio
+personalizzato sul bucket. Senza, resta l'URL pubblico `r2.dev` del bucket,
+che **Cloudflare stessa sconsiglia in produzione** perche' e' limitato nel
+numero di richieste: va benissimo per provare, non per il sito vero.
+
+Finche' resti senza zona, **carica foto gia' ridimensionate** (500px di lato
+lungo sono piu' che sufficienti per queste pagine): sono i byte che il
+visitatore scarica tali e quali.
 
 ### Verificare che le trasformazioni siano davvero attive
 

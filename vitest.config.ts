@@ -9,4 +9,7 @@ export default defineConfig({
   test: {
     exclude: ['**/node_modules/**', '**/dist/**', '**/.astro/**', 'e2e/**'],
   },
+  // Stesso alias di astro.config.mjs: senza, un test non puo' importare (ne'
+  // mockare) un modulo che si riferisce alla configurazione con '~/config/site'.
+  resolve: { alias: { '~': new URL('./src', import.meta.url).pathname } },
 })

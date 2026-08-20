@@ -73,6 +73,10 @@ const codice = cardCode(card, set)
 // riservato al placeholder foil: su una foto vera non avrebbe senso.
 const mostraFoto = Boolean(card.image) && immaginiAttive()
 const cardSizes = '(max-width:1080px) 86vw, 380px'
+// Senza trasformazioni configurate esiste una sola foto: il preload deve
+// allora puntarla con `href`, perche' un <link rel=preload> senza sorgente
+// non precarica nulla — e' il modo peggiore di degradare, invisibile.
+const srcsetFoto = mostraFoto ? srcsetImmagine(card.image!) : undefined
 
 // "Nella stessa vetrina": stesso pattern src delle altre pagine.
 const fotoAttive = immaginiAttive()
@@ -83,7 +87,11 @@ const srcCarta = (c: { image?: string }) => (fotoAttive && c.image ? urlImmagine
   {
     mostraFoto && (
       <Fragment slot="head">
-        <link rel="preload" as="image" imagesrcset={srcsetImmagine(card.image!)} sizes={cardSizes} />
+        {srcsetFoto ? (
+          <link rel="preload" as="image" imagesrcset={srcsetFoto} sizes={cardSizes} />
+        ) : (
+          <link rel="preload" as="image" href={urlImmagine(card.image!, 450)} />
+        )}
       </Fragment>
     )
   }

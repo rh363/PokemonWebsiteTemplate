@@ -20,6 +20,10 @@ interface Props {
 const { card, set, sizes = '(max-width:760px) 45vw, 190px', priority = false } = Astro.props
 
 const mostraFoto = Boolean(card.image) && immaginiAttive()
+// `undefined` quando le trasformazioni non sono configurate (nessuna zona
+// Cloudflare): li' la foto e' una sola, quindi niente srcset — e nemmeno
+// `sizes`, che senza candidati non ha su cosa scegliere e confonde soltanto.
+const srcset = mostraFoto ? srcsetImmagine(card.image!) : undefined
 ---
 
 {
@@ -28,8 +32,8 @@ const mostraFoto = Boolean(card.image) && immaginiAttive()
       <img
         class="ds-cardart__img"
         src={urlImmagine(card.image!, 300)}
-        srcset={srcsetImmagine(card.image!)}
-        sizes={sizes}
+        srcset={srcset}
+        sizes={srcset ? sizes : undefined}
         alt={card.name}
         width="63"
         height="88"
