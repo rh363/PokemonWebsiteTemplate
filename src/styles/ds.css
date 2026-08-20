@@ -410,8 +410,14 @@ details.ds-fg[open] .ds-fg__chev{transform:rotate(0deg)}
    quindi si dissolve con la keyframe fadeIn gia' in layout.css; il wrapper
    di Dialog ha animation:"none" esplicito (bundle:1030-1130) e resta senza
    dissolvenza. E' una differenza voluta del sorgente, non una svista di
-   porting: va riprodotta, non uniformata. */
-.ds-sheet{position:fixed;inset:auto 0 0 0;margin:0;width:100%;max-height:86vh;
+   porting: va riprodotta, non uniformata.
+   max-width:none non e' decorativo: il foglio di stile UA da' a ogni
+   <dialog> modale un max-width:calc(100% - 2em - 6px) — 38px in meno del
+   viewport a font-size 16px — che vince su width:100% e lasciava il pannello
+   staccato dal bordo destro, col bottone del footer tagliato fuori. Nel
+   sorgente il pannello e' un semplice div dentro un wrapper fixed, senza
+   nessun limite del genere: qui il limite va disattivato, non aggirato. */
+.ds-sheet{position:fixed;inset:auto 0 0 0;margin:0;width:100%;max-width:none;max-height:86vh;
   box-sizing:border-box;color:inherit;flex-direction:column;
   background:var(--surface-card);border:none;
   border-top:var(--bw-strong) solid var(--ink-950);
