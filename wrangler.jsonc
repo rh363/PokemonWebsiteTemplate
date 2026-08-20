@@ -1,9 +1,9 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  // ← "name" e' un segnaposto: il proprietario del progetto deve sostituirlo
-  //   col nome reale del Worker prima del primo deploy (vedi README.md,
-  //   sezione "Deploy su Cloudflare").
-  "name": "NOME-DEL-WORKER",
+  // Nome del Worker su Cloudflare: e' anche il sottodominio di default
+  //   (<name>.<sottodominio-account>.workers.dev) finche' non si collega un
+  //   dominio proprio. Vedi README.md, sezione "Deploy su Cloudflare".
+  "name": "pokemonwebsitetemplate",
   "compatibility_date": "2026-08-18",
   "assets": {
     "directory": "./dist",
