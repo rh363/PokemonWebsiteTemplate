@@ -37,7 +37,7 @@ export const SITE = {
   seo: {
     titolo: 'Cartafolia — vetrina e catalogo, Ceccano',
     descrizione:
-      'Vetrina e catalogo di carte da collezione a Ceccano. Cerca una carta, guarda com’è conservata, poi passa a vederla dal vero. Non vendiamo online.',
+      'Vetrina e catalogo di carte da collezione a Ceccano. Cerca una carta, guarda com’è conservata.',
     locale: 'it_IT',
   },
   anno: 2026,
