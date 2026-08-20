@@ -89,7 +89,7 @@ const voci = NAV.map((v) => (v.id === 'catalogo' ? { ...v, count: catalogCount }
 </header>
 
 <script>
-  import { apriChiedi, apriQuick } from '~/stores/chrome'
+  import { apriChiedi, apriQuick, chiudiChiedi, chiudiQuick } from '~/stores/chrome'
 
   // <ClientRouter /> (Base.astro) trasforma la navigazione interna in uno
   // swap soft: Astro reinserisce questo <script> nel nuovo documento, ma un
@@ -159,6 +159,25 @@ const voci = NAV.map((v) => (v.id === 'catalogo' ? { ...v, count: catalogCount }
   // bisogno di essere ri-registrato a ogni swap — solo richiamato, il che
   // avviene gia' dentro 'astro:page-load' qui sopra.
   addEventListener('scroll', sync, { passive: true })
+
+  // Chiude anteprima rapida e "Chiedi una carta" a ogni navigazione. Lo stato
+  // di quei due dialog vive in un modulo (~/stores/chrome), non nel DOM:
+  // sopravvive quindi allo swap soft di ClientRouter, che non rivaluta i
+  // moduli gia' caricati. E' la stessa persistenza che fa funzionare un tap
+  // arrivato prima dell'idratazione — qui pero' si ritorce: "Vedi la scheda"
+  // dentro l'anteprima navigava alla scheda della carta lasciando
+  // l'anteprima aperta sopra, perche' la nuova isola SiteChrome montava,
+  // leggeva uno store ancora valorizzato e riapriva il dialog. Una
+  // navigazione dura azzererebbe tutto da sola ricaricando i moduli: qui si
+  // fa lo stesso, a mano, nel momento in cui il documento cambia.
+  // 'astro:before-swap' e non 'astro:page-load': lo store va azzerato PRIMA
+  // che la nuova isola monti e lo legga. Attaccato una volta sola, fuori dal
+  // callback di 'astro:page-load', per la stessa ragione dei listener qui
+  // sopra.
+  document.addEventListener('astro:before-swap', () => {
+    chiudiQuick()
+    chiudiChiedi()
+  })
 
   // Arricchimento del menu nativo: <details> non chiude da solo su Escape o
   // su click fuori (a differenza di <dialog>). Nessuna isola richiesta:

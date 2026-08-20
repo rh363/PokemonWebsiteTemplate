@@ -192,6 +192,29 @@ impostato prima del click:
   combinazione isole + transizioni + il fix di `SiteChrome` sopra.
 - Nessun errore in console durante l'intera sequenza di navigazioni.
 
-Nessun `transition:persist` necessario: ogni isola si rimonta pulita ad ogni
-navigazione, che e' il comportamento voluto (stato non condiviso fra pagine
-diverse).
+Nessun `transition:persist` necessario: ogni isola si rimonta ad ogni
+navigazione, che e' il comportamento voluto.
+
+**Attenzione pero': "si rimonta" non vuol dire "riparte da zero".** Una
+stesura precedente di questa nota chiudeva con «stato non condiviso fra
+pagine diverse»: falso, ed e' lo stesso equivoco che sopra costava il
+trigger della NavBar, visto dall'altro lato. A non essere rivalutati dopo
+uno swap non sono solo gli `<script>` di pagina: sono i **moduli**, con
+tutto il loro stato. `~/stores/chrome` e' un modulo, quindi i suoi store
+attraversano la navigazione intatti — e' proprio cio' che fa atterrare da
+qualche parte un tap arrivato prima dell'idratazione, ma significa anche che
+un'isola che monta sulla pagina nuova legge lo stato lasciato dalla pagina
+vecchia.
+
+Difetto reale che ne e' nato (segnalato dall'utente, corretto): "Vedi la
+scheda" dentro l'anteprima rapida portava a `/carta/<slug>` con l'anteprima
+**ancora aperta sopra**, perche' `SiteChrome` rimontava e ritrovava lo slug
+nello store. La correzione sta in `NavBar.astro`: `astro:before-swap`
+azzera gli store del guscio, facendo a mano cio' che una navigazione dura
+otterrebbe ricaricando i moduli. Presidiato da `e2e/quick-view.spec.ts`,
+che verifica *dopo* l'idratazione dell'isola e la fetch del catalogo —
+controllare subito dopo lo swap passerebbe anche col difetto in piedi.
+
+La regola generale, quindi: con le transizioni soft attive, **ogni stato che
+vive in un modulo va trattato come stato di sessione, non di pagina**. Se
+deve morire con la pagina, qualcuno deve ucciderlo esplicitamente allo swap.
